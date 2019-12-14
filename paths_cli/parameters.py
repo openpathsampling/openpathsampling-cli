@@ -83,7 +83,7 @@ class OPSStorageLoadSingle(OPSStorageLoadNames):
             return store[0]
 
         # if only one is named, take it
-        named_things = [o for o in store if o.name]
+        named_things = [o for o in store if o.is_named]
         if len(named_things) == 1:
             return named_things[0]
 
