@@ -3,6 +3,7 @@ import tempfile
 import os
 
 import openpathsampling as paths
+from openpathsampling.tests.test_helpers import make_1d_traj
 
 from paths_cli.parameters import *
 
@@ -98,6 +99,7 @@ class ParamInstanceTest(object):
             os.remove(os.path.join(self.tempdir, temp_f))
         os.rmdir(self.tempdir)
 
+
 class TestENGINE(ParamInstanceTest):
     PARAMETER = ENGINE
     def setup(self):
@@ -126,15 +128,71 @@ class TestSCHEME(ParamInstanceTest):
         self._getter_test(getter)
 
 
-class TestINIT_TRAJ(object):
+class TestINIT_TRAJ(ParamInstanceTest):
+    PARAMETER = INIT_TRAJ
     def setup(self):
+        super(TestINIT_TRAJ, self).setup()
+        self.traj = make_1d_traj([-0.1, 1.0, 4.4, 7.7, 10.01])
+        ensemble = self.scheme.network.sampling_ensembles[0]
+        self.sample_set = paths.SampleSet([
+            paths.Sample(trajectory=self.traj,
+                         replica=0,
+                         ensemble=ensemble)
+        ])
+        self.other_traj = make_1d_traj([-1.0, 1.0, 100.0])
+        self.other_sample_set = paths.SampleSet([
+            paths.Sample(trajectory=self.other_traj,
+                         replica=0,
+                         ensemble=ensemble)
+        ])
+
+    @staticmethod
+    def _parse_getter(getter):
+        split_up = getter.split('-')
+        get_type = split_up[-1]
+        getter_style = "-".join(split_up[:-1])
+        return get_type, getter_style
+
+    def create_file(self, getter):
+        filename = self._filename(getter)
+        storage = paths.Storage(filename, 'w')
+        storage.save(self.traj)
+        storage.save(self.other_traj)
+        get_type, getter_style = self._parse_getter(getter)
+        main, other = {
+            'traj': (self.traj, self.other_traj),
+            'sset': (self.sample_set, self.other_sample_set)
+        }[get_type]
+        if get_type == 'sset':
+            storage.save(self.sample_set)
+            storage.save(self.other_sample_set)
+
+        tag, other_tag = {
+            'name': ('traj', None),
+            'number': (None, None),
+            'tag-final': ('final_conditions', 'initial_conditions'),
+            'tag-initial': ('initial_conditions', None)
+        }[getter_style]
+        if tag:
+            storage.tags[tag] = main
+
+        if other_tag:
+            storage.tags[other_tag] = other
+        storage.close()
+        return filename
+
+    @pytest.mark.parametrize("getter", [
+        'name-traj', 'number-traj', 'tag-final-traj', 'tag-initial-traj',
+        'name-sset', 'number-sset', 'tag-final-sset', 'tag-initial-sset'
+    ])
+    def test_get(self, getter):
+        filename = self.create_file(getter)
         pytest.skip()
         pass
 
-    @pytest.mark.parametrize("getter", ['name', 'number', 'tag-final',
-                                        'tag-initial', 'file'])
-    def test_get(self, getter):
-        pass
+    def test_get_file(self):
+        pytest.skip()
+
 
 class TestCVS(ParamInstanceTest):
     PARAMETER = CVS
@@ -147,12 +205,20 @@ class TestCVS(ParamInstanceTest):
     def test_get(self, getter):
         self._getter_test(getter)
 
-class TestSTATES(object):
+
+class TestSTATES(ParamInstanceTest):
     PARAMETER = STATES
     def setup(self):
-        pytest.skip()
-        pass
+        super(TestSTATES, self).setup()
+        self.get_arg = {'name': "A", 'number': 0}
+        self.obj = self.state_A
 
     @pytest.mark.parametrize("getter", ['name', 'number'])
     def test_get(self, getter):
-        pass
+        self._getter_test(getter)
+
+    @pytest.mark.parametrize("getter", ['name', 'number'])
+    def test_get_other(self, getter):
+        self.get_arg = {'name': 'B', 'number': 1}
+        self.obj = self.state_B
+        self._getter_test(getter)

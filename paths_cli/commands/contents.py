@@ -65,3 +65,4 @@ def get_section_string_nameable(section, store, get_named):
 
 CLI = nclist
 SECTION = "Miscellaneous"
+REQUIRES_OPS = (1, 0)

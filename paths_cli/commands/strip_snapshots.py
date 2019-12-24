@@ -73,3 +73,4 @@ def strip_snapshots_main(input_storage, output_storage, cvs, blocksize):
 
 CLI = strip_snapshots
 SECTION = "Miscellaneous"
+REQUIRES_OPS = (1, 0)
