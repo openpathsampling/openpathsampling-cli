@@ -187,6 +187,20 @@ class TestINIT_TRAJ(ParamInstanceTest):
     ])
     def test_get(self, getter):
         filename = self.create_file(getter)
+        storage = paths.Storage(filename, mode='r')
+        get_type, getter_style = self._parse_getter(getter)
+        expected = {
+            'sset': self.sample_set,
+            'traj': self.traj
+        }[get_type]
+        get_arg = {
+            'name': 'traj',
+            'number': 0,
+            'tag-final': 'final_conditions',
+            'tag-initial': 'initial_conditions'
+        }[getter_style]
+        obj = self.PARAMETER.get(storage, get_arg)
+
         pytest.skip()
         pass
 

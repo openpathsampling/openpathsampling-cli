@@ -64,8 +64,11 @@ class OPSStorageLoadSingle(OPSStorageLoadNames):
         result = None
         # if the we can get by name/number, do it
         if name is not None:
-            # note: new storage may do a try/except here
-            result = store[name]
+            try:
+                result = store[name]
+            except:
+                # on any error, we try everything else
+                pass
 
             if result is None:
                 try:
@@ -98,6 +101,9 @@ class OPSStorageLoadSingle(OPSStorageLoadNames):
 
 def init_traj_fallback(parameter, storage, name):
     result = None
+    if isinstance(name, int):
+        return storage.trajectories[name]
+
     if name and os.path.isfile(name):
         # TODO: read from file
         pass
@@ -130,7 +136,7 @@ INIT_TRAJ = OPSStorageLoadSingle(
     param=Option('-t', '--init-traj',
                  help="identifier for initial trajectory"),
     store='tags',
-    num_store='trajectories',
+    num_store='samplesets',
     fallback=init_traj_fallback
 )
 
