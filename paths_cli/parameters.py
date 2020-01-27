@@ -46,13 +46,14 @@ class OPSStorageLoadNames(AbstractLoader):
         super(OPSStorageLoadNames, self).__init__(param)
         self.store = store
 
-    def get(self, storage, name):
-        return getattr(storage, self.store)[name]
+    def get(self, storage, names):
+        return [getattr(storage, self.store)[name] for name in names]
 
 
-class OPSStorageLoadSingle(OPSStorageLoadNames):
+class OPSStorageLoadSingle(AbstractLoader):
     def __init__(self, param, store, fallback=None, num_store=None):
-        super(OPSStorageLoadSingle, self).__init__(param, store)
+        super(OPSStorageLoadSingle, self).__init__(param)
+        self.store = store
         self.fallback = fallback
         if num_store is None:
             num_store = store
@@ -98,6 +99,8 @@ class OPSStorageLoadSingle(OPSStorageLoadNames):
             raise RuntimeError("Couldn't find %s", name)
 
         return result
+
+
 
 def init_traj_fallback(parameter, storage, name):
     result = None

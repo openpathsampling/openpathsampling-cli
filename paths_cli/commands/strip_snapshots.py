@@ -21,11 +21,10 @@ def strip_snapshots(input_file, output_file, cv, blocksize):
     By giving the --cv option (once for each CV), you can select to only
     save certain CVs. If you do not give that option, all CVs will be saved.
     """
-    loaded_cvs = [CVS.get(cv) for cv in cv]
     return strip_snapshots_main(
         input_storage=INPUT_FILE.get(input_file),
         output_storage=OUTPUT_FILE.get(output_file),
-        cvs=loaded_cvs,
+        cvs=CVS.get(cv),
         blocksize=blocksize
     )
 

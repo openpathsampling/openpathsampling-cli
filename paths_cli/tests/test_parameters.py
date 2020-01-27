@@ -208,11 +208,22 @@ class TestINIT_TRAJ(ParamInstanceTest):
         pytest.skip()
 
 
-class TestCVS(ParamInstanceTest):
+class MultiParamInstanceTest(ParamInstanceTest):
+    def _getter_test(self, getter):
+        test_file = self.create_file(getter)
+        storage = paths.Storage(self._filename(getter), mode='r')
+        get_arg = self.get_arg[getter]
+        obj_list = self.PARAMETER.get(storage, get_arg)
+        for obj in obj_list:
+            assert obj.__uuid__ == self.obj.__uuid__
+            assert obj == self.obj
+
+
+class TestCVS(MultiParamInstanceTest):
     PARAMETER = CVS
     def setup(self):
         super(TestCVS, self).setup()
-        self.get_arg = {'name': "x", 'number': 0}
+        self.get_arg = {'name': ["x"], 'number': [0]}
         self.obj = self.cv
 
     @pytest.mark.parametrize("getter", ['name', 'number'])
@@ -220,11 +231,11 @@ class TestCVS(ParamInstanceTest):
         self._getter_test(getter)
 
 
-class TestSTATES(ParamInstanceTest):
+class TestSTATES(MultiParamInstanceTest):
     PARAMETER = STATES
     def setup(self):
         super(TestSTATES, self).setup()
-        self.get_arg = {'name': "A", 'number': 0}
+        self.get_arg = {'name': ["A"], 'number': [0]}
         self.obj = self.state_A
 
     @pytest.mark.parametrize("getter", ['name', 'number'])
@@ -233,6 +244,6 @@ class TestSTATES(ParamInstanceTest):
 
     @pytest.mark.parametrize("getter", ['name', 'number'])
     def test_get_other(self, getter):
-        self.get_arg = {'name': 'B', 'number': 1}
+        self.get_arg = {'name': ['B'], 'number': [1]}
         self.obj = self.state_B
         self._getter_test(getter)
