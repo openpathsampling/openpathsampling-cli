@@ -128,10 +128,10 @@ class TestSCHEME(ParamInstanceTest):
         self._getter_test(getter)
 
 
-class TestINIT_TRAJ(ParamInstanceTest):
-    PARAMETER = INIT_TRAJ
+class TestINIT_CONDS(ParamInstanceTest):
+    PARAMETER = INIT_CONDS
     def setup(self):
-        super(TestINIT_TRAJ, self).setup()
+        super(TestINIT_CONDS, self).setup()
         self.traj = make_1d_traj([-0.1, 1.0, 4.4, 7.7, 10.01])
         ensemble = self.scheme.network.sampling_ensembles[0]
         self.sample_set = paths.SampleSet([

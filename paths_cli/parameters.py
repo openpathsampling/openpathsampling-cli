@@ -135,9 +135,10 @@ SCHEME = OPSStorageLoadSingle(
     fallback=None
 )
 
-INIT_TRAJ = OPSStorageLoadSingle(
-    param=Option('-t', '--init-traj',
-                 help="identifier for initial trajectory"),
+INIT_CONDS = OPSStorageLoadSingle(
+    param=Option('-t', '--init-conds',
+                 help=("identifier for initial conditions "
+                       + "(sample set or trajectory")),
     store='tags',
     num_store='samplesets',
     fallback=init_traj_fallback

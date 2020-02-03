@@ -76,7 +76,7 @@ tool with:
     openpathsampling strip-snapshots --help
 """
 
-def main():
+def main():  # no-cov
     cli = OpenPathSamplingCLI(
         name="openpathsampling",
         help=main_help,
@@ -84,6 +84,6 @@ def main():
     )
     cli()
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # no-cov
     main()
     # print("list commands:", cli.list_commands())
