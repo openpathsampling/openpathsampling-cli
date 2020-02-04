@@ -42,7 +42,6 @@ class OpenPathSamplingCLI(click.MultiCommand):
                 commands.append(command[:-3])
         return files, commands
 
-
     def list_commands(self, ctx):
         return list(self._get_command.keys())
 

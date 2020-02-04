@@ -119,13 +119,20 @@ class TestSCHEME(ParamInstanceTest):
     def setup(self):
         super(TestSCHEME, self).setup()
         self.get_arg = {'name': 'scheme', 'number': 0, 'only': None,
-                        'only-named': None}
+                        'only-named': None, 'bad-name': 'foo'}
         self.obj = self.scheme
 
     @pytest.mark.parametrize("getter", ['name', 'number', 'only',
                                         'only-named'])
     def test_get(self, getter):
         self._getter_test(getter)
+
+    def test_bad_get(self):
+        # NOTE: This is where we test the failure of get; don't need to do
+        # it in every parameter
+        with pytest.raises(RuntimeError):
+            obj = self._getter_test('bad-name')
+
 
 
 class TestINIT_CONDS(ParamInstanceTest):
@@ -269,3 +276,13 @@ class TestSTATES(MultiParamInstanceTest):
         self.get_arg = {'name': ['B'], 'number': [1]}
         self.obj = self.state_B
         self._getter_test(getter)
+
+def test_OUTPUT_FILE():
+    tempdir = tempfile.mkdtemp()
+    filename = os.path.join(tempdir, "test_output_file.nc")
+    assert not os.path.exists(filename)
+    storage = OUTPUT_FILE.get(filename)
+    assert os.path.exists(filename)
+    os.remove(filename)
+    os.rmdir(tempdir)
+

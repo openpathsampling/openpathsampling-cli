@@ -11,12 +11,15 @@ class AbstractParameter(object):
     def clicked(self, required=False):
         raise NotImplementedError()
 
+# we'll use tests of the -h option in the .travis.yml to ensure that the
+# .clicked methods work
+
 class Option(AbstractParameter):
-    def clicked(self, required=False):
+    def clicked(self, required=False):  # no-cov
         return click.option(*self.args, **self.kwargs, required=required)
 
 class Argument(AbstractParameter):
-    def clicked(self, required=False):
+    def clicked(self, required=False):  # no-cov
         return click.argument(*self.args, **self.kwargs, required=required)
 
 
@@ -25,11 +28,11 @@ class AbstractLoader(object):
         self.param = param
 
     @property
-    def clicked(self):
+    def clicked(self):  # no-cov
         return self.param.clicked
 
     def get(self, *args, **kwargs):
-        return NotImplementedError()
+        raise NotImplementedError()
 
 
 class StorageLoader(AbstractLoader):
@@ -83,9 +86,8 @@ class OPSStorageLoadSingle(AbstractLoader):
         if result is not None:
             return result
 
-
         # if only one is named, take it
-        if self.store != 'tags':
+        if self.store != 'tags' and name is None:
             # if there's only one of them, take that
             if len(store) == 1:
                 return store[0]
@@ -93,7 +95,7 @@ class OPSStorageLoadSingle(AbstractLoader):
             if len(named_things) == 1:
                 return named_things[0]
 
-        if len(num_store) == 1:
+        if len(num_store) == 1 and name is None:
             return num_store[0]
 
         if self.fallback:
