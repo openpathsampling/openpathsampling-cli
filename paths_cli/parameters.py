@@ -61,6 +61,7 @@ class OPSStorageLoadSingle(AbstractLoader):
 
     def get(self, storage, name):
         store = getattr(storage, self.store)
+        num_store = getattr(storage, self.num_store)
 
         result = None
         # if the we can get by name/number, do it
@@ -77,20 +78,23 @@ class OPSStorageLoadSingle(AbstractLoader):
                 except ValueError:
                     pass
                 else:
-                    num_store = getattr(storage, self.num_store)
                     result = num_store[num]
 
         if result is not None:
             return result
 
-        # if there's only one of them, take that
-        if len(store) == 1:
-            return store[0]
 
         # if only one is named, take it
-        named_things = [o for o in store if o.is_named]
-        if len(named_things) == 1:
-            return named_things[0]
+        if self.store != 'tags':
+            # if there's only one of them, take that
+            if len(store) == 1:
+                return store[0]
+            named_things = [o for o in store if o.is_named]
+            if len(named_things) == 1:
+                return named_things[0]
+
+        if len(num_store) == 1:
+            return num_store[0]
 
         if self.fallback:
             result = self.fallback(self, storage, name)
@@ -101,15 +105,11 @@ class OPSStorageLoadSingle(AbstractLoader):
         return result
 
 
-
 def init_traj_fallback(parameter, storage, name):
     result = None
+
     if isinstance(name, int):
         return storage.trajectories[name]
-
-    if name and os.path.isfile(name):
-        # TODO: read from file
-        pass
 
     if name is None:
         # fallback to final_conditions, initial_conditions, only trajectory
@@ -117,10 +117,12 @@ def init_traj_fallback(parameter, storage, name):
         for tag in ['final_conditions', 'initial_conditions']:
             result = storage.tags[tag]
             if result:
-                return [result]
+                return result
 
-        if len(storage.samplesets) == 1:
-            return [s.trajectory for s in storage.samplesets[0]]
+        # already tried storage.samplesets
+        if len(storage.trajectories) == 1:
+            return storage.trajectories[0]
+
 
 
 ENGINE = OPSStorageLoadSingle(

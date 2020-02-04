@@ -200,12 +200,34 @@ class TestINIT_CONDS(ParamInstanceTest):
             'tag-initial': 'initial_conditions'
         }[getter_style]
         obj = self.PARAMETER.get(storage, get_arg)
+        assert obj == expected
 
-        pytest.skip()
+    @pytest.mark.parametrize("num_in_file", [1, 2, 3, 4])
+    def test_get_none(self, num_in_file):
+        stored_things = [
+            self.traj, self.sample_set, self.other_sample_set,
+            self.other_sample_set
+        ]
+        to_store = stored_things[:num_in_file]
+        filename = self._filename("init_conds_" + str(num_in_file) + ".nc")
+        storage = paths.Storage(filename, mode='w')
+        for item in to_store:
+            storage.save(item)
+
+        if num_in_file == 3:
+            storage.tags['initial_conditions'] = self.other_sample_set
+        elif num_in_file == 4:
+            storage.tags['final_conditions'] = self.other_sample_set
+            storage.tags['initial_conditions'] = self.sample_set
+
+        storage.close()
+
+        st = paths.Storage(filename, mode='r')
+        obj = INIT_CONDS.get(st, None)
+        assert obj == stored_things[num_in_file - 1]
+
+
         pass
-
-    def test_get_file(self):
-        pytest.skip()
 
 
 class MultiParamInstanceTest(ParamInstanceTest):
