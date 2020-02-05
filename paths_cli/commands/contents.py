@@ -2,11 +2,11 @@ import click
 from paths_cli.parameters import INPUT_FILE
 
 @click.command(
-    'nclist',
+    'contents',
     short_help="list named objects from an OPS .nc file",
 )
 @INPUT_FILE.clicked(required=True)
-def nclist(input_file):
+def contents(input_file):
     """List the names of named objects in an OPS .nc file.
 
     This is particularly useful when getting ready to use one of simulation
@@ -63,6 +63,6 @@ def get_section_string_nameable(section, store, get_named):
                     + _item_or_items(n_unnamed))
     return out_str
 
-CLI = nclist
+CLI = contents
 SECTION = "Miscellaneous"
 REQUIRES_OPS = (1, 0)

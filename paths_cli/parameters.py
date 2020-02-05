@@ -182,12 +182,15 @@ STATES = OPSStorageLoadNames(
 )
 
 INPUT_FILE = StorageLoader(
-    param=Argument('input_file', type=str),
+    param=Argument('input_file',
+                   type=click.Path(exists=True, readable=True)),
     mode='r'
 )
 
 OUTPUT_FILE = StorageLoader(
-    param=Option('-o', '--output-file', type=str, help="output ncfile"),
+    param=Option('-o', '--output-file',
+                 type=click.Path(writable=True),
+                 help="output ncfile"),
     mode='w'
 )
 
