@@ -1,5 +1,5 @@
 import click
-import openpathsampling as paths
+# import openpathsampling as paths
 
 class AbstractParameter(object):
     def __init__(self, *args, **kwargs):
@@ -41,6 +41,7 @@ class StorageLoader(AbstractLoader):
         self.mode = mode
 
     def get(self, name):
+        import openpathsampling as paths
         return paths.Storage(name, mode=self.mode)
 
 
