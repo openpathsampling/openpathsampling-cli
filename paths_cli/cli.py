@@ -7,46 +7,76 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 plugin_folder = os.path.join(os.path.dirname(__file__), 'commands')
 
+_possible_plugin_folders = list(set([
+    os.path.join(os.path.dirname(__file__), 'commands'),
+    os.path.join(click.get_app_dir("OpenPathSampling"), 'cli-plugins'),
+    os.path.join(click.get_app_dir("OpenPathSampling", force_posix=True),
+                 'cli-plugins'),
+]))
+
+OPSPlugin = collections.namedtuple("OPSPlugin",
+                                   ['name', 'filename', 'func', 'section'])
+
 class OpenPathSamplingCLI(click.MultiCommand):
     def __init__(self, *args, **kwargs):
-        self.plugin_folders = [
+        # the logic here is all about loading the plugins
+        plugin_folders = [
             os.path.join(os.path.dirname(__file__), 'commands'),
             os.path.join(click.get_app_dir("OpenPathSampling",
                                            force_posix=True),
                          'cli-plugins')
         ]
+        self.plugin_folders = [f for f in _possible_plugin_folders
+                               if os.path.exists(f)]
+        plugin_files = self._list_plugin_files(self.plugin_folders)
+        self.plugins = self._load_plugin_files(plugin_files)
+
         self._get_command = {}
         self._sections = collections.defaultdict(list)
-        plugin_files, command_list = self._list_plugins()
-        for cmd, plugin_file in zip(command_list, plugin_files):
-            command, section = self._load_plugin(plugin_file)
-            self._get_command[cmd] = command
-            self._sections[section].append(cmd)
+        for plugin in self.plugins:
+            self._get_command[plugin.name] = plugin.func
+            self._sections[plugin.section].append(plugin.name)
+
         super(OpenPathSamplingCLI, self).__init__(*args, **kwargs)
 
-    def _load_plugin(self, name):
+    @staticmethod
+    def _list_plugin_files(plugin_folders):
+        plugin_files = []
+        for folder in plugin_folders:
+            files = [os.path.join(folder, f) for f in os.listdir(folder)
+                     if f.endswith(".py")]
+            plugin_files += files
+        return plugin_files
+
+    @staticmethod
+    def _filename_to_command_name(filename):
+        command_name = filename[:-3]  # get rid of .py
+        command_name = command_name.replace('_', '-')  # commands use -
+        return command_name
+
+    @staticmethod
+    def _load_plugin(name):
         ns = {}
-        fn = os.path.join(plugin_folder, name + '.py')
-        with open(fn) as f:
-            code = compile(f.read(), fn, 'exec')
+        with open(name) as f:
+            code = compile(f.read(), name, 'exec')
             eval(code, ns, ns)
         return ns['CLI'], ns['SECTION']
 
-    def _list_plugins(self):
-        files = []
-        commands = []
-        for filename in os.listdir(plugin_folder):
-            if filename.endswith('.py'):
-                command = filename.replace('_', '-')
-                files.append(filename[:-3])
-                commands.append(command[:-3])
-        return files, commands
+    def _load_plugin_files(self, plugin_files):
+        plugins = []
+        for full_name in plugin_files:
+            head, filename = os.path.split(full_name)
+            command_name = self._filename_to_command_name(filename)
+            func, section = self._load_plugin(full_name)
+            plugins.append(OPSPlugin(name=command_name, filename=full_name,
+                                     func=func, section=section))
+        return plugins
 
     def list_commands(self, ctx):
         return list(self._get_command.keys())
 
     def get_command(self, ctx, name):
-        name = name.replace('_', '-')  # auto alias to allow - or _
+        name = name.replace('_', '-')  # allow - or _ from user
         return self._get_command.get(name)
 
     def format_commands(self, ctx, formatter):
