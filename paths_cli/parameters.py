@@ -126,6 +126,18 @@ def init_traj_fallback(parameter, storage, name):
             return storage.trajectories[0]
 
 
+def init_snap_fallback(parameter, storage, name):
+    # this is structured so that other things can be added to it later
+    result = None
+
+    if name is None:
+        result = storage.tags['initial_snapshot']
+        if result:
+            return result
+
+        if len(storage.snapshots) == 2:
+            # this is really only 1 snapshot; reversed copy gets saved
+            return storage.snapshots[0]
 
 ENGINE = OPSStorageLoadSingle(
     param=Option('-e', '--engine', help="identifer for the engine"),
@@ -142,10 +154,18 @@ SCHEME = OPSStorageLoadSingle(
 INIT_CONDS = OPSStorageLoadSingle(
     param=Option('-t', '--init-conds',
                  help=("identifier for initial conditions "
-                       + "(sample set or trajectory")),
+                       + "(sample set or trajectory)")),
     store='tags',
     num_store='samplesets',
     fallback=init_traj_fallback
+)
+
+INIT_SNAP = OPSStorageLoadSingle(
+    param=Option('-f', '--init-frame',
+                 help="identifier for initial snapshot"),
+    store='tags',
+    num_store='snapshots',
+    fallback=init_snap_fallback
 )
 
 CVS = OPSStorageLoadNames(

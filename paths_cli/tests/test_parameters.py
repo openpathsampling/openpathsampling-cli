@@ -233,8 +233,41 @@ class TestINIT_CONDS(ParamInstanceTest):
         obj = INIT_CONDS.get(st, None)
         assert obj == stored_things[num_in_file - 1]
 
+class TestINIT_SNAP(ParamInstanceTest):
+    PARAMETER = INIT_SNAP
+    def setup(self):
+        super(TestINIT_SNAP, self).setup()
+        traj = make_1d_traj([1.0, 2.0])
+        self.other_snap = traj[0]
+        self.init_snap = traj[1]
 
-        pass
+    def create_file(self, getter):
+        filename = self._filename(getter)
+        storage = paths.Storage(filename, 'w')
+        storage.save(self.other_snap)
+        if getter != 'none-num':
+            storage.save(self.init_snap)
+            storage.tags['initial_snapshot'] = self.init_snap
+        storage.close()
+        return filename
+
+    @pytest.mark.parametrize('getter', ['none-num', 'tag', 'number',
+                                        'none-tag'])
+    def test_get(self, getter):
+        # get by number is 2 because of snapshot duplication in storage
+        get_arg = {'none-num': None,
+                   'none-tag': None,
+                   'tag': 'initial_snapshot',
+                   'number': 2}[getter]
+        expected = {'none-num': self.other_snap,
+                    'none-tag': self.init_snap,
+                    'tag': self.init_snap,
+                    'number': self.init_snap}[getter]
+        filename = self.create_file(getter)
+        storage = paths.Storage(filename, mode='r')
+
+        obj = self.PARAMETER.get(storage, get_arg)
+        assert obj == expected
 
 
 class MultiParamInstanceTest(ParamInstanceTest):
