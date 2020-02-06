@@ -46,10 +46,16 @@ class OpenPathSamplingCLI(click.MultiCommand):
 
     @staticmethod
     def _list_plugin_files(plugin_folders):
+        def is_plugin(filename):
+            return (
+                filename.endswith(".py") and not filename.startswith("_")
+                and not filename.startswith(".")
+            )
+
         plugin_files = []
         for folder in plugin_folders:
             files = [os.path.join(folder, f) for f in os.listdir(folder)
-                     if f.endswith(".py")]
+                     if is_plugin(f)]
             plugin_files += files
         return plugin_files
 
