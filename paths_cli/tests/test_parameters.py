@@ -319,3 +319,23 @@ def test_OUTPUT_FILE():
     os.remove(filename)
     os.rmdir(tempdir)
 
+def test_APPEND_FILE():
+    tempdir = tempfile.mkdtemp()
+    filename = os.path.join(tempdir, "test_append_file.nc")
+    assert not os.path.exists(filename)
+    storage = APPEND_FILE.get(filename)
+    print(storage)
+    assert os.path.exists(filename)
+    traj = make_1d_traj([0.0, 1.0])
+    storage.tags['first_save'] = traj[0]
+    storage.close()
+    storage = APPEND_FILE.get(filename)
+    assert storage.tags['first_save'] == traj[0]
+    storage.tags['second_save'] = traj[1]
+    storage.close()
+    storage = APPEND_FILE.get(filename)
+    assert len(storage.tags) == 2
+    storage.close()
+    os.remove(filename)
+    os.rmdir(tempdir)
+

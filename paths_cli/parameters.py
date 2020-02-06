@@ -1,4 +1,5 @@
 import click
+import os
 # import openpathsampling as paths
 
 class AbstractParameter(object):
@@ -40,8 +41,17 @@ class StorageLoader(AbstractLoader):
         super(StorageLoader, self).__init__(param)
         self.mode = mode
 
+    def workaround(self, name):
+        # this is messed up... for some reason, storage doesn't create a new
+        # file in append mode. That may be a bug
+        import openpathsampling as paths
+        if self.mode == 'a' and not os.path.exists(name):
+            st = paths.Storage(name, mode='w')
+            st.close()
+
     def get(self, name):
         import openpathsampling as paths
+        self.workaround(name)
         return paths.Storage(name, mode=self.mode)
 
 
@@ -192,6 +202,13 @@ OUTPUT_FILE = StorageLoader(
                  type=click.Path(writable=True),
                  help="output ncfile"),
     mode='w'
+)
+
+APPEND_FILE = StorageLoader(
+    param=Option('-a', '--append-file',
+                 type=click.Path(writable=True, readable=True),
+                 help="file to append to"),
+    mode='a'
 )
 
 N_STEPS_MC = click.option('-n', '--nsteps', type=int,
