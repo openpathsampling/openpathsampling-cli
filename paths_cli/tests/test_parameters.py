@@ -50,14 +50,15 @@ class ParamInstanceTest(object):
         self.state_B = paths.CVDefinedVolume(
             self.cv, 10, float("inf")
         ).named("B")
-        network = paths.TPSNetwork(self.state_A, self.state_B)
+        self.network = paths.TPSNetwork(self.state_A,
+                                        self.state_B).named('network')
         self.scheme = paths.OneWayShootingMoveScheme(
-            network,
+            self.network,
             paths.UniformSelector(),
             self.engine
         ).named("scheme")
         self.other_scheme = paths.OneWayShootingMoveScheme(
-            network,
+            self.network,
             paths.UniformSelector(),
             self.other_engine
         )
@@ -309,6 +310,71 @@ class TestSTATES(MultiParamInstanceTest):
         self.get_arg = {'name': ['B'], 'number': [1]}
         self.obj = self.state_B
         self._getter_test(getter)
+
+
+class MULTITest(MultiParamInstanceTest):
+    # Abstract base class for tests of MULTI_* parameters
+    # These parameters require name or number input, otherwise error
+    @pytest.mark.parametrize("getter", ['name', 'number'])
+    def test_get(self, getter):
+        self._getter_test(getter)
+
+    def test_get_none(self):
+        filename = self.create_file("none")
+        storage = paths.Storage(filename, mode='r')
+        with pytest.raises(TypeError):
+            # TypeError: 'NoneType' object is not iterable
+            self.PARAMETER.get(storage, None)
+
+
+class TestMULTI_VOLUME(TestSTATES, MULTITest):
+    PARAMETER = MULTI_VOLUME
+    # MULTI_VOLUME is basically the same as STATES, with different option
+    # parameters
+
+
+class TestMULTI_ENGINE(MULTITest):
+    PARAMETER = MULTI_ENGINE
+    def setup(self):
+        super(TestMULTI_ENGINE, self).setup()
+        self.get_arg = {'name': ["engine"], 'number': [0]}
+        self.obj = self.engine
+
+
+class TestMulti_NETWORK(MULTITest):
+    PARAMETER = MULTI_NETWORK
+    def setup(self):
+        super(TestMulti_NETWORK, self).setup()
+        self.get_arg = {'name': ['network'], 'number': [0]}
+        self.obj = self.network
+
+
+class TestMULTI_SCHEME(MULTITest):
+    PARAMETER = MULTI_SCHEME
+    def setup(self):
+        super(TestMULTI_SCHEME, self).setup()
+        self.get_arg = {'name': ['scheme'], 'number': [0]}
+        self.obj = self.scheme
+
+
+class TestMULTI_TAG(MULTITest):
+    PARAMETER = MULTI_TAG
+    def setup(self):
+        super(TestMULTI_TAG, self).setup()
+        self.obj = make_1d_traj([1.0, 2.0, 3.0])
+        self.get_arg = {'name': ['traj']}
+
+    def create_file(self, getter):
+        filename = self._filename(getter)
+        storage = paths.Storage(filename, 'w')
+        storage.tag['traj'] = self.obj
+        storage.close()
+        return filename
+
+    @pytest.mark.parametrize("getter", ['name'])
+    def test_get(self, getter):
+        self._getter_test(getter)
+
 
 def test_OUTPUT_FILE():
     tempdir = tempfile.mkdtemp()

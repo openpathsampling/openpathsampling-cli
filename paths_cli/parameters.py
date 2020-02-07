@@ -202,7 +202,7 @@ MULTI_VOLUME = OPSStorageLoadNames(
     param=Option('--volume', type=str, multiple=True,
                  help='name or index of volume' + HELP_MULTIPLE),
     store='volumes'
-)  #TODO:unit tests
+)
 
 MULTI_ENGINE = OPSStorageLoadNames(
     param=Option('--engine', type=str, multiple=True,
@@ -221,19 +221,19 @@ MULTI_TAG = OPSStorageLoadNames(
     param=Option('--tag', type=str, multiple=True,
                  help='tag for object' + HELP_MULTIPLE),
     store='tags'
-)  # TODO: unit testsA
+)
 
 MULTI_NETWORK = OPSStorageLoadNames(
     param=Option('--network', type=str, multiple=True,
                  help='name or index of network' + HELP_MULTIPLE),
     store='networks'
-)  # TODO: unit tests
+)
 
 MULTI_SCHEME = OPSStorageLoadNames(
     param=Option('--scheme', type=str, multiple=True,
                  help='name or index of move scheme' + HELP_MULTIPLE),
     store='schemes'
-)  # TODO: unit tests
+)
 
 INPUT_FILE = StorageLoader(
     param=Argument('input_file',
