@@ -43,7 +43,7 @@ class StorageLoader(AbstractLoader):
         super(StorageLoader, self).__init__(param)
         self.mode = mode
 
-    def workaround(self, name):
+    def _workaround(self, name):
         # this is messed up... for some reason, storage doesn't create a new
         # file in append mode. That may be a bug
         import openpathsampling as paths
@@ -53,7 +53,7 @@ class StorageLoader(AbstractLoader):
 
     def get(self, name):
         import openpathsampling as paths
-        self.workaround(name)
+        self._workaround(name)
         return paths.Storage(name, mode=self.mode)
 
 
@@ -257,3 +257,5 @@ APPEND_FILE = StorageLoader(
 
 N_STEPS_MC = click.option('-n', '--nsteps', type=int,
                           help="number of Monte Carlo trials to run")
+
+MULTI_CV = CVS

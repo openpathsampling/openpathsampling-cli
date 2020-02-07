@@ -7,6 +7,8 @@ import collections
 import os
 
 import click
+# import click_completion
+# click_completion.init()
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 

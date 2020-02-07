@@ -338,4 +338,3 @@ def test_APPEND_FILE():
     storage.close()
     os.remove(filename)
     os.rmdir(tempdir)
-
