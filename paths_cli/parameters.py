@@ -15,6 +15,8 @@ class AbstractParameter(object):
 # we'll use tests of the -h option in the .travis.yml to ensure that the
 # .clicked methods work
 
+HELP_MULTIPLE = "; may be used more than once"
+
 class Option(AbstractParameter):
     def clicked(self, required=False):  # no-cov
         return click.option(*self.args, **self.kwargs, required=required)
@@ -56,12 +58,23 @@ class StorageLoader(AbstractLoader):
 
 
 class OPSStorageLoadNames(AbstractLoader):
+    """Simple loader that expects its input to be a name or index.
+    """
     def __init__(self, param, store):
         super(OPSStorageLoadNames, self).__init__(param)
         self.store = store
 
     def get(self, storage, names):
-        return [getattr(storage, self.store)[name] for name in names]
+        int_corrected = []
+        for name in names:
+            try:
+                name = int(name)
+            except ValueError:
+                pass
+            int_corrected.append(name)
+
+        return [getattr(storage, self.store)[name]
+                for name in int_corrected]
 
 
 class OPSStorageLoadSingle(AbstractLoader):
@@ -181,15 +194,46 @@ INIT_SNAP = OPSStorageLoadSingle(
 
 CVS = OPSStorageLoadNames(
     param=Option('--cv', type=str, multiple=True,
-                 help='name of CV; may select more than once'),
+                 help='name of CV' + HELP_MULTIPLE),
     store='cvs'
 )
 
+MULTI_VOLUME = OPSStorageLoadNames(
+    param=Option('--volume', type=str, multiple=True,
+                 help='name or index of volume' + HELP_MULTIPLE),
+    store='volumes'
+)  #TODO:unit tests
+
+MULTI_ENGINE = OPSStorageLoadNames(
+    param=Option('--engine', type=str, multiple=True,
+                 help='name or index of engine' + HELP_MULTIPLE),
+    store='engines'
+)
+
+
 STATES = OPSStorageLoadNames(
-    param=Option('-s', '--state', multiple=True,
-                 help='name of state; may select more than once'),
+    param=Option('-s', '--state', type=str, multiple=True,
+                 help='name  of state' + HELP_MULTIPLE),
     store='volumes'
 )
+
+MULTI_TAG = OPSStorageLoadNames(
+    param=Option('--tag', type=str, multiple=True,
+                 help='tag for object' + HELP_MULTIPLE),
+    store='tags'
+)  # TODO: unit testsA
+
+MULTI_NETWORK = OPSStorageLoadNames(
+    param=Option('--network', type=str, multiple=True,
+                 help='name or index of network' + HELP_MULTIPLE),
+    store='networks'
+)  # TODO: unit tests
+
+MULTI_SCHEME = OPSStorageLoadNames(
+    param=Option('--scheme', type=str, multiple=True,
+                 help='name or index of move scheme' + HELP_MULTIPLE),
+    store='schemes'
+)  # TODO: unit tests
 
 INPUT_FILE = StorageLoader(
     param=Argument('input_file',
