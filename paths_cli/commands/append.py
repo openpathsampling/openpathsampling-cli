@@ -20,7 +20,7 @@ from paths_cli.parameters import (
               help=("save object to a tag; requires that only one "
                     + "object be specfied. Can also be used to rename "
                     + "tagged objects. To append a tagged object without "
-                    + "a tag, use --add-tag \"\""))
+                    + "a tag, use --save-tag \"\""))
 def append(input_file, append_file, engine, cv, volume, network, scheme,
            tag, save_tag):
     """Append objects from INPUT_FILE to another file.
@@ -42,17 +42,14 @@ def append(input_file, append_file, engine, cv, volume, network, scheme,
     for obj in to_save:
         output_storage.save(obj)
 
-    if tag and save_tag is None:
-        save_tag = tag
+    if tag and len(tag) == 1 and save_tag is None:
+        save_tag = tag[0]
 
     if save_tag:
         output_storage.tags[save_tag] = to_save[0]
 
     # TO TEST
-    # 1. append a tag in a new file: its tag comes with it
-    # 2. rename a tagged object
     # 3. "untag" an object by not associating a tag in the new storage
-    # 4. tag a previously untagged object
 
     output_storage.close()
 
