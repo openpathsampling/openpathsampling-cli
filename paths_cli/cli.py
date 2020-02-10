@@ -7,6 +7,8 @@ import collections
 import os
 
 import click
+# import click_completion
+# click_completion.init()
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
@@ -116,14 +118,14 @@ tool with:
     openpathsampling strip-snapshots --help
 """
 
+OPS_CLI = OpenPathSamplingCLI(
+    name="openpathsampling",
+    help=_MAIN_HELP,
+    context_settings=CONTEXT_SETTINGS
+)
 
 def main():  # no-cov
-    cli = OpenPathSamplingCLI(
-        name="openpathsampling",
-        help=_MAIN_HELP,
-        context_settings=CONTEXT_SETTINGS
-    )
-    cli()
+    OPS_CLI()
 
 
 if __name__ == '__main__':  # no-cov
