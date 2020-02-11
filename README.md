@@ -1,3 +1,7 @@
+[![Build Status](https://travis-ci.com/openpathsampling/openpathsampling-cli.svg?branch=master)](https://travis-ci.com/openpathsampling/openpathsampling-cli)
+[![Coverage Status](https://coveralls.io/repos/github/openpathsampling/openpathsampling-cli/badge.svg?branch=master)](https://coveralls.io/github/openpathsampling/openpathsampling-cli?branch=master)
+[![Maintainability](https://api.codeclimate.com/v1/badges/0d1ee29e1a05cfcdc01a/maintainability)](https://codeclimate.com/github/openpathsampling/openpathsampling-cli/maintainability)
+
 # OpenPathSampling CLI
 
 *The command line interface to OpenPathSampling*
