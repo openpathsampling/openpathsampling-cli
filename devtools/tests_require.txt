@@ -1,0 +1,4 @@
+autorelease
+pytest
+pytest-cov
+python-coveralls
