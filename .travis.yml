@@ -20,9 +20,9 @@ env:
     # TWINE_PASSWORD
     # AUTORELEASE_TOKEN
   matrix:
+    - CONDA_PY=3.8
     - CONDA_PY=3.6
     - CONDA_PY=3.7
-    - CONDA_PY=3.8
 
 before_install:
   - echo "before install"
@@ -39,8 +39,9 @@ install:
 
 script:
   - python -c "import paths_cli"
-  #- python autorelease_check.py --branch ${TRAVIS_BRANCH} --event ${TRAVIS_EVENT_TYPE} #--allow-patch-skip  # allow-patch-skip if there was a testpypi problem
-  - py.test -vv --cov=paths_cli --cov-report xml:cov.xml
+  - python autorelease_check.py --branch ${TRAVIS_BRANCH} --event ${TRAVIS_EVENT_TYPE} #--allow-patch-skip  # allow-patch-skip if there was a testpypi problem
+  #- py.test -vv --cov=paths_cli --cov-report xml:cov.xml
+  - py.test -vv --cov --cov-report xml:cov.xml
 
 after_success:
   - COVERALLS_PARALLEL=true coveralls
