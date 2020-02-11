@@ -1,10 +1,8 @@
 [report]
 omit =
-    */python?.?/*
-    */openpathsampling/*
-    */paths_cli/version.py
-    */paths_cli/_installed_version.py
     */paths_cli/tests/*
+    */paths_cli/_installed_version.py
+    */paths_cli/version.py
 exclude_lines =
     no-cov
     def __repr__

@@ -1,1 +1,4 @@
+cython  # see if this helps MDTraj
+numpy
+
 sphinx-click
