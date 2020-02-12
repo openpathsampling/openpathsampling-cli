@@ -52,6 +52,7 @@ def append(input_file, append_file, engine, cv, volume, network, scheme,
     # 3. "untag" an object by not associating a tag in the new storage
 
     output_storage.close()
+    storage.close()
 
 
 CLI = append
