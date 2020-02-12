@@ -1,5 +1,6 @@
 version: ~> 1.0
 
+os: linux
 language: python
 
 notifications:
@@ -16,10 +17,11 @@ env:
   global:
     - CANONICAL_PYTHON="3.8"
     - CODECLIMATE=""
+    - PACKAGE_IMPORT_NAME="paths_cli"
     - TWINE_USERNAME="dwhswenson"
     # TWINE_PASSWORD
     # AUTORELEASE_TOKEN
-  matrix:
+  jobs:
     - CONDA_PY=3.8
     - CONDA_PY=3.6
     - CONDA_PY=3.7
@@ -46,4 +48,4 @@ after_success:
   - COVERALLS_PARALLEL=true coveralls
 
 import:
-  - dwhswenson/autorelease:autorelease-travis.yml@v0.1.2
+  - dwhswenson/autorelease:autorelease-travis.yml@package_import_name
