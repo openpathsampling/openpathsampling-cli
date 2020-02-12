@@ -1,4 +1,5 @@
 cython  # see if this helps MDTraj
 numpy
 
+packaging
 sphinx-click
