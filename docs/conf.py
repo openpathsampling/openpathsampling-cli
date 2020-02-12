@@ -22,7 +22,7 @@ with open("parameter_table.rst", mode='w') as f:
 
 # -- Project information -----------------------------------------------------
 import pkg_resources
-import packaging
+import packaging.version
 
 project = 'OpenPathSampling CLI'
 copyright = '2019-2020, David W.H. Swenson'
