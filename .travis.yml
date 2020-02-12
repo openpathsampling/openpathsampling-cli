@@ -48,4 +48,4 @@ after_success:
   - COVERALLS_PARALLEL=true coveralls
 
 import:
-  - dwhswenson/autorelease:autorelease-travis.yml@package_import_name
+  - dwhswenson/autorelease:autorelease-travis.yml@v0.2.0
