@@ -145,7 +145,6 @@ def main(log):
 
     logger = logging.getLogger(__name__)
     logger.debug("About to run command")  # TODO: maybe log invocation?
-    pass
 
 if __name__ == '__main__':  # no-cov
     cli()

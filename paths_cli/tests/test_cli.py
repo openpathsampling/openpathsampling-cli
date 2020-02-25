@@ -46,7 +46,7 @@ def test_main_log(with_log):
     }[with_log]
     expected = {
         True: logged_stdout + cmd_stdout,
-        False: cmd_stdout
+        False: ""
     }[with_log]
     with runner.isolated_filesystem():
         with open("logging.conf", mode='w') as log_conf:

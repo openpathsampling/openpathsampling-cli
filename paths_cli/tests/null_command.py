@@ -1,10 +1,12 @@
+import logging
 import click
 @click.command(
     'null-command',
     short_help="Do nothing (testing)"
 )
 def null_command():
-    print("Running null command")
+    logger = logging.getLogger(__name__)
+    logger.info("Running null command")
 
 CLI = null_command
 SECTION = "Workflow"
