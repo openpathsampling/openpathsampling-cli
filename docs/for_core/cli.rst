@@ -79,10 +79,13 @@ foregoing the CLI tools to run simulations, some of the "miscellaneous"
 commands are likely to be quite useful. Here are some that are available in
 the CLI:
 
-* ``nclist``: list all the named objects in an OPS storage, organized by
+* ``contents``: list all the named objects in an OPS storage, organized by
   store (type); this is extremely useful to get the name of an object to use
   as command-line input to one of the simulation scripts
-* ``strip-snapshots``: create a copy of the input storage file with the
+.. * ``strip-snapshots``: create a copy of the input storage file with the
   details (coordinates/velocities) of all snapshots removed; this allows you
   to make a much smaller copy (with results of CVs) to copy back to a local
   computer for analysis
+* ``append`` : add an object from once OPS storage into another one; this is
+  useful for getting everything into a single file before running a
+  simulation
