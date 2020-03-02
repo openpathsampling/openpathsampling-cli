@@ -1,8 +1,9 @@
+import collections
+import functools
 import os
 import tempfile
 from unittest.mock import MagicMock, patch
 import pytest
-
 
 import openpathsampling as paths
 from openpathsampling.tests.test_helpers import make_1d_traj
@@ -64,7 +65,7 @@ class TestPrecompute(object):
                 return snap.xyz[0][0]
 
         self.cv = paths.FunctionCV("test", RunOnceFunction())
-        traj = paths.tests.test_helpers.make_1d_traj([2, 1])
+        traj = make_1d_traj([2, 1])
         self.snap = traj[0]
         self.other_snap = traj[1]
 
@@ -75,9 +76,54 @@ class TestPrecompute(object):
         assert recalced == 2
         assert self.cv.diskcache_enabled is True
 
-    def test_precompute_cvs_and_inputs(self):
-        pytest.skip()
+    @pytest.mark.parametrize('cvs', [['test'], None])
+    def test_precompute_cvs_and_inputs(self, cvs):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            storage = paths.Storage(os.path.join(tmpdir, "test.nc"),
+                                    mode='w')
+            traj = make_1d_traj(list(range(10)))
+            cv = paths.FunctionCV("test", lambda s: s.xyz[0][0])
+            storage.save(traj)
+            storage.save(cv)
+
+            if cvs is not None:
+                cvs = [storage.cvs[cv] for cv in cvs]
+
+            precompute_func, blocks = precompute_cvs_func_and_inputs(
+                input_storage=storage,
+                cvs=cvs,
+                blocksize=2
+            )
+            assert len(blocks) == 5
+            for block in blocks:
+                assert len(block) == 2
+
+            # smoke test: only effect should be caching results
+            precompute_func(blocks[0])
 
 
 def test_rewrite_file():
-    pytest.skip()
+    # making a mock for storage instead of actually testing integration
+    class FakeStore(object):
+        def __init__(self):
+            self._stores = collections.defaultdict(list)
+
+        def store(self, obj, store_name):
+            self._stores[store_name].append(obj)
+
+    stage_names = ['foo', 'bar']
+    storage = FakeStore()
+    store_funcs = {
+        name: functools.partial(storage.store, store_name=name)
+        for name in stage_names
+    }
+    stage_mapping = {
+        'foo': (store_funcs['foo'], [0, 1, 2]),
+        'bar': (store_funcs['bar'], [[3], [4], [5]])
+    }
+    silent_tqdm = lambda x, desc=None, leave=True: x
+    with patch('paths_cli.file_copying.tqdm', silent_tqdm):
+        rewrite_file(stage_names, stage_mapping)
+
+    assert storage._stores['foo'] == [0, 1, 2]
+    assert storage._stores['bar'] == [[3], [4], [5]]
