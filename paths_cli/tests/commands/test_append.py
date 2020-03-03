@@ -88,7 +88,6 @@ def test_append_remove_tag(tps_network_and_traj):
         result = runner.invoke(append,
                                [in_file, '-a', "output.nc",
                                 "--tag", 'template', '--save-tag', ''])
-        print(result.output)
         assert result.exception is None
         assert result.exit_code == 0
 

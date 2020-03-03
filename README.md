@@ -28,7 +28,6 @@ miscellaneous operations on OPS output files.
 **Miscellaneous Commands:**
 
 * `contents`:         List named objects from an OPS .nc file
-* `strip-snapshots`:  Remove coordinates/velocities from an OPS storage
 * `append`:           add objects from INPUT_FILE  to another file
 
 Full documentation is at https://openpathsampling-cli.readthedocs.io/; a brief

@@ -128,10 +128,9 @@ _MAIN_HELP = """
 OpenPathSampling is a Python library for path sampling simulations. This
 command line tool facilitates common tasks when working with
 OpenPathSampling. To use it, use one of the subcommands below. For example,
-you can get more information about the strip-snapshots (filesize reduction)
-tool with:
+you can get more information about the pathsampling tool with:
 
-    openpathsampling strip-snapshots --help
+    openpathsampling pathsampling --help
 """
 
 @click.command(cls=OpenPathSamplingCLI, name="openpathsampling",
