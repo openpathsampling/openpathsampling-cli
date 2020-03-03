@@ -2,24 +2,31 @@ import pytest
 from unittest.mock import patch, MagicMock
 from click.testing import CliRunner
 
-import logging
-
 from paths_cli.cli import *
 from .null_command import NullCommandContext
+
 
 class TestOpenPathSamplingCLI(object):
     # TODO: more thorough testing of private methods to find/register
     # plugins might be nice; so far we mainly focus on testing the API.
     # (Still have smoke tests covering everything, though.)
     def setup(self):
+        def make_mock(name, helpless=False):
+            mock = MagicMock(return_value=name)
+            if helpless:
+                mock.short_help = None
+            else:
+                mock.short_help = name + " help"
+            return mock
+
         self.plugin_dict = {
             'foo': OPSPlugin(name='foo',
                              filename='foo.py',
-                             func=lambda: 'foo',
+                             func=make_mock('foo'),
                              section='Simulation'),
             'foo-bar': OPSPlugin(name='foo-bar',
                                  filename='foo_bar.py',
-                                 func=lambda: 'foobar',
+                                 func=make_mock('foobar', helpless=True),
                                  section='Miscellaneous')
         }
         self.fake_plugins = list(self.plugin_dict.values())
@@ -47,10 +54,27 @@ class TestOpenPathSamplingCLI(object):
         assert cmd() == 'foobar'
 
     def test_format_commands(self):
-        pytest.skip()
-        # use a mock to get the formatter
-        # test that it skips a section if it is empty
-        pass
+        class MockFormatter(object):
+            def __init__(self):
+                self.title = None
+                self.contents = {}
+
+            def section(self, title):
+                self.title = title
+                return MagicMock()
+
+            def write_dl(self, rows):
+                self.contents[self.title] = rows
+
+        formatter = MockFormatter()
+        # add a non-existent command; tests when get_command is None
+        self.cli._sections['Workflow'] = ['baz']
+        self.cli.format_commands(ctx=None, formatter=formatter)
+        foo_row = ('foo', 'foo help')
+        foobar_row = ('foo-bar', '')
+        assert formatter.contents['Simulation Commands'] == [foo_row]
+        assert formatter.contents['Miscellaneous Commands'] == [foobar_row]
+        assert len(formatter.contents) == 2
 
 
 @pytest.mark.parametrize('with_log', [True, False])
