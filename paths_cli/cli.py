@@ -60,7 +60,7 @@ class OpenPathSamplingCLI(click.MultiCommand):
         self._sections[plugin.section].remove(plugin.name)
 
     def plugin_for_command(self, command_name):
-        return {p.name: p for p in self.plugins}[name]
+        return {p.name: p for p in self.plugins}[command_name]
 
     @staticmethod
     def _list_plugin_files(plugin_folders):
