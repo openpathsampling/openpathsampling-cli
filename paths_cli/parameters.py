@@ -1,6 +1,9 @@
 import click
 import os
-# import openpathsampling as paths
+
+_UNNAMED_STORES = ['snapshots', 'trajectories', 'samples', 'sample_sets',
+                   'steps']
+
 
 class AbstractParameter(object):
     def __init__(self, *args, **kwargs):
@@ -12,11 +15,10 @@ class AbstractParameter(object):
     def clicked(self, required=False):
         raise NotImplementedError()
 
-# we'll use tests of the -h option in the .travis.yml to ensure that the
-# .clicked methods work
-
 HELP_MULTIPLE = "; may be used more than once"
 
+# we'll use tests of the -h option in the .travis.yml to ensure that the
+# .clicked methods work
 class Option(AbstractParameter):
     def clicked(self, required=False):  # no-cov
         return click.option(*self.args, **self.kwargs, required=required)
@@ -77,119 +79,136 @@ class OPSStorageLoadNames(AbstractLoader):
                 for name in int_corrected]
 
 
-class OPSStorageLoadSingle(AbstractLoader):
-    def __init__(self, param, store, fallback=None, num_store=None):
-        super(OPSStorageLoadSingle, self).__init__(param)
-        self.store = store
-        self.fallback = fallback
-        if num_store is None:
-            num_store = store
-        self.num_store = num_store
+class Getter(object):
+    def __init__(self, store_name):
+        self.store_name = store_name
 
-    def get(self, storage, name):
-        store = getattr(storage, self.store)
-        num_store = getattr(storage, self.num_store)
+    def _get(self, storage, name):
+        store = getattr(storage, self.store_name)
+        try:
+            return store[name]
+        except:
+            return None
 
-        result = None
-        # if the we can get by name/number, do it
-        if name is not None:
-            try:
-                result = store[name]
-            except:
-                # on any error, we try everything else
-                pass
+class GetByName(Getter):
+    def __call__(self, storage, name):
+        return self._get(storage, name)
 
-            if result is None:
-                try:
-                    num = int(name)
-                except ValueError:
-                    pass
-                else:
-                    result = num_store[num]
+class GetByNumber(Getter):
+    def __call__(self, storage, name):
+        try:
+            num = int(name)
+        except:
+            return None
 
+        return self._get(storage, num)
+
+class GetPredefinedName(Getter):
+    def __init__(self, store_name, name):
+        super().__init__(store_name=store_name)
+        self.name = name
+
+    def __call__(self, storage):
+        return self._get(storage, self.name)
+
+class GetOnly(Getter):
+    def __call__(self, storage):
+        store = getattr(storage, self.store_name)
+        if len(store) == 1:
+            return store[0]
+
+class GetOnlyNamed(Getter):
+    def __call__(self, storage):
+        store = getattr(storage, self.store_name)
+        named_things = [o for o in store if o.is_named]
+        if len(named_things) == 1:
+            return named_things[0]
+
+class GetOnlySnapshot(Getter):
+    def __init__(self, store_name="snapshots"):
+        super().__init__(store_name)
+
+    def __call__(self, storage):
+        store = getattr(storage, self.store_name)
+        if len(store) == 2:
+            # this is really only 1 snapshot; reversed copy gets saved
+            return store[0]
+
+
+def _try_strategies(strategies, storage, **kwargs):
+    result = None
+    for strategy in strategies:
+        result = strategy(storage, **kwargs)
         if result is not None:
             return result
 
-        # if only one is named, take it
-        if self.store != 'tags' and name is None:
-            # if there's only one of them, take that
-            if len(store) == 1:
-                return store[0]
-            named_things = [o for o in store if o.is_named]
-            if len(named_things) == 1:
-                return named_things[0]
 
-        if len(num_store) == 1 and name is None:
-            return num_store[0]
+class OPSStorageLoadSingle(AbstractLoader):
+    """Objects that expect to load a single object.
 
-        if self.fallback:
-            result = self.fallback(self, storage, name)
+    These can sometimes include guesswork to figure out which object is
+    desired.
+    """
+    def __init__(self, param, store, value_strategies=None,
+                 none_strategies=None):
+        super(OPSStorageLoadSingle, self).__init__(param)
+        self.store = store
+        if value_strategies is None:
+            value_strategies = [GetByName(self.store),
+                                GetByNumber(self.store)]
+        self.value_strategies = value_strategies
+
+        if none_strategies is None:
+            none_strategies = [GetOnly(self.store),
+                               GetOnlyNamed(self.store)]
+        self.none_strategies = none_strategies
+
+    def get(self, storage, name):
+        store = getattr(storage, self.store)
+        # num_store = getattr(storage, self.num_store)
+
+        if name is not None:
+            result = _try_strategies(self.value_strategies, storage,
+                                     name=name)
+        else:
+            result = _try_strategies(self.none_strategies, storage)
 
         if result is None:
             raise RuntimeError("Couldn't find %s", name)
 
         return result
 
-
-def init_traj_fallback(parameter, storage, name):
-    result = None
-
-    if isinstance(name, int):
-        return storage.trajectories[name]
-
-    if name is None:
-        # fallback to final_conditions, initial_conditions, only trajectory
-        # the "get" here may need to be changed for new storage
-        for tag in ['final_conditions', 'initial_conditions']:
-            result = storage.tags[tag]
-            if result:
-                return result
-
-        # already tried storage.samplesets
-        if len(storage.trajectories) == 1:
-            return storage.trajectories[0]
-
-
-def init_snap_fallback(parameter, storage, name):
-    # this is structured so that other things can be added to it later
-    result = None
-
-    if name is None:
-        result = storage.tags['initial_snapshot']
-        if result:
-            return result
-
-        if len(storage.snapshots) == 2:
-            # this is really only 1 snapshot; reversed copy gets saved
-            return storage.snapshots[0]
-
 ENGINE = OPSStorageLoadSingle(
     param=Option('-e', '--engine', help="identifer for the engine"),
     store='engines',
-    fallback=None  # for now... I'll add more tricks later
+    # fallback=None  # for now... I'll add more tricks later
 )
 
 SCHEME = OPSStorageLoadSingle(
     param=Option('-m', '--scheme', help="identifier for the move scheme"),
     store='schemes',
-    fallback=None
+    # fallback=None
 )
 
 INIT_CONDS = OPSStorageLoadSingle(
     param=Option('-t', '--init-conds',
                  help=("identifier for initial conditions "
                        + "(sample set or trajectory)")),
-    store='tags',
-    num_store='samplesets',
-    fallback=init_traj_fallback
+    store='samplesets',
+    value_strategies=[GetByName('tags'), GetByNumber('samplesets'),
+                      GetByNumber('trajectories')],
+    none_strategies=[GetOnly('samplesets'), GetOnly('trajectories'),
+                     GetPredefinedName('tags', 'final_conditions'),
+                     GetPredefinedName('tags', 'initial_conditions')]
 )
 
 INIT_SNAP = OPSStorageLoadSingle(
     param=Option('-f', '--init-frame',
                  help="identifier for initial snapshot"),
-    store='tags',
-    num_store='snapshots',
-    fallback=init_snap_fallback
+    store='snapshots',
+    value_strategies=[GetByName('tags'), GetByNumber('snapshots')],
+    none_strategies=[GetOnlySnapshot(),
+                     GetPredefinedName('tags', 'initial_snapshot')]
 )
 
 CVS = OPSStorageLoadNames(
