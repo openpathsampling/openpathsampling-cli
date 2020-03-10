@@ -6,9 +6,10 @@ modification, or where CVs need to be disk-cached.
 
 import click
 from tqdm.auto import tqdm
-from paths_cli.parameters import (
-    Option, Argument, HELP_MULTIPLE, StorageLoader, OPSStorageLoadNames
+from paths_cli.param_core import (
+    Option, Argument, StorageLoader, OPSStorageLoadNames
 )
+from paths_cli.parameters import HELP_MULTIPLE
 
 INPUT_APPEND_FILE = StorageLoader(
     param=Argument('append_file',
