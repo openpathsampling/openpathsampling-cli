@@ -12,6 +12,7 @@ import collections
 import click
 
 from paths_cli import parameters
+from  paths_cli import param_core
 
 TableEntry = collections.namedtuple("TableEntry",
                                     "param flags get_args help")
@@ -20,7 +21,7 @@ def is_click_decorator(thing):
     return getattr(thing, '__module__', None) == 'click.decorators'
 
 def is_parameter(thing):
-    return (isinstance(thing, parameters.AbstractLoader)
+    return (isinstance(thing, param_core.AbstractLoader)
             or is_click_decorator(thing))
 
 def rst_wrap(code):
@@ -33,10 +34,10 @@ def flags_help(click_decorator):
     return flags, help_
 
 def get_args(parameter):
-    if isinstance(parameter, parameters.StorageLoader):
+    if isinstance(parameter, param_core.StorageLoader):
         return "``name``"
-    elif isinstance(parameter, (parameters.OPSStorageLoadNames,
-                                parameters.OPSStorageLoadSingle)):
+    elif isinstance(parameter, (param_core.OPSStorageLoadNames,
+                                param_core.OPSStorageLoadSingle)):
         return "``storage``, ``name``"
     elif is_click_decorator(parameter):
         return "No ``get`` function"
@@ -44,7 +45,7 @@ def get_args(parameter):
         return "Unknown"
 
 def get_click_decorator(thing):
-    if isinstance(thing, parameters.AbstractLoader):
+    if isinstance(thing, param_core.AbstractLoader):
         return thing.param.clicked()
     elif is_click_decorator(thing):
         return thing
