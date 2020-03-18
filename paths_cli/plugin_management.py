@@ -64,6 +64,11 @@ class CLIPluginLoader(object):
 
 class FilePluginLoader(CLIPluginLoader):
     """File-based plugins (quick and dirty)
+
+    Parameters
+    ----------
+    search_path : str
+        path to the directory that contains plugins (OS-dependent format)
     """
     def __init__(self, search_path):
         super().__init__(plugin_type="file", search_path=search_path)
@@ -96,6 +101,11 @@ class FilePluginLoader(CLIPluginLoader):
 
 class NamespacePluginLoader(CLIPluginLoader):
     """Load namespace plugins (plugins for wide distribution)
+
+    Parameters
+    ----------
+    search_path : str
+        namespace (dot-separated) where plugins can be found
     """
     def __init__(self, search_path):
         super().__init__(plugin_type="namespace", search_path=search_path)
