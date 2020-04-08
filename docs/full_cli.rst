@@ -9,6 +9,6 @@ currently gives all commands alphabetically, without regard to section. In
 general, this is not yet well-organized; contributions to improve that would
 be appreciated.
 
-.. click:: paths_cli.cli:OPS_CLI
+.. click:: paths_cli.cli:main
    :prog: openpathsampling
    :show-nested:

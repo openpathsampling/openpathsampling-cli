@@ -4,6 +4,8 @@ This contains the "main" class/functions for running the OPS CLI.
 """
 # builds off the example of MultiCommand in click's docs
 import collections
+import logging
+import logging.config
 import os
 
 import click
@@ -36,15 +38,29 @@ class OpenPathSamplingCLI(click.MultiCommand):
                 self.plugin_folders.append(folder)
 
         plugin_files = self._list_plugin_files(self.plugin_folders)
-        self.plugins = self._load_plugin_files(plugin_files)
+        plugins = self._load_plugin_files(plugin_files)
 
         self._get_command = {}
         self._sections = collections.defaultdict(list)
-        for plugin in self.plugins:
-            self._get_command[plugin.name] = plugin.func
-            self._sections[plugin.section].append(plugin.name)
+        self.plugins = []
+        for plugin in plugins:
+            self._register_plugin(plugin)
 
         super(OpenPathSamplingCLI, self).__init__(*args, **kwargs)
+
+    def _register_plugin(self, plugin):
+        self.plugins.append(plugin)
+        self._get_command[plugin.name] = plugin.func
+        self._sections[plugin.section].append(plugin.name)
+
+    def _deregister_plugin(self, plugin):
+        # mainly used in testing
+        self.plugins.remove(plugin)
+        del self._get_command[plugin.name]
+        self._sections[plugin.section].remove(plugin.name)
+
+    def plugin_for_command(self, command_name):
+        return {p.name: p for p in self.plugins}[command_name]
 
     @staticmethod
     def _list_plugin_files(plugin_folders):
@@ -112,22 +128,22 @@ _MAIN_HELP = """
 OpenPathSampling is a Python library for path sampling simulations. This
 command line tool facilitates common tasks when working with
 OpenPathSampling. To use it, use one of the subcommands below. For example,
-you can get more information about the strip-snapshots (filesize reduction)
-tool with:
+you can get more information about the pathsampling tool with:
 
-    openpathsampling strip-snapshots --help
+    openpathsampling pathsampling --help
 """
 
-OPS_CLI = OpenPathSamplingCLI(
-    name="openpathsampling",
-    help=_MAIN_HELP,
-    context_settings=CONTEXT_SETTINGS
-)
+@click.command(cls=OpenPathSamplingCLI, name="openpathsampling",
+               help=_MAIN_HELP, context_settings=CONTEXT_SETTINGS)
+@click.option('--log', type=click.Path(exists=True, readable=True),
+              help="logging configuration file")
+def main(log):
+    if log:
+        logging.config.fileConfig(log, disable_existing_loggers=False)
+    # TODO: if log not given, check for logging.conf in .openpathsampling/
 
-def main():  # no-cov
-    OPS_CLI()
-
+    logger = logging.getLogger(__name__)
+    logger.debug("About to run command")  # TODO: maybe log invocation?
 
 if __name__ == '__main__':  # no-cov
     main()
-    # print("list commands:", cli.list_commands())
