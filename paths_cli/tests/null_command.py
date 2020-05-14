@@ -1,5 +1,8 @@
 import logging
 import click
+
+from paths_cli.plugin_management import FilePluginLoader, OPSPlugin
+
 @click.command(
     'null-command',
     short_help="Do nothing (testing)"
@@ -14,7 +17,13 @@ SECTION = "Workflow"
 class NullCommandContext(object):
     """Context that registers/deregisters the null command (for tests)"""
     def __init__(self, cli):
-        self.plugin = cli._load_plugin_files([__file__])[0]
+        self.plugin = OPSPlugin(name="null-command",
+                                location=__file__,
+                                func=CLI,
+                                section=SECTION,
+                                plugin_type="file")
+
+        cli._register_plugin(self.plugin)
         self.cli = cli
 
     def __enter__(self):

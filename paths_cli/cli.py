@@ -7,23 +7,15 @@ import collections
 import logging
 import logging.config
 import os
+import pathlib
 
 import click
 # import click_completion
 # click_completion.init()
 
+from .plugin_management import FilePluginLoader, NamespacePluginLoader
+
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-
-_POSSIBLE_PLUGIN_FOLDERS = [
-    os.path.join(os.path.dirname(__file__), 'commands'),
-    os.path.join(click.get_app_dir("OpenPathSampling"), 'cli-plugins'),
-    os.path.join(click.get_app_dir("OpenPathSampling", force_posix=True),
-                 'cli-plugins'),
-]
-
-OPSPlugin = collections.namedtuple("OPSPlugin",
-                                   ['name', 'filename', 'func', 'section'])
-
 
 class OpenPathSamplingCLI(click.MultiCommand):
     """Main class for the command line interface
@@ -32,13 +24,20 @@ class OpenPathSamplingCLI(click.MultiCommand):
     """
     def __init__(self, *args, **kwargs):
         # the logic here is all about loading the plugins
-        self.plugin_folders = []
-        for folder in _POSSIBLE_PLUGIN_FOLDERS:
-            if folder not in self.plugin_folders and os.path.exists(folder):
-                self.plugin_folders.append(folder)
+        commands = str(pathlib.Path(__file__).parent.resolve() / 'commands')
+        def app_dir_plugins(posix):
+            return str(pathlib.Path(
+                click.get_app_dir("OpenPathSampling", force_posix=posix)
+            ).resolve() / 'cli-plugins')
 
-        plugin_files = self._list_plugin_files(self.plugin_folders)
-        plugins = self._load_plugin_files(plugin_files)
+        self.plugin_loaders = [
+            FilePluginLoader(commands),
+            FilePluginLoader(app_dir_plugins(posix=False)),
+            FilePluginLoader(app_dir_plugins(posix=True)),
+            NamespacePluginLoader('paths_cli.plugins')
+        ]
+
+        plugins = sum([loader() for loader in self.plugin_loaders], [])
 
         self._get_command = {}
         self._sections = collections.defaultdict(list)
@@ -61,45 +60,6 @@ class OpenPathSamplingCLI(click.MultiCommand):
 
     def plugin_for_command(self, command_name):
         return {p.name: p for p in self.plugins}[command_name]
-
-    @staticmethod
-    def _list_plugin_files(plugin_folders):
-        def is_plugin(filename):
-            return (
-                filename.endswith(".py") and not filename.startswith("_")
-                and not filename.startswith(".")
-            )
-
-        plugin_files = []
-        for folder in plugin_folders:
-            files = [os.path.join(folder, f) for f in os.listdir(folder)
-                     if is_plugin(f)]
-            plugin_files += files
-        return plugin_files
-
-    @staticmethod
-    def _filename_to_command_name(filename):
-        command_name = filename[:-3]  # get rid of .py
-        command_name = command_name.replace('_', '-')  # commands use -
-        return command_name
-
-    @staticmethod
-    def _load_plugin(name):
-        ns = {}
-        with open(name) as f:
-            code = compile(f.read(), name, 'exec')
-            eval(code, ns, ns)
-        return ns['CLI'], ns['SECTION']
-
-    def _load_plugin_files(self, plugin_files):
-        plugins = []
-        for full_name in plugin_files:
-            _, filename = os.path.split(full_name)
-            command_name = self._filename_to_command_name(filename)
-            func, section = self._load_plugin(full_name)
-            plugins.append(OPSPlugin(name=command_name, filename=full_name,
-                                     func=func, section=section))
-        return plugins
 
     def list_commands(self, ctx):
         return list(self._get_command.keys())
