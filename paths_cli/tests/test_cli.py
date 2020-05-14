@@ -3,13 +3,11 @@ from unittest.mock import patch, MagicMock
 from click.testing import CliRunner
 
 from paths_cli.cli import *
+from paths_cli.plugin_management import OPSPlugin
 from .null_command import NullCommandContext
 
 
 class TestOpenPathSamplingCLI(object):
-    # TODO: more thorough testing of private methods to find/register
-    # plugins might be nice; so far we mainly focus on testing the API.
-    # (Still have smoke tests covering everything, though.)
     def setup(self):
         def make_mock(name, helpless=False):
             mock = MagicMock(return_value=name)
@@ -21,22 +19,25 @@ class TestOpenPathSamplingCLI(object):
 
         self.plugin_dict = {
             'foo': OPSPlugin(name='foo',
-                             filename='foo.py',
+                             location='foo.py',
                              func=make_mock('foo'),
-                             section='Simulation'),
+                             section='Simulation',
+                             plugin_type='file'),
             'foo-bar': OPSPlugin(name='foo-bar',
-                                 filename='foo_bar.py',
+                                 location='foo_bar.py',
                                  func=make_mock('foobar', helpless=True),
-                                 section='Miscellaneous')
+                                 section='Miscellaneous',
+                                 plugin_type="file")
         }
-        self.fake_plugins = list(self.plugin_dict.values())
-        mock_plugins = MagicMock(return_value=self.fake_plugins)
-        with patch.object(OpenPathSamplingCLI, '_load_plugin_files',
-                          mock_plugins):
-            self.cli = OpenPathSamplingCLI()
+        self.plugins = list(self.plugin_dict.values())
+        self.cli = OpenPathSamplingCLI()
+        for plugin in self.cli.plugins:
+            self.cli._deregister_plugin(plugin)
+        for plugin in self.plugins:
+            self.cli._register_plugin(plugin)
 
     def test_plugins(self):
-        assert self.cli.plugins == self.fake_plugins
+        assert self.cli.plugins == self.plugins
         assert self.cli._sections['Simulation'] == ['foo']
         assert self.cli._sections['Miscellaneous'] == ['foo-bar']
 

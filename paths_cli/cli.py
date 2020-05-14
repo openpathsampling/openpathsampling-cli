@@ -17,13 +17,6 @@ from .plugin_management import FilePluginLoader, NamespacePluginLoader
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
-_POSSIBLE_PLUGIN_FOLDERS = [
-    os.path.join(os.path.dirname(__file__), 'commands'),
-    os.path.join(click.get_app_dir("OpenPathSampling"), 'cli-plugins'),
-    os.path.join(click.get_app_dir("OpenPathSampling", force_posix=True),
-                 'cli-plugins'),
-]
-
 class OpenPathSamplingCLI(click.MultiCommand):
     """Main class for the command line interface
 
