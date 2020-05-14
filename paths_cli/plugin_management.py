@@ -79,6 +79,10 @@ class FilePluginLoader(CLIPluginLoader):
                 filename.endswith(".py") and not filename.startswith("_")
                 and not filename.startswith(".")
             )
+
+        if not os.path.exists(os.path.join(self.search_path)):
+            return []
+
         candidates = [os.path.join(self.search_path, f)
                       for f in os.listdir(self.search_path)
                       if is_plugin(f)]
