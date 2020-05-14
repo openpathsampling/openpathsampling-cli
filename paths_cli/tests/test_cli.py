@@ -31,8 +31,10 @@ class TestOpenPathSamplingCLI(object):
         }
         self.plugins = list(self.plugin_dict.values())
         self.cli = OpenPathSamplingCLI()
-        for plugin in self.cli.plugins:
+        # need to copy the plugins since we're changing the list
+        for plugin in self.cli.plugins[:]:
             self.cli._deregister_plugin(plugin)
+
         for plugin in self.plugins:
             self.cli._register_plugin(plugin)
 
