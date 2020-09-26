@@ -61,4 +61,5 @@ wrappers around well-tested OPS code.
    parameters
    workflows
    full_cli
+   api/index
 
