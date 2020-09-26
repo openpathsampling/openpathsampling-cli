@@ -23,3 +23,12 @@ def tps_network_and_traj():
     init_traj = make_1d_traj([-0.1, 0.1, 0.3, 0.5, 0.7, 0.9, 1.1],
                              [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0])
     return (network, init_traj)
+
+@pytest.fixture
+def tps_fixture(flat_engine, tps_network_and_traj):
+    network, traj = tps_network_and_traj
+    scheme = paths.OneWayShootingMoveScheme(network=network,
+                                            selector=paths.UniformSelector(),
+                                            engine=flat_engine)
+    init_conds = scheme.initial_conditions_from_trajectories(traj)
+    return (scheme, network, flat_engine, init_conds)
