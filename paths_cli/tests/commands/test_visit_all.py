@@ -18,15 +18,6 @@ def print_test(output_storage, states, engine, initial_frame):
 
 
 @pytest.fixture()
-def tps_fixture(flat_engine, tps_network_and_traj):
-    network, traj = tps_network_and_traj
-    scheme = paths.OneWayShootingMoveScheme(network=network,
-                                            selector=paths.UniformSelector(),
-                                            engine=flat_engine)
-    init_conds = scheme.initial_conditions_from_trajectories(traj)
-    return (scheme, network, flat_engine, init_conds)
-
-@pytest.fixture()
 def visit_all_fixture(tps_fixture):
     scheme, network, engine, init_conds = tps_fixture
     states = sorted(network.all_states, key=lambda x: x.__uuid__)

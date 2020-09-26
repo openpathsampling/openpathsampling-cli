@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.com/openpathsampling/openpathsampling-cli.svg?branch=master)](https://travis-ci.com/openpathsampling/openpathsampling-cli)
 [![Documentation Status](https://readthedocs.org/projects/openpathsampling-cli/badge/?version=latest)](https://openpathsampling-cli.readthedocs.io/en/latest/?badge=latest)
-[![Coverage Status](https://coveralls.io/repos/github/openpathsampling/openpathsampling-cli/badge.svg?branch=master)](https://coveralls.io/github/openpathsampling/openpathsampling-cli?branch=master)
+[![Coverage Status](https://codecov.io/gh/openpathsampling/openpathsampling-cli/branch/master/graph/badge.svg)](https://codecov.io/gh/openpathsampling/openpathsampling-cli)
 [![Maintainability](https://api.codeclimate.com/v1/badges/0d1ee29e1a05cfcdc01a/maintainability)](https://codeclimate.com/github/openpathsampling/openpathsampling-cli/maintainability)
 
 # OpenPathSampling CLI
