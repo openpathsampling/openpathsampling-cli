@@ -45,7 +45,7 @@ script:
   - py.test -vv --cov --cov-report xml:cov.xml
 
 after_success:
-  - COVERALLS_PARALLEL=true coveralls
+  - bash <(curl -s https://codecov.io/bash)
 
 import:
-  - dwhswenson/autorelease:autorelease-travis.yml@v0.2.0
+  - dwhswenson/autorelease:autorelease-travis.yml@v0.2.1
