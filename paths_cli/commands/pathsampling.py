@@ -15,15 +15,15 @@ from paths_cli.parameters import (
 @SCHEME.clicked(required=False)
 @INIT_CONDS.clicked(required=False)
 @N_STEPS_MC
-def path_sampling(input_file, output_file, scheme, init_conds, nsteps):
+def pathsampling(input_file, output_file, scheme, init_conds, nsteps):
     """General path sampling, using setup in INPUT_FILE"""
     storage = INPUT_FILE.get(input_file)
-    path_sampling_main(output_storage=OUTPUT_FILE.get(output_file),
-                       scheme=SCHEME.get(storage, scheme),
-                       init_conds=INIT_CONDS.get(storage, init_conds),
-                       n_steps=nsteps)
+    pathsampling_main(output_storage=OUTPUT_FILE.get(output_file),
+                      scheme=SCHEME.get(storage, scheme),
+                      init_conds=INIT_CONDS.get(storage, init_conds),
+                      n_steps=nsteps)
 
-def path_sampling_main(output_storage, scheme, init_conds, n_steps):
+def pathsampling_main(output_storage, scheme, init_conds, n_steps):
     import openpathsampling as paths
     init_conds = scheme.initial_conditions_from_trajectories(init_conds)
     simulation = paths.PathSampling(
@@ -37,6 +37,6 @@ def path_sampling_main(output_storage, scheme, init_conds, n_steps):
     return simulation.sample_set, simulation
 
 
-CLI = path_sampling
+CLI = pathsampling
 SECTION = "Simulation"
 REQUIRES_OPS = (1, 0)
