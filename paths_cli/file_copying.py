@@ -17,6 +17,7 @@ INPUT_APPEND_FILE = StorageLoader(
     mode='a'
 )
 
+
 class PrecomputeLoadNames(OPSStorageLoadNames):
     def get(self, storage, name):
         if len(name) == 0:
@@ -25,6 +26,7 @@ class PrecomputeLoadNames(OPSStorageLoadNames):
             return []
 
         return super(PrecomputeLoadNames, self).get(storage, name)
+
 
 PRECOMPUTE_CVS = PrecomputeLoadNames(
     param=Option('--cv', type=str, multiple=True,
