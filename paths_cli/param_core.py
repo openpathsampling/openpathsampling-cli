@@ -85,9 +85,17 @@ class StorageLoader(AbstractLoader):
             st.close()
 
     def get(self, name):
-        import openpathsampling as paths
-        self._workaround(name)
-        return paths.Storage(name, mode=self.mode)
+        if name.endswith(".db") or name.endswith(".sql"):
+            from openpathsampling.experimental.simstore import \
+                SQLStorageBackend
+            from openpathsampling.experimental.storage import Storage
+            backend = SQLStorageBackend(name, mode=self.mode)
+            storage = Storage.from_backend(backend)
+        else:
+            from openpathsampling import Storage
+            self._workaround(name)
+            storage = paths.Storage(name, self.mode)
+        return storage
 
 
 class OPSStorageLoadNames(AbstractLoader):
