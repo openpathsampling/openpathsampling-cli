@@ -94,7 +94,7 @@ class StorageLoader(AbstractLoader):
         else:
             from openpathsampling import Storage
             self._workaround(name)
-            storage = paths.Storage(name, self.mode)
+            storage = Storage(name, self.mode)
         return storage
 
 
