@@ -76,16 +76,25 @@ class StorageLoader(AbstractLoader):
         super(StorageLoader, self).__init__(param)
         self.mode = mode
 
+    @staticmethod
+    def _is_simstore(name):
+        return name.endswith(".db") or name.endswith(".sql")
+
     def _workaround(self, name):
         # this is messed up... for some reason, storage doesn't create a new
         # file in append mode. That may be a bug
         import openpathsampling as paths
-        if self.mode == 'a' and not os.path.exists(name):
+        needs_workaround = (
+            self.mode == 'a'
+            and not os.path.exists(name)
+            and not self._is_simstore(name)
+        )
+        if needs_workaround:
             st = paths.Storage(name, mode='w')
             st.close()
 
     def get(self, name):
-        if name.endswith(".db") or name.endswith(".sql"):
+        if self._is_simstore(name):
             from openpathsampling.experimental.simstore import \
                 SQLStorageBackend
             from openpathsampling.experimental.storage import Storage

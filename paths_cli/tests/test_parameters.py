@@ -376,21 +376,23 @@ class TestMULTI_TAG(MULTITest):
         self._getter_test(getter)
 
 
-def test_OUTPUT_FILE():
+@pytest.mark.parametrize('ext', ['nc', 'db', 'sql'])
+def test_OUTPUT_FILE(ext):
     tempdir = tempfile.mkdtemp()
-    filename = os.path.join(tempdir, "test_output_file.nc")
+    filename = os.path.join(tempdir, "test_output_file." + ext)
     assert not os.path.exists(filename)
     storage = OUTPUT_FILE.get(filename)
     assert os.path.exists(filename)
     os.remove(filename)
     os.rmdir(tempdir)
 
-def test_APPEND_FILE():
+@pytest.mark.parametrize('ext', ['nc', 'db', 'sql'])
+def test_APPEND_FILE(ext):
     tempdir = tempfile.mkdtemp()
-    filename = os.path.join(tempdir, "test_append_file.nc")
+    filename = os.path.join(tempdir, "test_append_file." + ext)
     assert not os.path.exists(filename)
     storage = APPEND_FILE.get(filename)
-    print(storage)
+    # print(storage)  # potentially useful debug; keep
     assert os.path.exists(filename)
     traj = make_1d_traj([0.0, 1.0])
     storage.tags['first_save'] = traj[0]
