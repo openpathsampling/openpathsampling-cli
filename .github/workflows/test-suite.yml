@@ -55,7 +55,7 @@ jobs:
           else
             BRANCH=$PR_BRANCH
           fi
-          python autorelease_check.py --branch $BRACH --even ${EVENT}
+          python autorelease_check.py --branch $BRANCH --even ${EVENT}
       - name: "Unit tests"
         run: |
           python -c "import paths_cli"
