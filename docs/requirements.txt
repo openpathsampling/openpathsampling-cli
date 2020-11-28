@@ -3,3 +3,4 @@ numpy
 
 packaging
 sphinx-click
+sphinx >= 3.1  # will this work?
