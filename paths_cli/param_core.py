@@ -95,6 +95,10 @@ class StorageLoader(AbstractLoader):
 
     def get(self, name):
         if self._is_simstore(name):
+            import openpathsampling as paths
+            from openpathsampling.experimental.storage import \
+                    monkey_patch_all
+            paths = monkey_patch_all(paths)
             from openpathsampling.experimental.simstore import \
                 SQLStorageBackend
             from openpathsampling.experimental.storage import Storage
@@ -217,10 +221,20 @@ class GetOnlySnapshot(Getter):
     def __init__(self, store_name="snapshots"):
         super().__init__(store_name)
 
+    def _min_num_snapshots(self, storage):
+        # For netcdfplus, we see 2 snapshots when there is only one
+        # (reversed copy gets saved). For SimStore, we see only one.
+        import openpathsampling as paths
+        if isinstance(storage, paths.netcdfplus.NetCDFPlus):
+            min_snaps = 2
+        else:
+            min_snaps = 1
+        return min_snaps
+
     def __call__(self, storage):
         store = getattr(storage, self.store_name)
-        if len(store) == 2:
-            # this is really only 1 snapshot; reversed copy gets saved
+        min_snaps = self._min_num_snapshots(storage)
+        if len(store) == min_snaps:
             return store[0]
 
 
