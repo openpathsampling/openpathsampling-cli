@@ -301,6 +301,7 @@ class OPSStorageLoadSingle(AbstractLoader):
             result = _try_strategies(self.none_strategies, storage)
 
         if result is None:
-            raise RuntimeError("Couldn't find %s", name)
+            raise RuntimeError("Couldn't find %s in %s" % (name,
+                                                           self.store))
 
         return result
