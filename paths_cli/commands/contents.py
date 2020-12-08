@@ -1,13 +1,8 @@
 import click
 from paths_cli.parameters import INPUT_FILE
 
-UNNAMED_SECTIONS = {
-    'Steps': lambda storage: storage.steps,
-    'Move Changes': lambda storage: storage.movechanges,
-    'SampleSets': lambda storage: storage.samplesets,
-    'Trajectories': lambda storage: storage.trajectories,
-    'Snapshots': lambda storage: storage.snapshots
-}
+UNNAMED_SECTIONS = ['steps', 'movechanges', 'samplesets', 'trajectories',
+                    'snapshots']
 
 @click.command(
     'contents',
@@ -52,7 +47,15 @@ def report_all_tables(storage):
     print(get_section_string_nameable('Tags', storage.tags, _get_named_tags))
 
     print("\nData Objects:")
-    for section, store_func in UNNAMED_SECTIONS.items():
+    data_object_mapping = {
+        'Steps': lambda storage: storage.steps,
+        'Move Changes': lambda storage: storage.movechanges,
+        'SampleSets': lambda storage: storage.samplesets,
+        'Trajectories': lambda storage: storage.trajectories,
+        'Snapshots': lambda storage: storage.snapshots
+    }
+
+    for section, store_func in data_object_mapping.items():
         store = store_func(storage)
         print(get_unnamed_section_string(section, store))
 

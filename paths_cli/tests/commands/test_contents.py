@@ -40,3 +40,30 @@ def test_contents(tps_fixture):
         assert results.output.split('\n') == expected
         for truth, beauty in zip(expected, results.output.split('\n')):
             assert truth == beauty
+
+@pytest.mark.parametrize('table', ['volumes', 'trajectories'])
+def test_contents_table(tps_fixture, table):
+    scheme, network, engine, init_conds = tps_fixture
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        storage = paths.Storage("setup.nc", 'w')
+        for obj in tps_fixture:
+            storage.save(obj)
+        storage.tags['initial_conditions'] = init_conds
+
+        results = runner.invoke(contents, ['setup.nc', '--table', table])
+        cwd = os.getcwd()
+        expected = {
+            'volumes': [
+                f"Storage @ '{cwd}/setup.nc'",
+                "volumes: 8 items", "* A", "* B", "* plus 6 unnamed items",
+                ""
+            ],
+            'trajectories': [
+                f"Storage @ '{cwd}/setup.nc'",
+                "trajectories: 1 unnamed item",
+                ""
+            ]
+        }[table]
+        assert results.output.split("\n") == expected
+        assert results.exit_code == 0
