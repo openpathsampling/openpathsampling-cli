@@ -19,9 +19,9 @@ SCHEME = OPSStorageLoadSingle(
 )
 
 INIT_CONDS = OPSStorageLoadSingle(
-    param=Option('-t', '--init-conds',
+    param=Option('-t', '--init-conds', multiple=True,
                  help=("identifier for initial conditions "
-                       + "(sample set or trajectory)")),
+                       + "(sample set or trajectory)" + HELP_MULTIPLE)),
     store='samplesets',
     value_strategies=[GetByName('tags'), GetByNumber('samplesets'),
                       GetByNumber('trajectories')],
@@ -56,7 +56,6 @@ MULTI_ENGINE = OPSStorageLoadNames(
                  help='name or index of engine' + HELP_MULTIPLE),
     store='engines'
 )
-
 
 STATES = OPSStorageLoadNames(
     param=Option('-s', '--state', type=str, multiple=True,
