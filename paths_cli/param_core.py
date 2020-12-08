@@ -72,6 +72,7 @@ class StorageLoader(AbstractLoader):
     mode : 'r', 'w', or 'a'
         the mode for the file
     """
+    has_simstore_patch = False
     def __init__(self, param, mode):
         super(StorageLoader, self).__init__(param)
         self.mode = mode
@@ -97,11 +98,14 @@ class StorageLoader(AbstractLoader):
         if self._is_simstore(name):
             import openpathsampling as paths
             from openpathsampling.experimental.storage import \
-                    monkey_patch_all
-            paths = monkey_patch_all(paths)
+                    Storage, monkey_patch_all
+
+            if not self.has_simstore_patch:
+                paths = monkey_patch_all(paths)
+                StorageLoader.has_simstore_patch = True
+
             from openpathsampling.experimental.simstore import \
                 SQLStorageBackend
-            from openpathsampling.experimental.storage import Storage
             backend = SQLStorageBackend(name, mode=self.mode)
             storage = Storage.from_backend(backend)
         else:
@@ -301,7 +305,13 @@ class OPSStorageLoadSingle(AbstractLoader):
             result = _try_strategies(self.none_strategies, storage)
 
         if result is None:
-            raise RuntimeError("Couldn't find %s in %s" % (name,
-                                                           self.store))
+            if name is None:
+                msg = "Couldn't guess which item to use from " + self.store
+            else:
+                msg = "Couldn't find {name} is {store}".format(
+                    name=name,
+                    store=self.store
+                )
+            raise RuntimeError(msg)
 
         return result
