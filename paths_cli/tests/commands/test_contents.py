@@ -41,7 +41,7 @@ def test_contents(tps_fixture):
         for truth, beauty in zip(expected, results.output.split('\n')):
             assert truth == beauty
 
-@pytest.mark.parametrize('table', ['volumes', 'trajectories'])
+@pytest.mark.parametrize('table', ['volumes', 'trajectories', 'tags'])
 def test_contents_table(tps_fixture, table):
     scheme, network, engine, init_conds = tps_fixture
     runner = CliRunner()
@@ -63,7 +63,13 @@ def test_contents_table(tps_fixture, table):
                 f"Storage @ '{cwd}/setup.nc'",
                 "trajectories: 1 unnamed item",
                 ""
-            ]
+            ],
+            'tags': [
+                f"Storage @ '{cwd}/setup.nc'",
+                "tags: 1 item",
+                "* initial_conditions",
+                ""
+            ],
         }[table]
         assert results.output.split("\n") == expected
         assert results.exit_code == 0
