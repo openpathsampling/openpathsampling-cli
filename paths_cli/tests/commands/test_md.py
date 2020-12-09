@@ -1,0 +1,83 @@
+import pytest
+import os
+import tempfile
+from unittest.mock import patch, Mock
+from click.testing import CliRunner
+
+from paths_cli.commands.md import *
+
+import openpathsampling as paths
+
+from openpathsampling.tests.test_helpers import \
+        make_1d_traj, CalvinistDynamics
+
+
+class TestEnsembleSatisfiedContinueConditions(object):
+    def setup(self):
+        cv = paths.CoordinateFunctionCV('x', lambda x: x.xyz[0][0])
+        vol_A = paths.CVDefinedVolume(cv, float("-inf"), 0.0)
+        vol_B = paths.CVDefinedVolume(cv, 1.0, float("inf"))
+        ensembles = [
+            paths.LengthEnsemble(1).named("len1"),
+            paths.LengthEnsemble(3).named("len3"),
+            paths.SequentialEnsemble([
+                paths.LengthEnsemble(1) & paths.AllInXEnsemble(vol_A),
+                paths.AllOutXEnsemble(vol_A | vol_B),
+                paths.LengthEnsemble(1) & paths.AllInXEnsemble(vol_A)
+            ]).named('return'),
+            paths.SequentialEnsemble([
+                paths.LengthEnsemble(1) & paths.AllInXEnsemble(vol_A),
+                paths.AllOutXEnsemble(vol_A | vol_B),
+                paths.LengthEnsemble(1) & paths.AllInXEnsemble(vol_B)
+            ]).named('transition'),
+        ]
+        self.ensembles = {ens.name: ens for ens in ensembles}
+        traj_vals = [-0.1, 1.1, 0.5, -0.2, 0.1, -0.3, 0.4, 1.4, -1.0]
+        self.trajectory = make_1d_traj(traj_vals)
+        self.engine = CalvinistDynamics(traj_vals)
+        self.satisfied_when_traj_len = {
+            "len1": 1,
+            "len3": 3,
+            "return": 6,
+            "transition": 8,
+        }
+        self.conditions = EnsembleSatisfiedContinueConditions(ensembles)
+
+
+    @pytest.mark.parametrize('trusted', [True, False])
+    @pytest.mark.parametrize('traj_len,expected', [
+        # expected = (num_calls, num_satisfied)
+        (0, (1, 0)),
+        (1, (2, 1)),
+        (2, (3, 1)),
+        (3, (3, 2)),
+        (5, (2, 2)),
+        (6, (3, 3)),
+        (7, (1, 3)),
+        (8, (3, 4)),
+    ])
+    def test_call(self, traj_len, expected, trusted):
+        if trusted:
+            already_satisfied = [
+                self.ensembles[key]
+                for key, val in self.satisfied_when_traj_len.items()
+                if traj_len > val
+            ]
+            for ens in already_satisfied:
+                self.conditions.satisfied[ens] = True
+
+        traj = self.trajectory[:traj_len]
+        mock = Mock(wraps=self.conditions._check_previous_frame)
+        self.conditions._check_previous_frame = mock
+        expected_calls, expected_satisfied = expected
+        result = self.conditions(traj, trusted)
+        assert result == (expected_satisfied != 4)
+        assert sum(self.conditions.satisfied.values()) == expected_satisfied
+        if trusted:
+            # only test call count if we're trusted
+            assert mock.call_count == expected_calls
+
+    def test_generate(self):
+        init_snap = self.trajectory[0]
+        traj = self.engine.generate(init_snap, self.conditions)
+        assert len(traj) == 8
