@@ -38,8 +38,34 @@ def md(input_file, output_file, engine, ensemble, nsteps, init_frame):
         initial_frame=INIT_SNAP.get(storage, init_frame)
     )
 
+class ProgressReporter(object):
+    def __init__(self, timestep, update_freq):
+        self.timestep = timestep
+        self.update_freq = update_freq
 
-class EnsembleSatisfiedContinueConditions(object):
+    def steps_progress_string(self, n_steps):
+        report_str = "Ran {n_steps} frames"
+        if self.timestep is not None:
+            report_str += " [{}]".format(str(n_steps * timestep))
+        report_str += '.'
+        return report_str
+
+    def progress_string(self, n_steps):
+        report_str = self.steps_progress_string(n_steps) + "\n"
+        return report_str.format(n_steps=n_steps)
+
+
+    def report_progress(self, n_steps):
+        import openpathsampling as paths
+        if n_steps % self.update_freq == 0:
+            string = self.progress_string(n_steps)
+            paths.tools.refresh_output(string)
+
+    def __call__(self, trajectory, trusted=False):
+        raise NotImplementedError()
+
+
+class EnsembleSatisfiedContinueConditions(ProgressReporter):
     """Continuation condition for including subtrajs for each ensemble.
 
     This object creates a continuation condition (a callable) analogous with
@@ -52,8 +78,23 @@ class EnsembleSatisfiedContinueConditions(object):
     ensembles: List[:class:`openpathsampling.Ensemble`]
         the ensembles to satisfy
     """
-    def __init__(self, ensembles):
+    def __init__(self, ensembles, timestep=None, update_freq=10):
+        super().__init__(timestep, update_freq)
         self.satisfied = {ens: False for ens in ensembles}
+
+    def progress_string(self, n_steps):
+        report_str = self.steps_progress_string(n_steps)
+        report_str += (" Found ensembles [{found}]. "
+                       "Looking for [{missing}].\n")
+        found = [ens.name for ens, done in self.satisfied.items() if done]
+        missing = [ens.name for ens, done in self.satisfied.items()
+                   if not done]
+        found_str = ",".join(found)
+        missing_str = ",".join(missing)
+        return report_str.format(n_steps=n_steps,
+                                 found=found_str,
+                                 missing=missing_str)
+
 
     def _check_previous_frame(self, trajectory, start, unsatisfied):
         if -start > len(trajectory):
@@ -81,6 +122,8 @@ class EnsembleSatisfiedContinueConditions(object):
             return self._call_untrusted(trajectory)
 
         # below here, trusted is True
+        self.report_progress(len(trajectory) - 1)
+
         unsatisfied = [ens for ens, done in self.satisfied.items()
                        if not done]
         # TODO: update on how many ensembles left, what frame number we are
@@ -92,6 +135,20 @@ class EnsembleSatisfiedContinueConditions(object):
         return not all(self.satisfied.values())
 
 
+class FixedLengthContinueCondition(ProgressReporter):
+    """
+    """
+    def __init__(self, length, timestep=None, update_freq=10):
+        super().__init__(timestep, update_freq)
+        self.length = length
+
+    def __call__(self, trajectory, trusted=False):
+        len_traj = len(trajectory)
+        self.report_progress(len_traj - 1)
+        return len_traj < self.length
+
+
+
 def md_main(output_storage, engine, ensembles, nsteps, initial_frame):
     import openpathsampling as paths
     if nsteps is not None and ensembles:
@@ -101,7 +158,7 @@ def md_main(output_storage, engine, ensembles, nsteps, initial_frame):
     if ensembles:
         continue_cond = EnsembleSatisfiedContinueConditions(ensembles)
     else:
-        continue_cond = paths.LengthEnsemble(nsteps).can_append
+        continue_cond = FixedLengthContinueCondition(nsteps)
 
     trajectory = engine.generate(initial_frame, running=continue_cond)
     paths_cli.utils.tag_final_result(trajectory, output_storage,
