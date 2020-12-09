@@ -31,9 +31,9 @@ class TestEnsembleSatisfiedContinueConditions(object):
             ]).named('transition'),
         ]
         self.ensembles = {ens.name: ens for ens in ensembles}
-        traj_vals = [-0.1, 1.1, 0.5, -0.2, 0.1, -0.3, 0.4, 1.4, -1.0]
-        self.trajectory = make_1d_traj(traj_vals)
-        self.engine = CalvinistDynamics(traj_vals)
+        self.traj_vals = [-0.1, 1.1, 0.5, -0.2, 0.1, -0.3, 0.4, 1.4, -1.0]
+        self.trajectory = make_1d_traj(self.traj_vals)
+        self.engine = CalvinistDynamics(self.traj_vals)
         self.satisfied_when_traj_len = {
             "len1": 1,
             "len3": 3,
@@ -75,6 +75,10 @@ class TestEnsembleSatisfiedContinueConditions(object):
         if trusted:
             # only test call count if we're trusted
             assert mock.call_count == expected_calls
+
+    def test_long_traj_untrusted(self):
+        traj = make_1d_traj(self.traj_vals + [1.0, 1.2, 1.3, 1.4])
+        assert self.conditions(traj) is False
 
     def test_generate(self):
         init_snap = self.trajectory[0]
@@ -118,17 +122,25 @@ def test_md(md_fixture):
         assert results.output == expected_output
         assert results.exit_code == 0
 
-def test_md_main(md_fixture):
+@pytest.mark.parametrize('inp', ['nsteps', 'ensemble'])
+def test_md_main(md_fixture, inp):
     tempdir = tempfile.mkdtemp()
     try:
         store_name = os.path.join(tempdir, "md.nc")
         storage = paths.Storage(store_name, mode='w')
-        engine, ensemble, snapshot = md_fixture
+        engine, ens, snapshot = md_fixture
+        if inp == 'nsteps':
+            nsteps, ensembles = 5, None
+        elif inp == 'ensemble':
+            nsteps, ensembles = None, [ens]
+        else:
+            raise RuntimeError("pytest went crazy")
+
         traj, foo = md_main(
             output_storage=storage,
             engine=engine,
-            ensembles=[ensemble],
-            nsteps=None,
+            ensembles=ensembles,
+            nsteps=nsteps,
             initial_frame=snapshot
         )
         assert isinstance(traj, paths.Trajectory)
@@ -140,3 +152,11 @@ def test_md_main(md_fixture):
         os.remove(store_name)
         os.rmdir(tempdir)
 
+def test_md_main_error(md_fixture):
+    engine, ensemble, snapshot = md_fixture
+    with pytest.raises(RuntimeError):
+        md_main(output_storage=None,
+                engine=engine,
+                ensembles=[ensemble],
+                nsteps=5,
+                initial_frame=snapshot)

@@ -66,9 +66,6 @@ class EnsembleSatisfiedContinueConditions(object):
                        if not done]
         # TODO: update on how many ensembles left, what frame number we are
 
-        if not unsatisfied:
-            return False
-
         start = -1
         while self._check_previous_frame(trajectory, start, unsatisfied):
             start -= 1
