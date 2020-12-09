@@ -11,7 +11,6 @@ import openpathsampling as paths
 from openpathsampling.tests.test_helpers import \
         make_1d_traj, CalvinistDynamics
 
-
 class TestEnsembleSatisfiedContinueConditions(object):
     def setup(self):
         cv = paths.CoordinateFunctionCV('x', lambda x: x.xyz[0][0])
@@ -81,3 +80,63 @@ class TestEnsembleSatisfiedContinueConditions(object):
         init_snap = self.trajectory[0]
         traj = self.engine.generate(init_snap, self.conditions)
         assert len(traj) == 8
+
+
+@pytest.fixture()
+def md_fixture(tps_fixture):
+    _, _, engine, sample_set = tps_fixture
+    snapshot = sample_set[0].trajectory[0]
+    ensemble = paths.LengthEnsemble(5).named('len5')
+    return engine, ensemble, snapshot
+
+def print_test(output_storage, engine, ensembles, nsteps, initial_frame):
+    print(isinstance(output_storage, paths.Storage))
+    print(engine.__uuid__)
+    print([e.__uuid__ for e in ensembles])  # only 1?
+    print(nsteps)
+    print(initial_frame.__uuid__)
+
+@patch('paths_cli.commands.md.md_main', print_test)
+def test_md(md_fixture):
+    engine, ensemble, snapshot = md_fixture
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        storage = paths.Storage("setup.nc", 'w')
+        storage.save([ensemble, snapshot, engine])
+        storage.tags['initial_snapshot'] = snapshot
+        storage.close()
+
+        results = runner.invoke(
+            md,
+            ["setup.nc", '-o', 'foo.nc', '--ensemble', 'len5', '-f',
+             'initial_snapshot']
+        )
+        expected_output = "\n".join([ "True", str(engine.__uuid__),
+                                     '[' + str(ensemble.__uuid__) + ']',
+                                     'None', str(snapshot.__uuid__)]) + "\n"
+
+        assert results.output == expected_output
+        assert results.exit_code == 0
+
+def test_md_main(md_fixture):
+    tempdir = tempfile.mkdtemp()
+    try:
+        store_name = os.path.join(tempdir, "md.nc")
+        storage = paths.Storage(store_name, mode='w')
+        engine, ensemble, snapshot = md_fixture
+        traj, foo = md_main(
+            output_storage=storage,
+            engine=engine,
+            ensembles=[ensemble],
+            nsteps=None,
+            initial_frame=snapshot
+        )
+        assert isinstance(traj, paths.Trajectory)
+        assert foo is None
+        assert len(traj) == 5
+        assert len(storage.trajectories) == 1
+        storage.close()
+    finally:
+        os.remove(store_name)
+        os.rmdir(tempdir)
+
