@@ -67,3 +67,11 @@ def test_contents_table(tps_fixture, table):
         }[table]
         assert results.output.split("\n") == expected
         assert results.exit_code == 0
+
+def test_contents_table_error():
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        storage = paths.Storage("temp.nc", mode='w')
+        storage.close()
+        results = runner.invoke(contents, ['temp.nc', '--table', 'foo'])
+        assert results.exit_code != 0

@@ -4,6 +4,21 @@ from paths_cli.parameters import INPUT_FILE
 UNNAMED_SECTIONS = ['steps', 'movechanges', 'samplesets', 'trajectories',
                     'snapshots']
 
+NAME_TO_ATTR = {
+    'CVs': 'cvs',
+    'Volumes': 'volumes',
+    'Engines': 'engines',
+    'Networks': 'networks',
+    'Move Schemes': 'schemes',
+    'Simulations': 'pathsimulators',
+    'Tags': 'tags',
+    'Steps': 'steps',
+    'Move Changes': 'movechanges',
+    'SampleSets': 'samplesets',
+    'Trajectories': 'trajectories',
+    'Snapshots': 'snapshots'
+}
+
 @click.command(
     'contents',
     short_help="list named objects from an OPS .nc file",
@@ -26,13 +41,22 @@ def contents(input_file, table):
         try:
             store = getattr(storage, table_attr)
         except AttributeError:
-            print("This needs to raise a good error; bad table name")
+            raise click.UsageError("Unknown table: '" + table_attr + "'")
         else:
-            if table_attr in UNNAMED_SECTIONS:
-                print(get_unnamed_section_string(table_attr, store))
-            else:
-                print(get_section_string_nameable(table_attr, store,
-                                                  _get_named_namedobj))
+            print(get_section_string(table_attr, store))
+
+
+def get_section_string(label, store):
+    attr = NAME_TO_ATTR.get(label, label.lower())
+    if attr in UNNAMED_SECTIONS:
+        string = get_unnamed_section_string(label, store)
+    elif attr in ['tag', 'tags']:
+        string = get_section_string_nameable(label, store, _get_named_tags)
+    else:
+        string = get_section_string_nameable(label, store,
+                                             _get_named_namedobj)
+    return string
+
 
 def report_all_tables(storage):
     store_section_mapping = {
