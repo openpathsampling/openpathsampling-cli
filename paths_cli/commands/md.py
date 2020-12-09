@@ -21,6 +21,13 @@ logger = logging.getLogger(__name__)
 @INIT_SNAP.clicked(required=False)
 def md(input_file, output_file, engine, ensemble, nsteps, init_frame):
     """Run MD for for time of steps or until ensembles are satisfied.
+
+    This can either take a --nsteps or --ensemble, but not both. If the
+    --ensemble option is specfied more than once, then this will attempt to
+    run until all ensembles are satisfied by a subtrajectory.
+
+    This still respects the maximum number of frames as set in the engine,
+    and will terminate if the trajectory gets longer than that.
     """
     storage = INPUT_FILE.get(input_file)
     md_main(
@@ -33,6 +40,18 @@ def md(input_file, output_file, engine, ensemble, nsteps, init_frame):
 
 
 class EnsembleSatisfiedContinueConditions(object):
+    """Continuation condition for including subtrajs for each ensemble.
+
+    This object creates a continuation condition (a callable) analogous with
+    the ensemble ``can_append`` method. This will tell the trajectory to
+    keep running until, for each of the given ensembles, a subtrajectory has
+    been found that will satisfy the ensemble.
+
+    Parameters
+    ----------
+    ensembles: List[:class:`openpathsampling.Ensemble`]
+        the ensembles to satisfy
+    """
     def __init__(self, ensembles):
         self.satisfied = {ens: False for ens in ensembles}
 
