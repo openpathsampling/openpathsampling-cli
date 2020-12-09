@@ -1,8 +1,6 @@
-import functools
-import operator
-
 import click
 
+import paths_cli.utils
 from paths_cli.parameters import (INPUT_FILE, OUTPUT_FILE, ENGINE,
                                   MULTI_ENSEMBLE, INIT_SNAP)
 
@@ -39,7 +37,6 @@ class EnsembleSatisfiedContinueConditions(object):
         self.satisfied = {ens: False for ens in ensembles}
 
     def _check_previous_frame(self, trajectory, start, unsatisfied):
-        # TODO: add some debug logging in here
         if -start > len(trajectory):
             # we've done the whole traj; don't keep going
             return False
@@ -91,10 +88,8 @@ def md_main(output_storage, engine, ensembles, nsteps, initial_frame):
         continue_cond = paths.LengthEnsemble(nsteps).can_append
 
     trajectory = engine.generate(initial_frame, running=continue_cond)
-    if output_storage is not None:
-        output_storage.save(trajectory)
-        output_storage.tags['final_conditions'] = trajectory
-
+    paths_cli.utils.tag_final_result(trajectory, output_storage,
+                                     'final_conditions')
     return trajectory, None
 
 CLI = md
