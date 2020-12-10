@@ -26,10 +26,11 @@ def test_pathsampling(tps_fixture):
 
         results = runner.invoke(pathsampling, ['setup.nc', '-o', 'foo.nc',
                                                '-n', '1000'])
-        assert results.exit_code == 0
         expected_output = (f"True\n{scheme.__uuid__}\n{init_conds.__uuid__}"
                            "\n1000\n")
+
         assert results.output == expected_output
+        assert results.exit_code == 0
 
 
 def test_pathsampling_main(tps_fixture):

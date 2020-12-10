@@ -43,6 +43,7 @@ def equilibrate_main(output_storage, scheme, init_conds, multiplier,
                      extra_steps):
     import openpathsampling as paths
     init_conds = scheme.initial_conditions_from_trajectories(init_conds)
+    scheme.assert_initial_conditions(init_conds)
     simulation = paths.PathSampling(
         storage=output_storage,
         move_scheme=scheme,
