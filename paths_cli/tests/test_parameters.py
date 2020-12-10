@@ -234,6 +234,14 @@ class TestINIT_CONDS(ParamInstanceTest):
         obj = INIT_CONDS.get(st, None)
         assert obj == stored_things[num_in_file - 1]
 
+    def test_get_multiple(self):
+        filename = self.create_file('number-traj')
+        storage = paths.Storage(filename, mode='r')
+        traj0, traj1 = self.PARAMETER.get(storage, (0, 1))
+        assert traj0 == self.traj
+        assert traj1 == self.other_traj
+
+
 class TestINIT_SNAP(ParamInstanceTest):
     PARAMETER = INIT_SNAP
     def setup(self):
