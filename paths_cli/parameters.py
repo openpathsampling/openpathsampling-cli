@@ -1,8 +1,8 @@
 import click
 from paths_cli.param_core import (
-    Option, Argument, OPSStorageLoadSingle, OPSStorageLoadNames,
-    StorageLoader, GetByName, GetByNumber, GetOnly, GetOnlySnapshot,
-    GetPredefinedName
+    Option, Argument, OPSStorageLoadSingle, OPSStorageLoadMultiple,
+    OPSStorageLoadNames, StorageLoader, GetByName, GetByNumber, GetOnly,
+    GetOnlySnapshot, GetPredefinedName
 )
 
 
@@ -18,10 +18,10 @@ SCHEME = OPSStorageLoadSingle(
     store='schemes',
 )
 
-INIT_CONDS = OPSStorageLoadSingle(
-    param=Option('-t', '--init-conds',
+INIT_CONDS = OPSStorageLoadMultiple(
+    param=Option('-t', '--init-conds', multiple=True,
                  help=("identifier for initial conditions "
-                       + "(sample set or trajectory)")),
+                       + "(sample set or trajectory)" + HELP_MULTIPLE)),
     store='samplesets',
     value_strategies=[GetByName('tags'), GetByNumber('samplesets'),
                       GetByNumber('trajectories')],
@@ -56,7 +56,6 @@ MULTI_ENGINE = OPSStorageLoadNames(
                  help='name or index of engine' + HELP_MULTIPLE),
     store='engines'
 )
-
 
 STATES = OPSStorageLoadNames(
     param=Option('-s', '--state', type=str, multiple=True,

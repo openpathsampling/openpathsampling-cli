@@ -315,3 +315,51 @@ class OPSStorageLoadSingle(AbstractLoader):
             raise RuntimeError(msg)
 
         return result
+
+
+class OPSStorageLoadMultiple(OPSStorageLoadSingle):
+    """Objects that can guess a single object or have multiple specified.
+
+    Parameters
+    ----------
+    param : :class:`.AbstractParameter`
+        the Option or Argument wrapping a click decorator
+    store : Str
+        the name of the store to search
+    value_strategies : List[Callable[(:class:`.Storage`, Str), Any]]
+        The strategies to be used when the CLI provides a value for this
+        parameter. Each should be a callable taking a storage and the string
+        input from the CLI, and should return the desired object or None if
+        it cannot be found.
+    none_strategies : List[Callable[:class:`openpathsampling.Storage, Any]]
+        The strategies to be used when the CLI does not provide a value for
+        this parameter. Each should be a callable taking a storage, and
+        returning the desired object or None if it cannot be found.
+    """
+    def get(self, storage, names):
+        """Load desired objects from storage.
+
+        Parameters
+        ----------
+        storage : openpathsampling.Storage
+            the input storage to search
+        names : List[Str] or None
+            strings from CLI providing the identifier (name or index) for
+            this object; None if not provided
+        """
+        if names == tuple():
+            names = None
+
+        if names is None or isinstance(names, (str, int)):
+            listified = True
+            names = [names]
+        else:
+            listified = False
+
+        results = [super(OPSStorageLoadMultiple, self).get(storage, name)
+                   for name in names]
+
+        if listified:
+            results = results[0]
+
+        return results
