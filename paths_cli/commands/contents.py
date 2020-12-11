@@ -1,12 +1,32 @@
 import click
 from paths_cli.parameters import INPUT_FILE
 
+UNNAMED_SECTIONS = ['steps', 'movechanges', 'samplesets', 'trajectories',
+                    'snapshots']
+
+NAME_TO_ATTR = {
+    'CVs': 'cvs',
+    'Volumes': 'volumes',
+    'Engines': 'engines',
+    'Networks': 'networks',
+    'Move Schemes': 'schemes',
+    'Simulations': 'pathsimulators',
+    'Tags': 'tags',
+    'Steps': 'steps',
+    'Move Changes': 'movechanges',
+    'SampleSets': 'samplesets',
+    'Trajectories': 'trajectories',
+    'Snapshots': 'snapshots'
+}
+
 @click.command(
     'contents',
     short_help="list named objects from an OPS .nc file",
 )
 @INPUT_FILE.clicked(required=True)
-def contents(input_file):
+@click.option('--table', type=str, required=False,
+              help="table to show results from")
+def contents(input_file, table):
     """List the names of named objects in an OPS .nc file.
 
     This is particularly useful when getting ready to use one of simulation
@@ -14,6 +34,31 @@ def contents(input_file):
     """
     storage = INPUT_FILE.get(input_file)
     print(storage)
+    if table is None:
+        report_all_tables(storage)
+    else:
+        table_attr = table.lower()
+        try:
+            store = getattr(storage, table_attr)
+        except AttributeError:
+            raise click.UsageError("Unknown table: '" + table_attr + "'")
+        else:
+            print(get_section_string(table_attr, store))
+
+
+def get_section_string(label, store):
+    attr = NAME_TO_ATTR.get(label, label.lower())
+    if attr in UNNAMED_SECTIONS:
+        string = get_unnamed_section_string(label, store)
+    elif attr in ['tag', 'tags']:
+        string = get_section_string_nameable(label, store, _get_named_tags)
+    else:
+        string = get_section_string_nameable(label, store,
+                                             _get_named_namedobj)
+    return string
+
+
+def report_all_tables(storage):
     store_section_mapping = {
         'CVs': storage.cvs, 'Volumes': storage.volumes,
         'Engines': storage.engines, 'Networks': storage.networks,
@@ -26,12 +71,16 @@ def contents(input_file):
     print(get_section_string_nameable('Tags', storage.tags, _get_named_tags))
 
     print("\nData Objects:")
-    unnamed_sections = {
-        'Steps': storage.steps, 'Move Changes': storage.movechanges,
-        'SampleSets': storage.samplesets,
-        'Trajectories': storage.trajectories, 'Snapshots': storage.snapshots
+    data_object_mapping = {
+        'Steps': lambda storage: storage.steps,
+        'Move Changes': lambda storage: storage.movechanges,
+        'SampleSets': lambda storage: storage.samplesets,
+        'Trajectories': lambda storage: storage.trajectories,
+        'Snapshots': lambda storage: storage.snapshots
     }
-    for section, store in unnamed_sections.items():
+
+    for section, store_func in data_object_mapping.items():
+        store = store_func(storage)
         print(get_unnamed_section_string(section, store))
 
 def _item_or_items(count):
