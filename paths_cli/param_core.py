@@ -102,6 +102,7 @@ class StorageLoader(AbstractLoader):
 
             if not self.has_simstore_patch:
                 paths = monkey_patch_all(paths)
+                paths.InterfaceSet.simstore = True
                 StorageLoader.has_simstore_patch = True
 
             from openpathsampling.experimental.simstore import \
