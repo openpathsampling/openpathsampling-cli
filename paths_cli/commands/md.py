@@ -39,25 +39,43 @@ def md(input_file, output_file, engine, ensemble, nsteps, init_frame):
     )
 
 class ProgressReporter(object):
+    """Generic class for a callable that reports progress.
+
+    Base class for ends-with-ensemble and fixed-length tricks.
+
+    Parameters
+    ----------
+    timestep : Any
+        timestep, optionally with units
+    update_freq : int
+        how often to report updates
+    """
     def __init__(self, timestep, update_freq):
         self.timestep = timestep
         self.update_freq = update_freq
 
     def steps_progress_string(self, n_steps):
+        """Return string for number of frames run and time elapsed
+
+        Not newline-terminated.
+        """
         report_str = "Ran {n_steps} frames"
         if self.timestep is not None:
-            report_str += " [{}]".format(str(n_steps * timestep))
+            report_str += " [{}]".format(str(n_steps * self.timestep))
         report_str += '.'
-        return report_str
+        return report_str.format(n_steps=n_steps)
 
     def progress_string(self, n_steps):
+        """Return the progress string. Subclasses may override.
+        """
         report_str = self.steps_progress_string(n_steps) + "\n"
         return report_str.format(n_steps=n_steps)
 
-
-    def report_progress(self, n_steps):
+    def report_progress(self, n_steps, force=False):
+        """Report the progress to the terminal.
+        """
         import openpathsampling as paths
-        if n_steps % self.update_freq == 0:
+        if (n_steps % self.update_freq == 0) or force:
             string = self.progress_string(n_steps)
             paths.tools.refresh_output(string)
 
@@ -77,6 +95,10 @@ class EnsembleSatisfiedContinueConditions(ProgressReporter):
     ----------
     ensembles: List[:class:`openpathsampling.Ensemble`]
         the ensembles to satisfy
+    timestep : Any
+        timestep, optionally with units
+    update_freq : int
+        how often to report updates
     """
     def __init__(self, ensembles, timestep=None, update_freq=10):
         super().__init__(timestep, update_freq)
@@ -136,7 +158,16 @@ class EnsembleSatisfiedContinueConditions(ProgressReporter):
 
 
 class FixedLengthContinueCondition(ProgressReporter):
-    """
+    """Continuation condition for fixed-length runs.
+
+    Parameters
+    ----------
+    length : int
+        final length of the trajectory in frames
+    timestep : Any
+        timestep, optionally with units
+    update_freq : int
+        how often to report updates
     """
     def __init__(self, length, timestep=None, update_freq=10):
         super().__init__(timestep, update_freq)
@@ -161,6 +192,7 @@ def md_main(output_storage, engine, ensembles, nsteps, initial_frame):
         continue_cond = FixedLengthContinueCondition(nsteps)
 
     trajectory = engine.generate(initial_frame, running=continue_cond)
+    continue_cond.report_progress(len(trajectory) - 1, force=True)
     paths_cli.utils.tag_final_result(trajectory, output_storage,
                                      'final_conditions')
     return trajectory, None

@@ -11,6 +11,32 @@ import openpathsampling as paths
 from openpathsampling.tests.test_helpers import \
         make_1d_traj, CalvinistDynamics
 
+class TestProgressReporter(object):
+    def setup(self):
+        self.progress = ProgressReporter(timestep=None, update_freq=5)
+
+    @pytest.mark.parametrize('timestep', [None, 0.1])
+    def test_progress_string(self, timestep):
+        progress = ProgressReporter(timestep, update_freq=5)
+        expected = "Ran 25 frames"
+        if timestep is not None:
+            expected += " [2.5]"
+        expected += '.\n'
+        assert progress.progress_string(25) == expected
+
+    @pytest.mark.parametrize('n_steps', [0, 5, 6])
+    @pytest.mark.parametrize('force', [True, False])
+    @patch('openpathsampling.tools.refresh_output',
+           lambda s: print(s, end=''))
+    def test_report_progress(self, n_steps, force, capsys):
+        self.progress.report_progress(n_steps, force)
+        expected = "Ran {n_steps} frames.\n".format(n_steps=n_steps)
+        out, err = capsys.readouterr()
+        if (n_steps in [0, 5]) or force:
+            assert out == expected
+        else:
+            assert out == ""
+
 class TestEnsembleSatisfiedContinueConditions(object):
     def setup(self):
         cv = paths.CoordinateFunctionCV('x', lambda x: x.xyz[0][0])
