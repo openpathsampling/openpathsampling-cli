@@ -57,6 +57,12 @@ MULTI_ENGINE = OPSStorageLoadNames(
     store='engines'
 )
 
+MULTI_ENSEMBLE = OPSStorageLoadNames(
+    param=Option('--ensemble', type=str, multiple=True,
+                 help='name of index of ensemble' + HELP_MULTIPLE),
+    store='ensembles'
+)
+
 STATES = OPSStorageLoadNames(
     param=Option('-s', '--state', type=str, multiple=True,
                  help='name  of state' + HELP_MULTIPLE),

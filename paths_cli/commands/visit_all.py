@@ -1,5 +1,6 @@
 import click
 
+import paths_cli.utils
 from paths_cli.parameters import (INPUT_FILE, OUTPUT_FILE, ENGINE, STATES,
                                   INIT_SNAP)
 
@@ -34,9 +35,8 @@ def visit_all_main(output_storage, states, engine, initial_frame):
     timestep = getattr(engine, 'timestep', None)
     visit_all_ens = paths.VisitAllStatesEnsemble(states, timestep=timestep)
     trajectory = engine.generate(initial_frame, [visit_all_ens.can_append])
-    if output_storage is not None:
-        output_storage.save(trajectory)
-        output_storage.tags['final_conditions'] = trajectory
+    paths_cli.utils.tag_final_result(trajectory, output_storage,
+                                     'final_conditions')
 
     return trajectory, None  # no simulation object to return here
 
