@@ -3,3 +3,6 @@ nose
 pytest
 pytest-cov
 coveralls
+# following are for SimStore integration
+dill
+sqlalchemy
