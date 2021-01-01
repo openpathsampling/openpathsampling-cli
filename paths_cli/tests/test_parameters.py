@@ -148,6 +148,17 @@ class TestENGINE(ParamInstanceTest):
     def test_get(self, getter):
         self._getter_test(getter)
 
+    def test_cannot_guess(self):
+        filename = self._filename('no-guess')
+        storage = paths.Storage(filename, 'w')
+        storage.save(self.engine)
+        storage.save(self.other_engine.named('other'))
+        storage.close()
+
+        storage = paths.Storage(filename, mode='r')
+        with pytest.raises(RuntimeError):
+            self.PARAMETER.get(storage, None)
+
 
 class TestSCHEME(ParamInstanceTest):
     PARAMETER = SCHEME
@@ -275,6 +286,17 @@ class TestINIT_CONDS(ParamInstanceTest):
         assert traj0 == self.traj
         assert traj1 == self.other_traj
 
+    def test_cannot_guess(self):
+        filename = self._filename('no-guess')
+        storage = paths.Storage(filename, 'w')
+        storage.save(self.traj)
+        storage.save(self.other_traj)
+        storage.close()
+
+        storage = paths.Storage(filename, 'r')
+        with pytest.raises(RuntimeError):
+            self.PARAMETER.get(storage, None)
+
 
 class TestINIT_SNAP(ParamInstanceTest):
     PARAMETER = INIT_SNAP
@@ -311,6 +333,18 @@ class TestINIT_SNAP(ParamInstanceTest):
 
         obj = self.PARAMETER.get(storage, get_arg)
         assert obj == expected
+
+    def test_simstore_single_snapshot(self):
+        stored_functions = pre_monkey_patch()
+        filename = os.path.join(self.tempdir, "simstore.db")
+        storage = APPEND_FILE.get(filename)
+        storage.save(self.init_snap)
+        storage.close()
+
+        storage = INPUT_FILE.get(filename)
+        snap = self.PARAMETER.get(storage, None)
+        assert snap == self.init_snap
+        undo_monkey_patch(stored_functions)
 
 
 class MultiParamInstanceTest(ParamInstanceTest):
