@@ -72,22 +72,48 @@ class StorageLoader(AbstractLoader):
     mode : 'r', 'w', or 'a'
         the mode for the file
     """
+    has_simstore_patch = False
     def __init__(self, param, mode):
         super(StorageLoader, self).__init__(param)
         self.mode = mode
+
+    @staticmethod
+    def _is_simstore(name):
+        return name.endswith(".db") or name.endswith(".sql")
 
     def _workaround(self, name):
         # this is messed up... for some reason, storage doesn't create a new
         # file in append mode. That may be a bug
         import openpathsampling as paths
-        if self.mode == 'a' and not os.path.exists(name):
+        needs_workaround = (
+            self.mode == 'a'
+            and not os.path.exists(name)
+            and not self._is_simstore(name)
+        )
+        if needs_workaround:
             st = paths.Storage(name, mode='w')
             st.close()
 
     def get(self, name):
-        import openpathsampling as paths
-        self._workaround(name)
-        return paths.Storage(name, mode=self.mode)
+        if self._is_simstore(name):
+            import openpathsampling as paths
+            from openpathsampling.experimental.storage import \
+                    Storage, monkey_patch_all
+
+            if not self.has_simstore_patch:
+                paths = monkey_patch_all(paths)
+                paths.InterfaceSet.simstore = True
+                StorageLoader.has_simstore_patch = True
+
+            from openpathsampling.experimental.simstore import \
+                SQLStorageBackend
+            backend = SQLStorageBackend(name, mode=self.mode)
+            storage = Storage.from_backend(backend)
+        else:
+            from openpathsampling import Storage
+            self._workaround(name)
+            storage = Storage(name, self.mode)
+        return storage
 
 
 class OPSStorageLoadNames(AbstractLoader):
@@ -200,10 +226,20 @@ class GetOnlySnapshot(Getter):
     def __init__(self, store_name="snapshots"):
         super().__init__(store_name)
 
+    def _min_num_snapshots(self, storage):
+        # For netcdfplus, we see 2 snapshots when there is only one
+        # (reversed copy gets saved). For SimStore, we see only one.
+        import openpathsampling as paths
+        if isinstance(storage, paths.netcdfplus.NetCDFPlus):
+            min_snaps = 2
+        else:
+            min_snaps = 1
+        return min_snaps
+
     def __call__(self, storage):
         store = getattr(storage, self.store_name)
-        if len(store) == 2:
-            # this is really only 1 snapshot; reversed copy gets saved
+        min_snaps = self._min_num_snapshots(storage)
+        if len(store) == min_snaps:
             return store[0]
 
 
@@ -270,7 +306,14 @@ class OPSStorageLoadSingle(AbstractLoader):
             result = _try_strategies(self.none_strategies, storage)
 
         if result is None:
-            raise RuntimeError("Couldn't find %s", name)
+            if name is None:
+                msg = "Couldn't guess which item to use from " + self.store
+            else:
+                msg = "Couldn't find {name} is {store}".format(
+                    name=name,
+                    store=self.store
+                )
+            raise RuntimeError(msg)
 
         return result
 
