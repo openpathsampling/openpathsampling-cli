@@ -2,10 +2,44 @@ import pytest
 import tempfile
 import os
 
-import openpathsampling as paths
+import paths_cli
 from openpathsampling.tests.test_helpers import make_1d_traj
 
 from paths_cli.parameters import *
+import openpathsampling as paths
+
+
+def pre_monkey_patch():
+    # store things that get monkey-patched; ensure we un-patch
+    stored_functions = {}
+    CallableCV = paths.CallableCV
+    PseudoAttr = paths.netcdfplus.FunctionPseudoAttribute
+    stored_functions['CallableCV.from'] = CallableCV.from_dict
+    stored_functions['PseudoAttr.from'] = PseudoAttr.from_dict
+    stored_functions['TPSNetwork.from'] = paths.TPSNetwork.from_dict
+    stored_functions['MISTISNetwork.from'] = paths.MISTISNetwork.from_dict
+    stored_functions['PseudoAttr.to'] = PseudoAttr.to_dict
+    stored_functions['TPSNetwork.to'] = paths.TPSNetwork.to_dict
+    stored_functions['MISTISNetwork.to'] = paths.MISTISNetwork.to_dict
+    return stored_functions
+
+def undo_monkey_patch(stored_functions):
+    CallableCV = paths.CallableCV
+    PseudoAttr = paths.netcdfplus.FunctionPseudoAttribute
+    CallableCV.from_dict = stored_functions['CallableCV.from']
+    PseudoAttr.from_dict = stored_functions['PseudoAttr.from']
+    paths.TPSNetwork.from_dict = stored_functions['TPSNetwork.from']
+    paths.MISTISNetwork.from_dict = stored_functions['MISTISNetwork.from']
+    PseudoAttr.to_dict = stored_functions['PseudoAttr.to']
+    paths.TPSNetwork.to_dict = stored_functions['TPSNetwork.to']
+    paths.MISTISNetwork.to_dict = stored_functions['MISTISNetwork.to']
+    paths_cli.param_core.StorageLoader.has_simstore_patch = False
+    paths.InterfaceSet.simstore = False
+    import importlib
+    importlib.reload(paths.netcdfplus)
+    importlib.reload(paths.collectivevariable)
+    importlib.reload(paths)
+
 
 
 class ParameterTest(object):
@@ -386,6 +420,7 @@ class TestMULTI_TAG(MULTITest):
 
 @pytest.mark.parametrize('ext', ['nc', 'db', 'sql'])
 def test_OUTPUT_FILE(ext):
+    stored_functions = pre_monkey_patch()
     tempdir = tempfile.mkdtemp()
     filename = os.path.join(tempdir, "test_output_file." + ext)
     assert not os.path.exists(filename)
@@ -393,9 +428,11 @@ def test_OUTPUT_FILE(ext):
     assert os.path.exists(filename)
     os.remove(filename)
     os.rmdir(tempdir)
+    undo_monkey_patch(stored_functions)
 
 @pytest.mark.parametrize('ext', ['nc', 'db', 'sql'])
 def test_APPEND_FILE(ext):
+    stored_functions = pre_monkey_patch()
     tempdir = tempfile.mkdtemp()
     filename = os.path.join(tempdir, "test_append_file." + ext)
     assert not os.path.exists(filename)
@@ -414,3 +451,4 @@ def test_APPEND_FILE(ext):
     storage.close()
     os.remove(filename)
     os.rmdir(tempdir)
+    undo_monkey_patch(stored_functions)
