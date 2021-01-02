@@ -53,8 +53,8 @@ jobs:
           python-version: "3.x"
       - run: |  # TODO: move this to an action
           source ./.github/workflows/autorelease-default-env.sh
-          if [ -f ".autorelease/test-testpypi.sh" ]; then
-            source ./autorelease/test-testpypi.sh
+          if [ -f "./.autorelease/test-testpypi.sh" ]; then
+            source ./.autorelease/test-testpypi.sh
           elif [ -f "autorelease-env.sh" ]; then
             cat autorelease-env.sh >> $GITHUB_ENV
           fi
