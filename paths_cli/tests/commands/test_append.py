@@ -8,13 +8,13 @@ from paths_cli.commands.append import *
 import openpathsampling as paths
 
 def make_input_file(tps_network_and_traj):
-    input_file = paths.Storage("setup.py", mode='w')
+    input_file = paths.Storage("setup.nc", mode='w')
     for obj in tps_network_and_traj:
         input_file.save(obj)
 
     input_file.tags['template'] = input_file.snapshots[0]
     input_file.close()
-    return "setup.py"
+    return "setup.nc"
 
 def test_append(tps_network_and_traj):
     runner = CliRunner()
@@ -22,8 +22,8 @@ def test_append(tps_network_and_traj):
         in_file = make_input_file(tps_network_and_traj)
         result = runner.invoke(append, [in_file, '-a', 'output.nc',
                                         '--volume', 'A', '--volume', 'B'])
-        assert result.exit_code == 0
         assert result.exception is None
+        assert result.exit_code == 0
         storage = paths.Storage('output.nc', mode='r')
         assert len(storage.volumes) == 2
         assert len(storage.snapshots) == 0

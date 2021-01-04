@@ -2,10 +2,44 @@ import pytest
 import tempfile
 import os
 
-import openpathsampling as paths
+import paths_cli
 from openpathsampling.tests.test_helpers import make_1d_traj
 
 from paths_cli.parameters import *
+import openpathsampling as paths
+
+
+def pre_monkey_patch():
+    # store things that get monkey-patched; ensure we un-patch
+    stored_functions = {}
+    CallableCV = paths.CallableCV
+    PseudoAttr = paths.netcdfplus.FunctionPseudoAttribute
+    stored_functions['CallableCV.from'] = CallableCV.from_dict
+    stored_functions['PseudoAttr.from'] = PseudoAttr.from_dict
+    stored_functions['TPSNetwork.from'] = paths.TPSNetwork.from_dict
+    stored_functions['MISTISNetwork.from'] = paths.MISTISNetwork.from_dict
+    stored_functions['PseudoAttr.to'] = PseudoAttr.to_dict
+    stored_functions['TPSNetwork.to'] = paths.TPSNetwork.to_dict
+    stored_functions['MISTISNetwork.to'] = paths.MISTISNetwork.to_dict
+    return stored_functions
+
+def undo_monkey_patch(stored_functions):
+    CallableCV = paths.CallableCV
+    PseudoAttr = paths.netcdfplus.FunctionPseudoAttribute
+    CallableCV.from_dict = stored_functions['CallableCV.from']
+    PseudoAttr.from_dict = stored_functions['PseudoAttr.from']
+    paths.TPSNetwork.from_dict = stored_functions['TPSNetwork.from']
+    paths.MISTISNetwork.from_dict = stored_functions['MISTISNetwork.from']
+    PseudoAttr.to_dict = stored_functions['PseudoAttr.to']
+    paths.TPSNetwork.to_dict = stored_functions['TPSNetwork.to']
+    paths.MISTISNetwork.to_dict = stored_functions['MISTISNetwork.to']
+    paths_cli.param_core.StorageLoader.has_simstore_patch = False
+    paths.InterfaceSet.simstore = False
+    import importlib
+    importlib.reload(paths.netcdfplus)
+    importlib.reload(paths.collectivevariable)
+    importlib.reload(paths)
+
 
 
 class ParameterTest(object):
@@ -113,6 +147,17 @@ class TestENGINE(ParamInstanceTest):
                                         'only-named'])
     def test_get(self, getter):
         self._getter_test(getter)
+
+    def test_cannot_guess(self):
+        filename = self._filename('no-guess')
+        storage = paths.Storage(filename, 'w')
+        storage.save(self.engine)
+        storage.save(self.other_engine.named('other'))
+        storage.close()
+
+        storage = paths.Storage(filename, mode='r')
+        with pytest.raises(RuntimeError):
+            self.PARAMETER.get(storage, None)
 
 
 class TestSCHEME(ParamInstanceTest):
@@ -234,6 +279,25 @@ class TestINIT_CONDS(ParamInstanceTest):
         obj = INIT_CONDS.get(st, None)
         assert obj == stored_things[num_in_file - 1]
 
+    def test_get_multiple(self):
+        filename = self.create_file('number-traj')
+        storage = paths.Storage(filename, mode='r')
+        traj0, traj1 = self.PARAMETER.get(storage, (0, 1))
+        assert traj0 == self.traj
+        assert traj1 == self.other_traj
+
+    def test_cannot_guess(self):
+        filename = self._filename('no-guess')
+        storage = paths.Storage(filename, 'w')
+        storage.save(self.traj)
+        storage.save(self.other_traj)
+        storage.close()
+
+        storage = paths.Storage(filename, 'r')
+        with pytest.raises(RuntimeError):
+            self.PARAMETER.get(storage, None)
+
+
 class TestINIT_SNAP(ParamInstanceTest):
     PARAMETER = INIT_SNAP
     def setup(self):
@@ -269,6 +333,18 @@ class TestINIT_SNAP(ParamInstanceTest):
 
         obj = self.PARAMETER.get(storage, get_arg)
         assert obj == expected
+
+    def test_simstore_single_snapshot(self):
+        stored_functions = pre_monkey_patch()
+        filename = os.path.join(self.tempdir, "simstore.db")
+        storage = APPEND_FILE.get(filename)
+        storage.save(self.init_snap)
+        storage.close()
+
+        storage = INPUT_FILE.get(filename)
+        snap = self.PARAMETER.get(storage, None)
+        assert snap == self.init_snap
+        undo_monkey_patch(stored_functions)
 
 
 class MultiParamInstanceTest(ParamInstanceTest):
@@ -376,21 +452,26 @@ class TestMULTI_TAG(MULTITest):
         self._getter_test(getter)
 
 
-def test_OUTPUT_FILE():
+@pytest.mark.parametrize('ext', ['nc', 'db', 'sql'])
+def test_OUTPUT_FILE(ext):
+    stored_functions = pre_monkey_patch()
     tempdir = tempfile.mkdtemp()
-    filename = os.path.join(tempdir, "test_output_file.nc")
+    filename = os.path.join(tempdir, "test_output_file." + ext)
     assert not os.path.exists(filename)
     storage = OUTPUT_FILE.get(filename)
     assert os.path.exists(filename)
     os.remove(filename)
     os.rmdir(tempdir)
+    undo_monkey_patch(stored_functions)
 
-def test_APPEND_FILE():
+@pytest.mark.parametrize('ext', ['nc', 'db', 'sql'])
+def test_APPEND_FILE(ext):
+    stored_functions = pre_monkey_patch()
     tempdir = tempfile.mkdtemp()
-    filename = os.path.join(tempdir, "test_append_file.nc")
+    filename = os.path.join(tempdir, "test_append_file." + ext)
     assert not os.path.exists(filename)
     storage = APPEND_FILE.get(filename)
-    print(storage)
+    # print(storage)  # potentially useful debug; keep
     assert os.path.exists(filename)
     traj = make_1d_traj([0.0, 1.0])
     storage.tags['first_save'] = traj[0]
@@ -404,3 +485,4 @@ def test_APPEND_FILE():
     storage.close()
     os.remove(filename)
     os.rmdir(tempdir)
+    undo_monkey_patch(stored_functions)

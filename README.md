@@ -22,6 +22,7 @@ miscellaneous operations on OPS output files.
 **Simulation Commands:**
 
 * `visit-all`:     Run MD to generate initial trajectories
+* `md`:            Run MD for fixed time or until a given ensemble is satisfied
 * `equilibrate`:   Run equilibration for path sampling
 * `pathsampling`:  Run any path sampling simulation, including TIS variants
 
