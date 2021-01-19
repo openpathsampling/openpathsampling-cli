@@ -3,7 +3,7 @@ from paths_cli.parameters import (INPUT_FILE, OUTPUT_FILE, ENGINE, STATES,
                                   N_STEPS_MC, INIT_SNAP)
 from paths_cli.commands.visit_all import visit_all_main
 from paths_cli.commands.equilibrate import equilibrate_main
-from paths_cli.commands.pathsampling import path_sampling_main
+from paths_cli.commands.pathsampling import pathsampling_main
 
 
 @click.command("one-pot-tps",
@@ -42,7 +42,7 @@ def one_pot_tps_main(output_storage, states, engine, engine_hot,
     equil_extra = 0
     equil_set, _ = equilibrate_main(None, scheme, trajectory,
                                     equil_multiplier, equil_extra)
-    return path_sampling_main(output_storage, scheme, equil_set, nsteps)
+    return pathsampling_main(output_storage, scheme, equil_set, nsteps)
 
 CLI = one_pot_tps
 SECTION = "Workflow"
