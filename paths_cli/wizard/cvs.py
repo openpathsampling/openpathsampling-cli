@@ -47,20 +47,17 @@ def _get_topology(wizard):
 
     return topology
 
-def _get_atom_indices(wizard, topology, cv_type):
+def _get_atom_indices(wizard, topology, n_atoms, cv_user_str):
     # TODO: move the logic here to parsing.tools
-    n_atoms = {'distance': 2,
-               'angle': 3,
-               'dihedral': 4}[cv_type]
     arr = None
     helper = partial(mdtraj_atom_helper, n_atoms=n_atoms)
     while arr is None:
-        atoms_str = wizard.ask("Which atoms do you want to measure the "
-                               "{cv_type} between?", helper=helper)
+        atoms_str = wizard.ask(f"Which atoms do you want to {cv_user_str}?",
+                               helper=helper)
         try:
             indices = custom_eval(atoms_str)
         except Exception as e:
-            wizard.exception(f"Sorry, I did't understand '{atoms_str}'", e)
+            wizard.exception(f"Sorry, I did't understand '{atoms_str}'.", e)
             mdtraj_atom_helper(wizard, '?', n_atoms)
             continue
 
@@ -81,20 +78,24 @@ def _get_atom_indices(wizard, topology, cv_type):
             arr = None
             continue
 
-    if arr is not None:
-        atom_names = [str(topology.mdtraj.atom(i)) for i in arr[0]]
-        wizard.say("Using atoms: " + " ".join(atom_names))
     return arr
 
 def _mdtraj_function_cv(wizard, cv_does_str, cv_user_prompt, func,
                         kwarg_name, n_atoms):
     from openpathsampling.experimental.storage.collective_variables import \
             MDTrajFunctionCV
-    wizard.say("We'll make a CV that measures the distance between two "
-               "atoms.")
+    wizard.say(f"We'll make a CV that measures the {cv_does_str}.")
     topology = _get_topology(wizard)
-    indices = _get_atom_indices(wizard, topology, n_atoms=n_atoms)
+    indices = _get_atom_indices(wizard, topology, n_atoms=n_atoms,
+                                cv_user_str=cv_user_prompt)
     kwargs = {kwarg_name: indices}
+
+    summary = ("Here's what we'll create:\n"
+               "  Function: " + str(func.__name__) + "\n"
+               "     Atoms: " + " ".join([str(topology.mdtraj.atom(i))
+                                          for i in indices[0]]) + "\n"
+               "  Topology: " + repr(topology.mdtraj))
+    wizard.say(summary)
 
     return MDTrajFunctionCV(func, topology, **kwargs)
 

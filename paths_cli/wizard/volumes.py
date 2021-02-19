@@ -38,7 +38,7 @@ def union_volume(wizard):
     return _binary_func_volume(wizard, operator.__or__)
 
 def negated_volume(wizard):
-    wizard.say("This volume will be everything not in the subvolume. ")
+    wizard.say("This volume will be everything not in the subvolume.")
     wizard.say("Let's make the subvolume.")
     subvol = volumes(wizard)
     vol = ~subvol
@@ -54,7 +54,7 @@ def cv_defined_volume(wizard):
     while is_periodic is None:
         is_periodic_char = wizard.ask("Is this CV periodic?",
                                       options=["[Y]es", "[N]o"])
-        is_periodic = {'y': True, 'n': False}
+        is_periodic = {'y': True, 'n': False}[is_periodic_char]
 
     if is_periodic:
         while period_min is None:

@@ -35,7 +35,18 @@ def abort_retry_quit(wizard, obj_type):
 
 
 def interpret_req(req):
-    _, num, direction = req
-    dir_str = {'+': 'at least ', '=': '', '-': 'at most '}[direction]
-    return dir_str + str(num)
+    _, min_, max_ = req
+    string = ""
+    if min_ == max_:
+        return str(min_)
+
+    if min_ >= 1:
+        string += "at least " + str(min_)
+
+    if max_ < float("inf"):
+        if string != "":
+            string += " and "
+        string += "at most " + str(max_)
+
+    return string
 

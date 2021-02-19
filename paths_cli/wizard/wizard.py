@@ -9,6 +9,13 @@ from paths_cli.wizard.tools import yes_no, a_an
 from paths_cli.parsing.core import custom_eval
 from paths_cli.wizard.joke import name_joke
 
+DISPLAY_NAME = {
+    'engines': "engine",
+    'cvs': "CV",
+    'states': "state",
+    'tps_network': "network",
+}
+
 WIZARD_PAGES = {
     "engines": (engines, "engine"),
     "cvs": (cvs, "cv"),
@@ -43,6 +50,9 @@ class Wizard:
 
         self.console = Console()
         self.default = {}
+
+    def debug(content):
+        self.console.print(content)
 
     def _speak(self, content, preface):
         # we do custom wrapping here
@@ -109,7 +119,7 @@ class Wizard:
         return result
 
     def obj_selector(self, store_name, text_name, create_func):
-        opts = {name: lambda wiz: obj
+        opts = {name: lambda wiz, o=obj: o
                 for name, obj in getattr(self, store_name).items()}
         create_new = f"Create a new {text_name}"
         opts[create_new] = create_func
@@ -123,16 +133,15 @@ class Wizard:
     def exception(self, msg, exception):
         self.bad_input(msg + "\nHere's the error I got:\n" + str(exception))
 
-    def _req_allows_another(self, req):
-        store, num, direction = req
+    def _req_do_another(self, req):
+        store, min_, max_ = req
         if store is None:
-            return True
+            return (True, False)
 
         count = len(getattr(self, store))
-        result = {'=': count < num,
-                  '+': True,
-                  '-': count < num}[direction]
-        return result
+        allows = count < max_
+        requires = count < min_
+        return requires, allows
 
     def name(self, obj, obj_type, store_name, default=None):
         self.say(f"Now let's name your {obj_type}.")
@@ -187,22 +196,44 @@ class Wizard:
     def _do_storage(self, storage):
         pass
 
+    def _ask_do_another(self, obj_type):
+        do_another = None
+        while do_another is None:
+            do_another_char = self.ask(
+                f"Would you like to make another {obj_type}?",
+                options=["[Y]es", "[N]o"]
+            )
+            try:
+                do_another = yes_no(do_another_char)
+            except KeyError:
+                self.bad_input("Sorry, I didn't understand that.")
+        return do_another
+
     def run_wizard(self):
         for page, req in self.requirements.items():
             store_name, _, _ = req
-            while self._req_allows_another(req):
+            do_another = True
+            while do_another:
                 func, obj_type = WIZARD_PAGES[page]
                 obj = func(self)
                 self.register(obj, obj_type, store_name)
+                requires_another, allows_another = self._req_do_another(req)
+                if requires_another:
+                    do_another = True
+                elif not requires_another and allows_another:
+                    do_another = self._ask_do_another(obj_type)
+                else:
+                    do_another = False
+
 
 
 TPS_WIZARD = Wizard({
     # WIZARD_PAGE_NAME: (store_name, num, exact/at least/at most)
-    'engines': ('engines', 1, '='),
-    'cvs': ('cvs', 1, '+'),
-    'states': ('states', 2, '+'),
-    'tps_network': ('metworks', 1, '='),
-    'tps_scheme': ('schemes', 1, '='),
+    'engines': ('engines', 1, 1),
+    'cvs': ('cvs', 1, float('inf')),
+    'states': ('states', 2, float('inf')),
+    'tps_network': ('metworks', 1, 1),
+    'tps_scheme': ('schemes', 1, 1),
     'tps_finalize': (None, None, None),
 })
 
@@ -222,3 +253,6 @@ MSTIS_WIZARD = Wizard({
     'mstis_network': (1, '='),
     'mstis_scheme': (1, '='),
 })
+
+if __name__ == "__main__":
+    TPS_WIZARD.run_wizard()
