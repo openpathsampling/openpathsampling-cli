@@ -11,8 +11,9 @@ _SPAWN = ['daughter', 'son', 'first-born']
 _MISC = [
     "Named after its father, perhaps?",
     "Isn't '{name}' also the name of a village in Tuscany?",
-    "Didn't Johnny Cash write a song about {a_an_thing} called '{name}'?",
+    "Didn't Johnny Cash write a song about {a_an_thing} named '{name}'?",
     "I think I'm going to start rapping as 'DJ {name}'.",
+    "It would also be a good name for a death metal band.",
 ]
 
 def _joke1(name, obj_type):
@@ -38,12 +39,12 @@ def name_joke(name, obj_type):
     rnd = random.random()
     if 0 <= rnd < 0.30:
         joke = _joke1
-    elif 0.30 <= rnd < 0.70:
+    elif 0.30 <= rnd < 0.60:
         joke = _joke2
-    elif 0.70 <= rnd < 0.85:
-        joke = _joke4
-    else:
+    elif 0.60 <= rnd < 0.75:
         joke = _joke3
+    else:
+        joke = _joke4
     return joke(name, obj_type)
 
 if __name__ == "__main__":

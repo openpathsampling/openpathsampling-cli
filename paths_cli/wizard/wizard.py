@@ -79,6 +79,11 @@ class Wizard:
         self._speak(content, preface)
         self.console.print()  # adds a blank line
 
+    def start(self, content):
+        # eventually, this will tweak so that we preface with a line and use
+        # green text here
+        self.say(content)
+
     def bad_input(self, content, preface="👺 "):
         # just changes the default preface; maybe print 1st line red?
         self.say(content, preface)
@@ -228,7 +233,7 @@ class Wizard:
 
 
 TPS_WIZARD = Wizard({
-    # WIZARD_PAGE_NAME: (store_name, num, exact/at least/at most)
+    # WIZARD_PAGE_NAME: (store_name, min_num, max_num)
     'engines': ('engines', 1, 1),
     'cvs': ('cvs', 1, float('inf')),
     'states': ('states', 2, float('inf')),
