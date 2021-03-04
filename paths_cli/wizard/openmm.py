@@ -1,5 +1,4 @@
 from paths_cli.wizard.errors import FILE_LOADING_ERROR_MSG, not_installed
-from paths_cli.wizard.tools import get_int_value
 try:
     from simtk import openmm as mm
     import mdtraj as md
@@ -69,10 +68,12 @@ def openmm(wizard):
 
     n_frames_max = n_steps_per_frame = None
 
-    n_steps_per_frame = get_int_value(wizard,
-                                      "How many MD steps per saved frame?")
-    n_frames_max = get_int_value(wizard, ("How many frames before aborting "
-                                          "a trajectory?"))
+    n_steps_per_frame = wizard.ask_custom_eval(
+        "How many MD steps per saved frame?", type_=int
+    )
+    n_frames_max = wizard.ask_custom_eval(
+        "How many frames before aborting a trajectory?", type_=int
+    )
     # TODO: assemble the OpenMM simulation
     engine = paths.engines.openmm.Engine(
         topology=topology,

@@ -1,5 +1,7 @@
 import paths_cli.wizard.openmm as openmm
-from load_from_ops import load_from_ops, LABEL as load_label
+from paths_cli.wizard.load_from_ops import (
+    load_from_ops, LABEL as load_label
+)
 from functools import partial
 
 SUPPORTED_ENGINES = {}

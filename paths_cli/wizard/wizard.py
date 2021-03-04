@@ -16,7 +16,7 @@ from paths_cli.wizard.joke import name_joke
 
 import shutil
 
-class Console:
+class Console:  # no-cov
     # TODO: add logging so we can output the session
     def print(self, *content):
         print(*content)
@@ -45,7 +45,7 @@ class Wizard:
         self.default = {}
         self._patched = False  # if we've done the monkey-patching
 
-    def _patch(self):
+    def _patch(self):  # no-cov
         import openpathsampling as paths
         from openpathsampling.experimental.storage import monkey_patch_all
         if not self._patched:
@@ -53,7 +53,7 @@ class Wizard:
             paths.InterfaceSet.simstore = True
             self._patched = True
 
-    def debug(content):
+    def debug(content):  # no-cov
         self.console.print(content)
 
     def _speak(self, content, preface):

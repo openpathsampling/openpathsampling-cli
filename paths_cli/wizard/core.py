@@ -1,6 +1,6 @@
 import random
-from joke import name_joke
-from tools import a_an
+from paths_cli.wizard.joke import name_joke
+from paths_cli.wizard.tools import a_an
 
 def name(wizard, obj, obj_type, store_name, default=None):
     wizard.say(f"Now let's name your {obj_type}.")
@@ -9,7 +9,8 @@ def name(wizard, obj, obj_type, store_name, default=None):
         name = wizard.ask("What do you want to call it?")
         if name in getattr(wizard, store_name):
             wizard.bad_input(f"Sorry, you already have {a_an(obj_type)} "
-                             f"named {name}. Please try another name.")
+                             f"{obj_type} named {name}. Please try another "
+                             "name.")
             name = None
 
     obj = obj.named(name)
@@ -19,7 +20,7 @@ def name(wizard, obj, obj_type, store_name, default=None):
     return obj
 
 def abort_retry_quit(wizard, obj_type):
-    a_an = 'an' if obj_type[0] in 'aeiou' else 'a'
+    a_an = a_an(obj_type)
     retry = wizard.ask(f"Do you want to try again to make {a_an} "
                        f"{obj_type}, do you want to continue without, or "
                        f"do you want to quit?",
@@ -60,6 +61,6 @@ def get_missing_object(wizard, obj_dict, display_name, fallback_func):
         objs = list(obj_dict.keys())
         sel = wizard.ask_enumerate(f"Which {display_name} would you like "
                                    "to use?", options=objs)
-        obj = objs[sel]
+        obj = obj_dict[sel]
     return obj
 
