@@ -5,25 +5,12 @@ import textwrap
 from paths_cli.wizard.cvs import cvs
 from paths_cli.wizard.engines import engines
 from paths_cli.wizard.volumes import volumes
+from paths_cli.wizard.tps import (
+    flex_length_tps_network, fixed_length_tps_network, tps_scheme
+)
 from paths_cli.wizard.tools import yes_no, a_an
 from paths_cli.parsing.core import custom_eval
 from paths_cli.wizard.joke import name_joke
-
-DISPLAY_NAME = {
-    'engines': "engine",
-    'cvs': "CV",
-    'states': "state",
-    'tps_network': "network",
-}
-
-WIZARD_PAGES = {
-    "engines": (engines, "engine"),
-    "cvs": (cvs, "cv"),
-    "states": (partial(volumes, as_state=True), "state"),
-    "tps_network": ...,
-    "tps_scheme": ...,
-    "tps_finalize": ...,
-}
 
 import shutil
 
@@ -40,8 +27,12 @@ class Console:
         return shutil.get_terminal_size((80, 24)).columns
 
 class Wizard:
-    def __init__(self, requirements):
-        self.requirements = requirements
+    def __init__(self, steps):
+        self.steps = steps
+        self.requirements = {
+            step.display_name: (step.store_name, step.minimum, step.maximum)
+            for step in steps
+        }
         self.engines = {}
         self.cvs = {}
         self.states = {}
@@ -109,13 +100,13 @@ class Wizard:
 
     # this should match the args for wizard.ask
     def ask_custom_eval(self, question, options=None, default=None,
-                        helper=None):
+                        helper=None, type_=float):
         result = None
         while result is None:
             as_str = self.ask(question, options=options, default=default,
                               helper=helper)
             try:
-                result = custom_eval(as_str)
+                result = type_(custom_eval(as_str))
             except Exception as e:
                 self.exception(f"Sorry, I couldn't understand the input "
                                f"'{as_str}'", e)
@@ -215,49 +206,61 @@ class Wizard:
         return do_another
 
     def run_wizard(self):
-        for page, req in self.requirements.items():
-            store_name, _, _ = req
+        for step in self.steps:
+            req = step.store_name, step.minimum, step.maximum
             do_another = True
             while do_another:
-                func, obj_type = WIZARD_PAGES[page]
-                obj = func(self)
-                self.register(obj, obj_type, store_name)
+                obj = step.func(self)
+                self.register(obj, step.display_name, step.store_name)
                 requires_another, allows_another = self._req_do_another(req)
                 if requires_another:
                     do_another = True
                 elif not requires_another and allows_another:
-                    do_another = self._ask_do_another(obj_type)
+                    do_another = self._ask_do_another(step.display_name)
                 else:
                     do_another = False
 
+from collections import namedtuple
+WizardStep = namedtuple('WizardStep', ['func', 'display_name', 'store_name',
+                                       'minimum', 'maximum'])
 
+SINGLE_ENGINE_STEP = WizardStep(func=engines,
+                                display_name="engine",
+                                store_name="engines",
+                                minimum=1,
+                                maximum=1)
+CVS_STEP = WizardStep(func=cvs,
+                      display_name="CV",
+                      store_name='cvs',
+                      minimum=1,
+                      maximum=float('inf'))
 
-TPS_WIZARD = Wizard({
-    # WIZARD_PAGE_NAME: (store_name, min_num, max_num)
-    'engines': ('engines', 1, 1),
-    'cvs': ('cvs', 1, float('inf')),
-    'states': ('states', 2, float('inf')),
-    'tps_network': ('metworks', 1, 1),
-    'tps_scheme': ('schemes', 1, 1),
-    'tps_finalize': (None, None, None),
-})
+MULTIPLE_STATES_STEP = WizardStep(func=partial(volumes, as_state=True),
+                                  display_name="state",
+                                  store_name="states",
+                                  minimum=2,
+                                  maximum=float('inf'))
 
-TIS_WIZARD = Wizard({
-    'engines': ('engines', 1, '='),
-    'cvs': ('cvs', 1, '+'),
-    'states': ('states', 2, '='),
-    'tis_network': (1, '='),
-    'tis_scheme': (1, '='),
-    'tis_finalize': (),
-})
+FLEX_LENGTH_TPS_WIZARD = Wizard([
+    SINGLE_ENGINE_STEP,
+    CVS_STEP,
+    MULTIPLE_STATES_STEP,
+    WizardStep(func=flex_length_tps_network,
+               display_name="network",
+               store_name="networks",
+               minimum=1,
+               maximum=1),
+    WizardStep(func=tps_scheme,
+               display_name="move scheme",
+               store_name="schemes",
+               minimum=1,
+               maximum=1),
+])
 
-MSTIS_WIZARD = Wizard({
-    'engines': (1, '='),
-    'cvs': (1, '+'),
-    'states': (2, '='),
-    'mstis_network': (1, '='),
-    'mstis_scheme': (1, '='),
-})
+# FIXED_LENGTH_TPS_WIZARD
+# TWO_STATE_TIS_WIZARD
+# MULTIPLE_STATE_TIS_WIZARD
+# MULTIPLE_INTERFACE_SET_TIS_WIZARD
 
 if __name__ == "__main__":
-    TPS_WIZARD.run_wizard()
+    FLEX_LENGTH_TPS_WIZARD.run_wizard()

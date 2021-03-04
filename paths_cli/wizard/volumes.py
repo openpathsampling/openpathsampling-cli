@@ -4,7 +4,7 @@ from paths_cli.wizard.cvs import cvs
 
 def _vol_intro(wizard, as_state):
     if as_state:
-        req = wizard.requirements['states']
+        req = wizard.requirements['state']
         if len(wizard.states) == 0:
             intro = ("Now let's define stable states for your system. "
                      f"You'll need to define {interpret_req(req)} of them.")

@@ -50,3 +50,16 @@ def interpret_req(req):
 
     return string
 
+
+def get_missing_object(wizard, obj_dict, display_name, fallback_func):
+    if len(obj_dict) == 0:
+        obj = fallback_func(wizard)
+    elif len(obj_dict) == 1:
+        obj = list(obj_dict.values())[0]
+    else:
+        objs = list(obj_dict.keys())
+        sel = wizard.ask_enumerate(f"Which {display_name} would you like "
+                                   "to use?", options=objs)
+        obj = objs[sel]
+    return obj
+

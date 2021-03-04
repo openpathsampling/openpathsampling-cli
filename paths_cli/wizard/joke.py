@@ -37,11 +37,11 @@ def _joke4(name, obj_type):
 
 def name_joke(name, obj_type):
     rnd = random.random()
-    if 0 <= rnd < 0.30:
+    if rnd < 0.25:
         joke = _joke1
-    elif 0.30 <= rnd < 0.60:
+    elif rnd < 0.50:
         joke = _joke2
-    elif 0.60 <= rnd < 0.75:
+    elif rnd < 0.65:
         joke = _joke3
     else:
         joke = _joke4
