@@ -1,4 +1,5 @@
 import random
+import os
 from functools import partial
 import textwrap
 
@@ -10,6 +11,7 @@ from paths_cli.wizard.tps import (
 )
 from paths_cli.wizard.tools import yes_no, a_an
 from paths_cli.parsing.core import custom_eval
+from paths_cli.wizard.errors import FILE_LOADING_ERROR_MSG
 from paths_cli.wizard.joke import name_joke
 
 import shutil
@@ -41,6 +43,15 @@ class Wizard:
 
         self.console = Console()
         self.default = {}
+        self._patched = False  # if we've done the monkey-patching
+
+    def _patch(self):
+        import openpathsampling as paths
+        from openpathsampling.experimental.storage import monkey_patch_all
+        if not self._patched:
+            paths = monkey_patch_all(paths)
+            paths.InterfaceSet.simstore = True
+            self._patched = True
 
     def debug(content):
         self.console.print(content)
@@ -86,7 +97,7 @@ class Wizard:
         self.say(opt_string, preface=" "*3)
         result = None
         while result is None:
-            choice = self.ask("Please select a number.",
+            choice = self.ask("Please select a number:",
                               options=[str(i+1)
                                        for i in range(len(options))])
             try:
@@ -127,7 +138,8 @@ class Wizard:
         return obj
 
     def exception(self, msg, exception):
-        self.bad_input(msg + "\nHere's the error I got:\n" + str(exception))
+        self.bad_input(f"{msg}\nHere's the error I got:\n"
+                       f"{exception.__class__.__name__}: {exception}")
 
     def _req_do_another(self, req):
         store, min_, max_ = req
@@ -164,6 +176,7 @@ class Wizard:
         return obj
 
     def save_to_file(self):
+        from openpathsampling.experimental.storage import Storage
         filename = None
         while filename is None:
             filename = self.ask("Where would you like to save your setup "
@@ -175,9 +188,9 @@ class Wizard:
                 continue
 
             if os.path.exists(filename):
-                overwrite = self.ask("{filename} exists. Overwrite it?",
+                overwrite = self.ask(f"{filename} exists. Overwrite it?",
                                      options=["[Y]es", "[N]o"])
-                overwrite = yes_no[overwrite]
+                overwrite = yes_no(overwrite)
                 if not overwrite:
                     filename = None
                     continue
@@ -189,8 +202,27 @@ class Wizard:
             else:
                 self._do_storage(storage)
 
+    def _storage_description_line(self, store_name):
+        store = getattr(self, store_name)
+        if len(store) == 1:
+            store_name = store_name[:-1]  # chop the 's'
+
+        line = f"* {len(store)} {store_name}: " + str(list(store.keys()))
+        return line
+
     def _do_storage(self, storage):
-        pass
+        store_names = ['engines', 'cvs', 'states', 'networks', 'schemes']
+        lines = [self._storage_description_line(store_name)
+                 for store_name in store_names]
+        statement = ("I'm going to store the following items:\n\n"
+                     + "\n".join(lines))
+        self.say(statement)
+        for store_name in store_names:
+            store = getattr(self, store_name)
+            for obj in store.values():
+                storage.save(obj)
+
+        self.say("Success! Everthing has been stored in your file.")
 
     def _ask_do_another(self, obj_type):
         do_another = None
@@ -206,6 +238,7 @@ class Wizard:
         return do_another
 
     def run_wizard(self):
+        self._patch()  # try to hide the slowness of our first import
         for step in self.steps:
             req = step.store_name, step.minimum, step.maximum
             do_another = True
@@ -220,6 +253,8 @@ class Wizard:
                 else:
                     do_another = False
 
+        self.save_to_file()
+
 from collections import namedtuple
 WizardStep = namedtuple('WizardStep', ['func', 'display_name', 'store_name',
                                        'minimum', 'maximum'])
@@ -229,6 +264,7 @@ SINGLE_ENGINE_STEP = WizardStep(func=engines,
                                 store_name="engines",
                                 minimum=1,
                                 maximum=1)
+
 CVS_STEP = WizardStep(func=cvs,
                       display_name="CV",
                       store_name='cvs',

@@ -158,12 +158,12 @@ if HAS_MDTRAJ:
         'Distance': distance,
         'Angle': angle,
         'Dihedral': dihedral,
-        'RMSD': rmsd,
+        # 'RMSD': rmsd,
     })
 
 SUPPORTED_CVS.update({
     'Coordinate': coordinate,
-    'Python script': ...,
+    # 'Python script': ...,
     _load_label: partial(load_from_ops,
                          store_name='cvs',
                          obj_name='CV'),
