@@ -1,4 +1,5 @@
 from paths_cli.wizard.errors import FILE_LOADING_ERROR_MSG, not_installed
+from paths_cli.wizard.core import get_object
 try:
     from simtk import openmm as mm
     import mdtraj as md
@@ -16,6 +17,7 @@ def _openmm_serialization_helper(wizard, user_input):  # no-cov
                "simtk.openmm.openmm.XmlSerializer.html")
 
 
+@get_object
 def _load_openmm_xml(wizard, obj_type):
     xml = wizard.ask(
         f"Where is the XML file for your OpenMM {obj_type}?",
@@ -30,20 +32,17 @@ def _load_openmm_xml(wizard, obj_type):
     else:
         return obj
 
+@get_object
 def _load_topology(wizard):
     import openpathsampling as paths
-    topology = None
-    while topology is None:
-        filename = wizard.ask("Where is a PDB file describing your system?")
-        try:
-            snap = paths.engines.openmm.snapshot_from_pdb(filename)
-        except Exception as e:
-            wizard.exception(FILE_LOADING_ERROR_MSG, e)
-            continue
+    filename = wizard.ask("Where is a PDB file describing your system?")
+    try:
+        snap = paths.engines.openmm.snapshot_from_pdb(filename)
+    except Exception as e:
+        wizard.exception(FILE_LOADING_ERROR_MSG, e)
+        return
 
-        topology = snap.topology
-
-    return topology
+    return snap.topology
 
 def openmm(wizard):
     import openpathsampling as paths
@@ -56,17 +55,9 @@ def openmm(wizard):
                "To use OpenMM in OPS, you need to provide XML versions of "
                "your system, integrator, and some file containing "
                "topology information.")
-    system = integrator = topology = None
-    while system is None:
-        system = _load_openmm_xml(wizard, 'system')
-
-    while integrator is None:
-        integrator = _load_openmm_xml(wizard, 'integrator')
-
-    while topology is None:
-        topology = _load_topology(wizard)
-
-    n_frames_max = n_steps_per_frame = None
+    system = _load_openmm_xml(wizard, 'system')
+    integrator = _load_openmm_xml(wizard, 'integrator')
+    topology = _load_topology(wizard)
 
     n_steps_per_frame = wizard.ask_custom_eval(
         "How many MD steps per saved frame?", type_=int

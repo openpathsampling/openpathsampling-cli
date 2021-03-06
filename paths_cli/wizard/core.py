@@ -64,3 +64,11 @@ def get_missing_object(wizard, obj_dict, display_name, fallback_func):
         obj = obj_dict[sel]
     return obj
 
+
+def get_object(func):
+    def inner(*args, **kwargs):
+        obj = None
+        while obj is None:
+            obj = func(*args, **kwargs)
+        return obj
+    return inner
