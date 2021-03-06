@@ -47,7 +47,7 @@ def _load_topology(wizard):
 def openmm(wizard):
     import openpathsampling as paths
     # quick exit if not installed; but should be impossible to get here
-    if not HAS_OPENMM:
+    if not HAS_OPENMM:  # no-cov
         not_installed("OpenMM", "engine")
         return
 
