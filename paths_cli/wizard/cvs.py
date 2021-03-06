@@ -12,7 +12,7 @@ except ImportError:
 else:
     HAS_MDTRAJ = True
 
-def mdtraj_atom_helper(wizard, user_input, n_atoms):
+def mdtraj_atom_helper(wizard, user_input, n_atoms):  # no-cov
     wizard.say("You should specify atom indices enclosed in double "
                "brackets, e.g, [" + str(list(range(n_atoms))) + "]")
     # TODO: implement the following:
@@ -28,6 +28,7 @@ def mdtraj_atom_helper(wizard, user_input, n_atoms):
 def _get_topology(wizard):
     from paths_cli.wizard.engines import engines
     topology = None
+    # TODO: isn't this get_missing_object?
     while topology is None:
         if len(wizard.engines) == 0:
             # SHOULD NEVER GET HERE
@@ -48,10 +49,10 @@ def _get_topology(wizard):
     return topology
 
 def _get_atom_indices(wizard, topology, n_atoms, cv_user_str):
-    # TODO: move the logic here to parsing.tools
     arr = None
     helper = partial(mdtraj_atom_helper, n_atoms=n_atoms)
     while arr is None:
+        # switch to get_custom_eval
         atoms_str = wizard.ask(f"Which atoms do you want to {cv_user_str}?",
                                helper=helper)
         try:
@@ -62,6 +63,7 @@ def _get_atom_indices(wizard, topology, n_atoms, cv_user_str):
             continue
 
         try:
+            # move this logic to parsing.tools
             arr = np.array(indices)
             if arr.dtype != int:
                 raise TypeError("Input is not integers")

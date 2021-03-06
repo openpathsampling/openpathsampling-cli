@@ -49,11 +49,9 @@ def _get_selector(wizard, selectors):
     if selectors is None:
         selectors = SHOOTING_SELECTORS
     selector = None
-    while selector is None:
-        sel = wizard.ask_enumerate("How do you want to select shooting "
-                                   "points?", options=list(selectors.keys()))
-        selector = selectors[sel](wizard)
-
+    sel = wizard.ask_enumerate("How do you want to select shooting "
+                               "points?", options=list(selectors.keys()))
+    selector = selectors[sel](wizard)
     return selector
 
 def one_way_shooting(wizard, selectors=None, engine=None):
@@ -112,12 +110,11 @@ def shooting(wizard, shooting_types=None, engine=None):
     if len(shooting_types) == 1:
         shooting_type = list(shooting_types.values())[0]
     else:
-        while shooting_type is None:
-            type_name = wizard.ask_enumerate(
-                "Select the type of shooting move.",
-                options=list(shooting_types.keys())
-            )
-            shooting_type = shooting_types[type_name]
+        type_name = wizard.ask_enumerate(
+            "Select the type of shooting move.",
+            options=list(shooting_types.keys())
+        )
+        shooting_type = shooting_types[type_name]
 
     shooting_strategy = shooting_type(wizard)
     return shooting_strategy

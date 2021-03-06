@@ -17,6 +17,7 @@ from paths_cli.wizard.shooting import (
 from functools import partial
 
 def _select_states(wizard, state_type):
+    # TODO: change this significantly ... I dislike in usage
     states = []
     do_another = True
     while do_another:
@@ -39,6 +40,7 @@ def _select_states(wizard, state_type):
     return state_objs
 
 def _get_pathlength(wizard):
+    # redo as get_custom_eval with int type
     pathlength = None
     while pathlength is None:
         len_str = wizard.ask("How long (in frames) do you want yout "
@@ -58,6 +60,7 @@ def flex_length_tps_network(wizard):
     return network
 
 def fixed_length_tps_network(wizard):
+    import openpathsampling as paths
     pathlength = _get_pathlength(wizard)
     initial_states = _select_states(wizard, 'initial')
     final_states = _select_states(wizard, 'final')
@@ -74,12 +77,11 @@ def tps_network(wizard):
         FIXED: paths.FixedLengthTPSNetwork,
     }
     network_type = None
-    while network_type is None:
-        network_type = wizard.ask_enumerate(
-            "Do you want to do flexible path length TPS (recommended) "
-            "or fixed path length TPS?", options=list(tps_types.keys())
-        )
-        network_class = tps_types[network_type]
+    network_type = wizard.ask_enumerate(
+        "Do you want to do flexible path length TPS (recommended) "
+        "or fixed path length TPS?", options=list(tps_types.keys())
+    )
+    network_class = tps_types[network_type]
 
     if network_type == FIXED:
         pathlength = _get_pathlength(wizard)
@@ -102,7 +104,7 @@ def _get_network(wizard):
         networks = list(wizard.networks.keys())
         sel = wizard.ask_enumerate("Which network would you like to use?",
                                    options=networks)
-        network = wizard.networks[network]
+        network = wizard.networks[sel]
     return network
 
 def tps_scheme(wizard, network=None):
@@ -120,9 +122,6 @@ def tps_scheme(wizard, network=None):
     scheme.append(global_strategy)
     return scheme
 
-def tps_finalize(wizard):
-    pass
-
 def tps_setup(wizard):
     network = tps_network(wizard)
     scheme = tps_scheme(wizard, network)
@@ -134,5 +133,4 @@ def tps_setup(wizard):
 if __name__ == "__main__":
     from paths_cli.wizard.wizard import Wizard
     wiz = Wizard({'tps_network': ('networks', 1, '='),
-                  'tps_scheme': ('schemes', 1, '='),
-                  'tps_finalize': (None, None, None)})
+                  'tps_scheme': ('schemes', 1, '=')})

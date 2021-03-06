@@ -10,11 +10,12 @@ from paths_cli.wizard.tps import (
     flex_length_tps_network, fixed_length_tps_network, tps_scheme
 )
 from paths_cli.wizard.tools import yes_no, a_an
-from paths_cli.parsing.core import custom_eval
+from paths_cli.wizard.core import get_object
 from paths_cli.wizard.errors import (
     FILE_LOADING_ERROR_MSG, RestartObjectException
 )
 from paths_cli.wizard.joke import name_joke
+from paths_cli.parsing.core import custom_eval
 
 import shutil
 
@@ -73,14 +74,13 @@ class Wizard:
             wrapped.append(wrap_line)
         self.console.print("\n".join(wrapped))
 
+    @get_object
     def ask(self, question, options=None, default=None, helper=None):
-        result = None
-        while result is None:
-            result = self.console.input("🧙 " + question + " ")
-            self.console.print()
-            if helper and result.startswith("?"):
-                helper(self, result)
-                result = None
+        result = self.console.input("🧙 " + question + " ")
+        self.console.print()
+        if helper and result.startswith("?"):
+            helper(self, result)
+            return
         return result
 
     def say(self, content, preface="🧙 "):
@@ -117,20 +117,19 @@ class Wizard:
         return result
 
     # this should match the args for wizard.ask
+    @get_object
     def ask_custom_eval(self, question, options=None, default=None,
                         helper=None, type_=float):
-        result = None
-        while result is None:
-            as_str = self.ask(question, options=options, default=default,
-                              helper=helper)
-            try:
-                result = type_(custom_eval(as_str))
-            except Exception as e:
-                self.exception(f"Sorry, I couldn't understand the input "
-                               f"'{as_str}'", e)
-                result = None
-
+        as_str = self.ask(question, options=options, default=default,
+                          helper=helper)
+        try:
+            result = type_(custom_eval(as_str))
+        except Exception as e:
+            self.exception(f"Sorry, I couldn't understand the input "
+                           f"'{as_str}'", e)
+            return
         return result
+
 
     def obj_selector(self, store_name, text_name, create_func):
         opts = {name: lambda wiz, o=obj: o
@@ -173,30 +172,31 @@ class Wizard:
         store_dict[obj.name] = obj
         return obj
 
+    @get_object
     def get_storage(self):
         from openpathsampling.experimental.storage import Storage
-        storage = None
-        while storage is None:
-            filename = self.ask("Where would you like to save your setup "
-                                "database?")
-            if not filename.endswith(".db"):
-                self.bad_input("Files produced by this wizard must end in "
-                               "'.db'.")
-                continue
+        filename = self.ask("Where would you like to save your setup "
+                            "database?")
+        if not filename.endswith(".db"):
+            self.bad_input("Files produced by this wizard must end in "
+                           "'.db'.")
+            return
 
-            if os.path.exists(filename):
-                overwrite = self.ask(f"{filename} exists. Overwrite it?",
-                                     options=["[Y]es", "[N]o"])
-                overwrite = yes_no(overwrite)
-                if not overwrite:
-                    continue
+        if os.path.exists(filename):
+            overwrite = self.ask(f"{filename} exists. Overwrite it?",
+                                 options=["[Y]es", "[N]o"])
+            overwrite = yes_no(overwrite)
+            if not overwrite:
+                return
 
-            try:
-                storage = Storage(filename, mode='w')
-            except Exception as e:
-                self.exception(FILE_LOADING_ERROR_MSG, e)
+        try:
+            storage = Storage(filename, mode='w')
+        except Exception as e:
+            self.exception(FILE_LOADING_ERROR_MSG, e)
+            return
 
         return storage
+
 
     def _storage_description_line(self, store_name):
         store = getattr(self, store_name)
