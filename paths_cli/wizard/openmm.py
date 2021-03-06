@@ -8,7 +8,7 @@ else:
     HAS_OPENMM = True
 
 
-def _openmm_serialization_helper(wizard, user_input):
+def _openmm_serialization_helper(wizard, user_input):  # no-cov
     wizard.say("You can write OpenMM objects like systems and integrators "
                "to XML files using the XMLSerializer class. Learn more "
                "here: \n"

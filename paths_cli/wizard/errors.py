@@ -4,6 +4,9 @@ class ImpossibleError(Exception):
             msg = "Something went really wrong. You should never see this."
         super().__init__(msg)
 
+class RestartObjectException(BaseException):
+    pass
+
 def not_installed(package, obj_type):
     retry = wizard.ask("Hey, it looks like you don't have {package} "
                        "installed. Do you want to try a different "

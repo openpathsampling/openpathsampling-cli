@@ -11,7 +11,9 @@ from paths_cli.wizard.tps import (
 )
 from paths_cli.wizard.tools import yes_no, a_an
 from paths_cli.parsing.core import custom_eval
-from paths_cli.wizard.errors import FILE_LOADING_ERROR_MSG
+from paths_cli.wizard.errors import (
+    FILE_LOADING_ERROR_MSG, RestartObjectException
+)
 from paths_cli.wizard.joke import name_joke
 
 import shutil
@@ -41,6 +43,8 @@ class Wizard:
         self.networks = {}
         self.schemes = {}
 
+        self.last_used_file = None  # for loading
+
         self.console = Console()
         self.default = {}
         self._patched = False  # if we've done the monkey-patching
@@ -54,10 +58,12 @@ class Wizard:
             self._patched = True
 
     def debug(content):  # no-cov
+        # debug does no pretty-printing
         self.console.print(content)
 
     def _speak(self, content, preface):
         # we do custom wrapping here
+        # TODO: move this to the console class; should also wrap on `input`
         width = self.console.width - len(preface)
         statement = preface + content
         lines = statement.split("\n")
@@ -91,6 +97,7 @@ class Wizard:
         self.say(content, preface)
 
     def ask_enumerate(self, question, options):
+        """Ask the user to select from a list of options"""
         self.say(question)
         opt_string = "\n".join([f" {(i+1):>3}. {opt}"
                                 for i, opt in enumerate(options)])
@@ -133,6 +140,7 @@ class Wizard:
         sel = self.ask_enumerate(f"Which {text_name} would you like to "
                                  "use?", list(opts.keys()))
         obj = opts[sel](self)
+        print(sel, obj)
         if sel == create_new:
             obj = self.register(obj, text_name, store_name)
         return obj
@@ -140,16 +148,6 @@ class Wizard:
     def exception(self, msg, exception):
         self.bad_input(f"{msg}\nHere's the error I got:\n"
                        f"{exception.__class__.__name__}: {exception}")
-
-    def _req_do_another(self, req):
-        store, min_, max_ = req
-        if store is None:
-            return (True, False)
-
-        count = len(getattr(self, store))
-        allows = count < max_
-        requires = count < min_
-        return requires, allows
 
     def name(self, obj, obj_type, store_name, default=None):
         self.say(f"Now let's name your {obj_type}.")
@@ -175,16 +173,15 @@ class Wizard:
         store_dict[obj.name] = obj
         return obj
 
-    def save_to_file(self):
+    def get_storage(self):
         from openpathsampling.experimental.storage import Storage
-        filename = None
-        while filename is None:
+        storage = None
+        while storage is None:
             filename = self.ask("Where would you like to save your setup "
                                 "database?")
             if not filename.endswith(".db"):
                 self.bad_input("Files produced by this wizard must end in "
                                "'.db'.")
-                filename = None
                 continue
 
             if os.path.exists(filename):
@@ -192,30 +189,32 @@ class Wizard:
                                      options=["[Y]es", "[N]o"])
                 overwrite = yes_no(overwrite)
                 if not overwrite:
-                    filename = None
                     continue
 
             try:
                 storage = Storage(filename, mode='w')
             except Exception as e:
                 self.exception(FILE_LOADING_ERROR_MSG, e)
-            else:
-                self._do_storage(storage)
+
+        return storage
 
     def _storage_description_line(self, store_name):
         store = getattr(self, store_name)
+        if len(store) == 0:
+            return ""
+
         if len(store) == 1:
             store_name = store_name[:-1]  # chop the 's'
 
         line = f"* {len(store)} {store_name}: " + str(list(store.keys()))
         return line
 
-    def _do_storage(self, storage):
+    def save_to_file(self, storage):
         store_names = ['engines', 'cvs', 'states', 'networks', 'schemes']
         lines = [self._storage_description_line(store_name)
                  for store_name in store_names]
         statement = ("I'm going to store the following items:\n\n"
-                     + "\n".join(lines))
+                     + "\n".join([line for line in lines if len(line) > 0]))
         self.say(statement)
         for store_name in store_names:
             store = getattr(self, store_name)
@@ -223,6 +222,16 @@ class Wizard:
                 storage.save(obj)
 
         self.say("Success! Everthing has been stored in your file.")
+
+    def _req_do_another(self, req):
+        store, min_, max_ = req
+        if store is None:
+            return (True, False)
+
+        count = len(getattr(self, store))
+        allows = count < max_
+        requires = count < min_
+        return requires, allows
 
     def _ask_do_another(self, obj_type):
         do_another = None
@@ -243,7 +252,11 @@ class Wizard:
             req = step.store_name, step.minimum, step.maximum
             do_another = True
             while do_another:
-                obj = step.func(self)
+                try:
+                    obj = step.func(self)
+                except RestartObjectException:
+                    self.say("Okay, let's try that again.")
+                    continue
                 self.register(obj, step.display_name, step.store_name)
                 requires_another, allows_another = self._req_do_another(req)
                 if requires_another:
@@ -253,7 +266,8 @@ class Wizard:
                 else:
                     do_another = False
 
-        self.save_to_file()
+        storage = self.get_storage()
+        self.save_to_file(storage)
 
 from collections import namedtuple
 WizardStep = namedtuple('WizardStep', ['func', 'display_name', 'store_name',
