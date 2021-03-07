@@ -101,6 +101,9 @@ class Wizard:
             choice = self.ask("Please select a number:",
                               options=[str(i+1)
                                        for i in range(len(options))])
+            if choice in options:
+                return choice
+
             try:
                 num = int(choice) - 1
                 result = options[num]

@@ -1,5 +1,5 @@
 from paths_cli.wizard.engines import engines
-from paths_cli.parsing.tools import custom_eval
+from paths_cli.parsing.tools import custom_eval, mdtraj_parse_atomlist
 from paths_cli.wizard.load_from_ops import load_from_ops
 from paths_cli.wizard.load_from_ops import LABEL as _load_label
 from paths_cli.wizard.core import get_object
@@ -59,26 +59,9 @@ def _get_atom_indices(wizard, topology, n_atoms, cv_user_str):
     atoms_str = wizard.ask(f"Which atoms do you want to {cv_user_str}?",
                            helper=helper)
     try:
-        indices = custom_eval(atoms_str)
+        arr = mdtraj_parse_atomlist(atoms_str, n_atoms, topology)
     except Exception as e:
-        wizard.exception(f"Sorry, I did't understand '{atoms_str}'.", e)
-        mdtraj_atom_helper(wizard, '?', n_atoms)
-        return
-
-    try:
-        # move this logic to parsing.tools
-        arr = np.array(indices)
-        if arr.dtype != int:
-            raise TypeError("Input is not integers")
-        if arr.shape != (1, n_atoms):
-            # try to clean it up
-            if len(arr.shape) == 1 and arr.shape[0] ==  n_atoms:
-                arr.shape = (1, n_atoms)
-            else:
-                raise TypeError(f"Invalid input. Requires {n_atoms} "
-                                "atoms.")
-    except Exception as e:
-        wizard.exception(f"Sorry, I did't understand '{atoms_str}'", e)
+        wizard.exception(f"Sorry, I didn't understand '{atoms_str}'.", e)
         mdtraj_atom_helper(wizard, '?', n_atoms)
         return
 
@@ -144,6 +127,8 @@ def rmsd(wizard):
 
 def coordinate(wizard):
     # TODO: atom_index should be from wizard.ask_custom_eval
+    from openpathsampling.experimental.storage.collective_variables import \
+            CoordinateFunctionCV
     atom_index = coord = None
     while atom_index is None:
         idx = wizard.ask("For which atom do you want to get the "
@@ -161,6 +146,10 @@ def coordinate(wizard):
             coord = {'x': 0, 'y': 1, 'z': 2}[xyz]
         except KeyError as e:
             wizard.bad_input("Please select one of 'x', 'y', or 'z'")
+
+    cv = CoordinateFunctionCV(lambda snap: snap.xyz[atom_index][coord])
+    return cv
+
 
 def _get_period(wizard):
     # to be used in custom CVs ... or maybe just in the file CV itself?
@@ -206,14 +195,12 @@ def cvs(wizard):
                "collective variables (CVs). We'll use these to define "
                "things like stable states.")
     cv_names = list(SUPPORTED_CVS.keys())
-    cv = None
-    while cv is None:
-        cv_type = wizard.ask_enumerate("What kind of CV do you want to "
-                                       "define?", options=cv_names)
-        cv = SUPPORTED_CVS[cv_type](wizard)
+    cv_type = wizard.ask_enumerate("What kind of CV do you want to "
+                                   "define?", options=cv_names)
+    cv = SUPPORTED_CVS[cv_type](wizard)
     return cv
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # no-cov
     from paths_cli.wizard.wizard import Wizard
     wiz = Wizard({})
     cvs(wiz)
