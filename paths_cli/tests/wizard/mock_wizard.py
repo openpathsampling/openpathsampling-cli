@@ -28,7 +28,12 @@ class MockConsole:
 
     def input(self, content):
         self.input_call_count += 1
-        user_input = next(self._input_iter)
+        try:
+            user_input = next(self._input_iter)
+        except StopIteration as e:
+            print(self.log_text)
+            raise e
+
         self.log.append(content + " " + user_input)
         return user_input
 
