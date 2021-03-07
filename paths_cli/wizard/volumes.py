@@ -50,22 +50,7 @@ def cv_defined_volume(wizard):
     wizard.say("A CV-defined volume allows an interval in a CV.")
     cv = wizard.obj_selector('cvs', "CV", cvs)
     period_min = period_max = lambda_min = lambda_max = None
-    is_periodic = None
-    while is_periodic is None:
-        is_periodic_char = wizard.ask("Is this CV periodic?",
-                                      options=["[Y]es", "[N]o"])
-        is_periodic = {'y': True, 'n': False}[is_periodic_char]
-
-    if is_periodic:
-        while period_min is None:
-            period_min = wizard.ask_custom_eval(
-                "What is the lower bound of the period?"
-            )
-        while period_max is None:
-            period_max = wizard.ask_custom_eval(
-                "What is the upper bound of the period?"
-            )
-
+    is_periodic = cv.is_periodic
     volume_bound_str = ("What is the {bound} allowed value for "
                         f"'{cv.name}' in this volume?")
 
@@ -82,7 +67,7 @@ def cv_defined_volume(wizard):
     if is_periodic:
         vol = paths.PeriodicCVDefinedVolume(
             cv, lambda_min=lambda_min, lambda_max=lambda_max,
-            period_min=period_min, period_max=period_max
+            period_min=cv.period_min, period_max=cv.period_max
         )
     else:
         vol = paths.CVDefinedVolume(

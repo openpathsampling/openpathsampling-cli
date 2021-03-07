@@ -2,6 +2,10 @@ import random
 from paths_cli.wizard.joke import name_joke
 from paths_cli.wizard.tools import a_an
 
+from collections import namedtuple
+
+WizardSay = namedtuple("WizardSay", ['msg', 'mode'])
+
 def name(wizard, obj, obj_type, store_name, default=None):
     wizard.say(f"Now let's name your {obj_type}.")
     name = None
@@ -72,3 +76,5 @@ def get_object(func):
             obj = func(*args, **kwargs)
         return obj
     return inner
+
+
