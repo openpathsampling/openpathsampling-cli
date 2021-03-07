@@ -9,6 +9,7 @@ from openpathsampling.experimental.storage.collective_variables import \
         CoordinateFunctionCV
 
 from paths_cli.wizard.wizard import *
+from paths_cli.wizard.steps import SINGLE_ENGINE_STEP
 
 
 

@@ -83,10 +83,12 @@ SUPPORTED_VOLUMES = {
     'Complement of a volume (not in given volume)': negated_volume,
 }
 
-def volumes(wizard, as_state=False):
-    intro = _vol_intro(wizard, as_state)
-    if intro is not None:
-        wizard.say(_vol_intro(wizard, as_state))
+def volumes(wizard, as_state=False, intro=None):
+    if intro is None:
+        intro = _vol_intro(wizard, as_state)
+
+    if intro:  # disallow None and ""
+        wizard.say(intro)
 
     wizard.say("You can describe this as either a range of values for some "
                "CV, or as some combination of other such volumes "

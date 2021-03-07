@@ -3,12 +3,6 @@ import os
 from functools import partial
 import textwrap
 
-from paths_cli.wizard.cvs import cvs
-from paths_cli.wizard.engines import engines
-from paths_cli.wizard.volumes import volumes
-from paths_cli.wizard.tps import (
-    flex_length_tps_network, fixed_length_tps_network, tps_scheme
-)
 from paths_cli.wizard.tools import yes_no, a_an
 from paths_cli.wizard.core import get_object
 from paths_cli.wizard.errors import (
@@ -247,6 +241,9 @@ class Wizard:
         return do_another
 
     def run_wizard(self):
+        self.start("Hi! I'm the OpenPathSampling Wizard.")
+        # TODO: next line is only temporary
+        self.say("Today I'll help you set up a 2-state TPS simulation.")
         self._patch()  # try to hide the slowness of our first import
         for step in self.steps:
             req = step.store_name, step.minimum, step.maximum
@@ -269,45 +266,9 @@ class Wizard:
         storage = self.get_storage()
         self.save_to_file(storage)
 
-from collections import namedtuple
-WizardStep = namedtuple('WizardStep', ['func', 'display_name', 'store_name',
-                                       'minimum', 'maximum'])
-
-SINGLE_ENGINE_STEP = WizardStep(func=engines,
-                                display_name="engine",
-                                store_name="engines",
-                                minimum=1,
-                                maximum=1)
-
-CVS_STEP = WizardStep(func=cvs,
-                      display_name="CV",
-                      store_name='cvs',
-                      minimum=1,
-                      maximum=float('inf'))
-
-MULTIPLE_STATES_STEP = WizardStep(func=partial(volumes, as_state=True),
-                                  display_name="state",
-                                  store_name="states",
-                                  minimum=2,
-                                  maximum=float('inf'))
-
-FLEX_LENGTH_TPS_WIZARD = Wizard([
-    SINGLE_ENGINE_STEP,
-    CVS_STEP,
-    MULTIPLE_STATES_STEP,
-    WizardStep(func=flex_length_tps_network,
-               display_name="network",
-               store_name="networks",
-               minimum=1,
-               maximum=1),
-    WizardStep(func=tps_scheme,
-               display_name="move scheme",
-               store_name="schemes",
-               minimum=1,
-               maximum=1),
-])
 
 # FIXED_LENGTH_TPS_WIZARD
+# MULTIPLE_STATE_TPS_WIZARD
 # TWO_STATE_TIS_WIZARD
 # MULTIPLE_STATE_TIS_WIZARD
 # MULTIPLE_INTERFACE_SET_TIS_WIZARD
