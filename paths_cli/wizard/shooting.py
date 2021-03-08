@@ -22,22 +22,22 @@ def gaussian_selector(wizard):
     selector = paths.GaussianBiasSelector(cv, alpha=alpha, l_0=l_0)
     return selector
 
-def random_velocities(wizard):
-    pass
+# def random_velocities(wizard):
+    # pass
 
-def gaussian_momentum_shift(wizard):
-    pass
+# def gaussian_momentum_shift(wizard):
+    # pass
 
-def get_allowed_modifiers(engine):
-    allowed = []
-    randomize_attribs = ['randomize_velocities', 'apply_constraints']
-    if any(hasattr(engine, attr) for attr in randomize_attribs):
-        allowed.append('random_velocities')
+# def get_allowed_modifiers(engine):
+    # allowed = []
+    # randomize_attribs = ['randomize_velocities', 'apply_constraints']
+    # if any(hasattr(engine, attr) for attr in randomize_attribs):
+        # allowed.append('random_velocities')
 
-    if not engine.has_constraints():
-        allowed.append('velocity_changers')
+    # if not engine.has_constraints():
+        # allowed.append('velocity_changers')
 
-    return allowed
+    # return allowed
 
 SHOOTING_SELECTORS = {
     'Uniform random': uniform_selector,
@@ -64,8 +64,8 @@ def one_way_shooting(wizard, selectors=None, engine=None):
     strat = strategies.OneWayShootingStrategy(selector=selector)
     return strat
 
-def two_way_shooting(wizard, selectors=None, modifiers=None):
-    pass
+# def two_way_shooting(wizard, selectors=None, modifiers=None):
+    # pass
 
 def spring_shooting(wizard, engine=None):
     from openpathsampling import strategies

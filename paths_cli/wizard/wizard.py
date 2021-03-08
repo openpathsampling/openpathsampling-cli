@@ -136,7 +136,6 @@ class Wizard:
         sel = self.ask_enumerate(f"Which {text_name} would you like to "
                                  "use?", list(opts.keys()))
         obj = opts[sel](self)
-        print(sel, obj)
         if sel == create_new:
             obj = self.register(obj, text_name, store_name)
         return obj

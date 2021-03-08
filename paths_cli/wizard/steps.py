@@ -4,9 +4,7 @@ from functools import partial
 from paths_cli.wizard.cvs import cvs
 from paths_cli.wizard.engines import engines
 from paths_cli.wizard.volumes import volumes
-from paths_cli.wizard.tps import (
-    flex_length_tps_network, fixed_length_tps_network, tps_scheme
-)
+from paths_cli.wizard.tps import tps_scheme
 
 WizardStep = namedtuple('WizardStep', ['func', 'display_name', 'store_name',
                                        'minimum', 'maximum'])
