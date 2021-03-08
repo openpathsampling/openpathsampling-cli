@@ -3,18 +3,6 @@ from paths_cli.wizard.core import get_missing_object
 from paths_cli.wizard.shooting import shooting
 from functools import partial
 
-def _get_network(wizard):
-    if len(wizard.networks) == 0:
-        network = tps_network(wizard)
-    elif len(wizard.networks) == 1:
-        network = list(wizard.networks.values())[0]
-    else:
-        networks = list(wizard.networks.keys())
-        sel = wizard.ask_enumerate("Which network would you like to use?",
-                                   options=networks)
-        network = wizard.networks[sel]
-    return network
-
 def tps_scheme(wizard, network=None):
     import openpathsampling as paths
     from openpathsampling import strategies

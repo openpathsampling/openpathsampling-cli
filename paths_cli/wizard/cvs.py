@@ -151,27 +151,6 @@ def coordinate(wizard):
     return cv
 
 
-def _get_period(wizard):
-    # to be used in custom CVs ... or maybe just in the file CV itself?
-    is_periodic = period_min = period_max = None
-    while is_periodic is None:
-        is_periodic_char = wizard.ask("Is this CV periodic?",
-                                      options=["[Y]es", "[N]o"])
-        is_periodic = {'y': True, 'n': False}[is_periodic_char]
-
-    if is_periodic:
-        while period_min is None:
-            period_min = wizard.ask_custom_eval(
-                "What is the lower bound of the period?"
-            )
-        while period_max is None:
-            period_max = wizard.ask_custom_eval(
-                "What is the upper bound of the period?"
-            )
-    return period_min, period_max
-
-
-
 SUPPORTED_CVS = {}
 
 if HAS_MDTRAJ:
