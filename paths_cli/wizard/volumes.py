@@ -105,8 +105,7 @@ def volumes(wizard, as_state=False, intro=None):
     return vol
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # no-cov
     from paths_cli.wizard.wizard import Wizard
     wiz = Wizard({'states': ('states', 1, '+')})
     volumes(wiz, as_state=True)
-
