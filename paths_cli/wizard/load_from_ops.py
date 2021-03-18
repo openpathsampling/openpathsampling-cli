@@ -1,6 +1,8 @@
-LABEL = "Load existing from OPS file"
 from paths_cli.parameters import INPUT_FILE
 from paths_cli.wizard.core import get_object
+
+from paths_cli.wizard.errors import FILE_LOADING_ERROR_MSG
+LABEL = "Load existing from OPS file"
 
 def named_objs_helper(storage, store_name):
     def list_items(wizard, user_input):
