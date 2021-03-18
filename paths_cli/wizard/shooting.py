@@ -12,8 +12,10 @@ def uniform_selector(wizard):
 
 def gaussian_selector(wizard):
     import openpathsampling as paths
-    cv = wizard.ask_enumerate("Which CV do you want the Gaussian to be "
-                              "based on?", options=wizard.cvs.keys())
+    cv_name = wizard.ask_enumerate("Which CV do you want the Gaussian to "
+                                   "be based on?",
+                                   options=wizard.cvs.keys())
+    cv = wizard.cvs[cv_name]
     l_0 = wizard.ask_custom_eval(f"At what value of {cv.name} should the "
                                  "Gaussian be centered?")
     std = wizard.ask_custom_eval("What should be the standard deviation of "
@@ -45,7 +47,7 @@ SHOOTING_SELECTORS = {
 }
 
 
-def _get_selector(wizard, selectors):
+def _get_selector(wizard, selectors=None):
     if selectors is None:
         selectors = SHOOTING_SELECTORS
     selector = None
@@ -61,7 +63,8 @@ def one_way_shooting(wizard, selectors=None, engine=None):
                                     engines)
 
     selector = _get_selector(wizard, selectors)
-    strat = strategies.OneWayShootingStrategy(selector=selector)
+    strat = strategies.OneWayShootingStrategy(selector=selector,
+                                              engine=engine)
     return strat
 
 # def two_way_shooting(wizard, selectors=None, modifiers=None):
@@ -78,8 +81,9 @@ def spring_shooting(wizard, engine=None):
     )
     k_spring = wizard.ask_custom_eval("What is the spring constant k?",
                                       type_=float)
-    strat = strategies.SpringShootingStrategy(delta_max=delta_max,
-                                              k_spring=k_spring)
+    strat = strategies.SpringShootingMoveScheme(
+        delta_max=delta_max, k_spring=k_spring, engine=engine
+    )
     return strat
 
 

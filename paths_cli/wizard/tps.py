@@ -3,6 +3,7 @@ from paths_cli.wizard.core import get_missing_object
 from paths_cli.wizard.shooting import shooting
 from functools import partial
 
+
 def tps_scheme(wizard, network=None):
     import openpathsampling as paths
     from openpathsampling import strategies
@@ -10,7 +11,12 @@ def tps_scheme(wizard, network=None):
         network = get_missing_object(wizard, wizard.networks, 'network',
                                      tps_network)
 
-    shooting_strategy = shooting(wizard)
+    shooting_strategy = shooting(wizard, network)
+
+    if isinstance(shooting_strategy, paths.MoveScheme):
+        # this means we got a fixed scheme and can't do strategies
+        return shooting_strategy
+
     # TODO: add an option for shifting maybe?
     global_strategy = strategies.OrganizeByMoveGroupStrategy()
     scheme = paths.MoveScheme(network)

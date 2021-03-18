@@ -47,4 +47,24 @@ def ad_engine(ad_openmm):
         ).named('ad_engine')
     return engine
 
-# TODO: add fixtures for all the AD things: CVs, states
+@pytest.fixture
+def toy_engine():
+    pes = (paths.engines.toy.OuterWalls([1.0, 1.0], [1.0, 1.0])
+           + paths.engines.toy.Gaussian(-1.0, [12.0, 12.0], [-0.5, 0.0])
+           + paths.engines.toy.Gaussian(-1.0, [12.0, 12.0], [0.5, 0.0]))
+    topology = paths.engines.toy.Topology(n_spatial=2,
+                                          masses=[1.0],
+                                          pes=pes)
+    integ = paths.engines.toy.LangevinBAOABIntegrator(
+        dt=0.02,
+        temperature=0.1,
+        gamma=2.5
+    )
+    options = {'integ': integ,
+               'n_frames_max': 5000,
+               'n_steps_per_frame': 1}
+    engine = paths.engines.toy.Engine(
+        options=options,
+        topology=topology
+    ).named('toy-engine')
+    return engine
