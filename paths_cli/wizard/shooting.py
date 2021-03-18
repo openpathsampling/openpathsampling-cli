@@ -1,3 +1,5 @@
+from functools import partial
+
 from paths_cli.wizard.core import get_missing_object
 from paths_cli.wizard.engines import engines
 from paths_cli.wizard.cvs import cvs
@@ -71,7 +73,7 @@ def one_way_shooting(wizard, selectors=None, engine=None):
     # pass
 
 def spring_shooting(wizard, engine=None):
-    from openpathsampling import strategies
+    import openpathsampling as paths
     if engine is None:
         engine = get_missing_object(wizard, wizard.engines, 'engine',
                                     engines)
@@ -81,9 +83,10 @@ def spring_shooting(wizard, engine=None):
     )
     k_spring = wizard.ask_custom_eval("What is the spring constant k?",
                                       type_=float)
-    strat = strategies.SpringShootingMoveScheme(
-        delta_max=delta_max, k_spring=k_spring, engine=engine
-    )
+    strat = partial(paths.SpringShootingMoveScheme,
+                    delta_max=delta_max,
+                    k_spring=k_spring,
+                    engine=engine)
     return strat
 
 

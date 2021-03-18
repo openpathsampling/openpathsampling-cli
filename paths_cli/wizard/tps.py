@@ -13,9 +13,9 @@ def tps_scheme(wizard, network=None):
 
     shooting_strategy = shooting(wizard, network)
 
-    if isinstance(shooting_strategy, paths.MoveScheme):
+    if not isinstance(shooting_strategy, paths.MoveStrategy):
         # this means we got a fixed scheme and can't do strategies
-        return shooting_strategy
+        return shooting_strategy(network=network)
 
     # TODO: add an option for shifting maybe?
     global_strategy = strategies.OrganizeByMoveGroupStrategy()
