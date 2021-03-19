@@ -11,7 +11,7 @@ def tps_scheme(wizard, network=None):
         network = get_missing_object(wizard, wizard.networks, 'network',
                                      tps_network)
 
-    shooting_strategy = shooting(wizard, network)
+    shooting_strategy = shooting(wizard, network=network)
 
     if not isinstance(shooting_strategy, paths.MoveStrategy):
         # this means we got a fixed scheme and can't do strategies

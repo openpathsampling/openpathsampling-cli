@@ -1,7 +1,7 @@
 import pytest
 import mock
 from paths_cli.tests.wizard.mock_wizard import (
-    MockConsole
+    MockConsole, make_mock_wizard, make_mock_retry_wizard
 )
 import pathlib
 
@@ -120,10 +120,25 @@ class TestWizard:
         assert "RuntimeError: baz" in console.log_text
 
     def test_name(self):
-        # why does that exist? cf core.name
-        # actually, it looks like we never use core.name; remove that and
-        # move its test here?
-        pass
+        wizard = make_mock_wizard('foo')
+        cv = CoordinateFunctionCV(lambda s: s.xyz[0][0])
+        assert not cv.is_named
+        result = wizard.name(cv, obj_type="CV", store_name="cvs")
+        assert result is cv
+        assert result.is_named
+        assert result.name == 'foo'
+
+    def test_name_exists(self):
+        wizard = make_mock_retry_wizard(['foo', 'bar'])
+        wizard.cvs['foo'] = 'placeholder'
+        cv = CoordinateFunctionCV(lambda s: s.xyz[0][0])
+        assert not cv.is_named
+        result = wizard.name(cv, obj_type="CV", store_name="cvs")
+        assert result is cv
+        assert result.is_named
+        assert result.name == 'bar'
+        assert wizard.console.input.call_count == 2
+
 
     @pytest.mark.parametrize('named', [True, False])
     def test_register(self, named):
