@@ -7,16 +7,16 @@ class ImpossibleError(Exception):
 class RestartObjectException(BaseException):
     pass
 
-def not_installed(package, obj_type):
-    retry = wizard.ask("Hey, it looks like you don't have {package} "
+def not_installed(wizard, package, obj_type):
+    retry = wizard.ask(f"Hey, it looks like you don't have {package} "
                        "installed. Do you want to try a different "
-                       "{obj_type}, or do you want to quit?",
+                       f"{obj_type}, or do you want to quit?",
                        options=["[R]etry", "[Q]uit"])
     if retry == 'r':
-        return
+        raise RestartObjectException()
     elif retry == 'q':
         exit()
-    else:
+    else:  # no-cov
         raise ImpossibleError()
 
 
