@@ -15,7 +15,7 @@ def two_state_tps(wizard, fixed_length=False):
     final_state = volumes(wizard, as_state=True, intro="")
     wizard.register(final_state, 'final state', 'states')
     if fixed_length:
-        ...
+        ...  # no-cov  (will add this later)
     else:
         network = paths.TPSNetwork(initial_state, final_state)
     scheme = tps_scheme(wizard, network=network)

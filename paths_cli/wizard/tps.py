@@ -1,7 +1,12 @@
 from paths_cli.wizard.tools import a_an
 from paths_cli.wizard.core import get_missing_object
 from paths_cli.wizard.shooting import shooting
+from paths_cli.wizard.volumes import volumes
+
 from functools import partial
+
+def tps_network(wizard):
+    raise NotImplementedError("Still need to add other network choic")
 
 
 def tps_scheme(wizard, network=None):
@@ -11,9 +16,9 @@ def tps_scheme(wizard, network=None):
         network = get_missing_object(wizard, wizard.networks, 'network',
                                      tps_network)
 
-    shooting_strategy = shooting(wizard, network=network)
+    shooting_strategy = shooting(wizard)
 
-    if not isinstance(shooting_strategy, paths.MoveStrategy):
+    if not isinstance(shooting_strategy, strategies.MoveStrategy):
         # this means we got a fixed scheme and can't do strategies
         return shooting_strategy(network=network)
 
