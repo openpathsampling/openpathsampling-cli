@@ -1,9 +1,9 @@
 import random
-from paths_cli.wizard.joke import name_joke
 from paths_cli.wizard.tools import a_an
 
 from collections import namedtuple
 
+WIZARD_STORE_NAMES = ['engines', 'cvs', 'states', 'networks', 'schemes']
 WizardSay = namedtuple("WizardSay", ['msg', 'mode'])
 
 def interpret_req(req):

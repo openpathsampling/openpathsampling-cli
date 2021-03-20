@@ -68,3 +68,12 @@ def toy_engine():
         topology=topology
     ).named('toy-engine')
     return engine
+
+
+@pytest.fixture
+def tps_network():
+    cv = paths.CoordinateFunctionCV('x', lambda s: s.xyz[0][0])
+    state_A = paths.CVDefinedVolume(cv, float("-inf"), 0).named("A")
+    state_B = paths.CVDefinedVolume(cv, 0, float("inf")).named("B")
+    network = paths.TPSNetwork(state_A, state_B).named('tps-network')
+    return network

@@ -10,16 +10,6 @@ from paths_cli.tests.wizard.mock_wizard import mock_wizard
 
 from paths_cli.wizard.tps import tps_scheme
 
-
-
-@pytest.fixture
-def tps_network():
-    cv = paths.CoordinateFunctionCV('x', lambda s: s.xyz[0][0])
-    state_A = paths.CVDefinedVolume(cv, float("-inf"), 0).named("A")
-    state_B = paths.CVDefinedVolume(cv, 0, float("inf")).named("B")
-    network = paths.TPSNetwork(state_A, state_B).named('tps-network')
-    return network
-
 @pytest.mark.parametrize('as_scheme', [False, True])
 def test_tps_scheme(tps_network, toy_engine, as_scheme):
     wizard = mock_wizard([])

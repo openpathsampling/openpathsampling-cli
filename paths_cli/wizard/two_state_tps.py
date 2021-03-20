@@ -1,8 +1,8 @@
+from paths_cli.wizard.volumes import volumes
+from paths_cli.wizard.tps import tps_scheme
 from paths_cli.wizard.steps import (
     SINGLE_ENGINE_STEP, CVS_STEP, WizardStep
 )
-from paths_cli.wizard.volumes import volumes
-from paths_cli.wizard.tps import tps_scheme
 from paths_cli.wizard.wizard import Wizard
 
 def two_state_tps(wizard, fixed_length=False):
