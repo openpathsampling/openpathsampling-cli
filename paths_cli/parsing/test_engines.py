@@ -47,9 +47,9 @@ class TestOpenMMEngineBuilder(object):
         for fname in ['system.xml', 'integrator.xml', 'ad.pdb']:
             assert fname in os.listdir()
 
-        integ = load_openmm_xml('integrator.xml', {})
+        integ = load_openmm_xml('integrator.xml')
         assert isinstance(integ, mm.CustomIntegrator)
-        sys = load_openmm_xml('system.xml', {})
+        sys = load_openmm_xml('system.xml')
         assert isinstance(sys, mm.System)
 
     def test_openmm_options(self):
@@ -66,7 +66,7 @@ class TestOpenMMEngineBuilder(object):
         self._create_files(tmpdir)
         os.chdir(tmpdir)
         dct = yaml.load(self.yml, yaml.FullLoader)
-        engine = build_openmm_engine(dct, {})
+        engine = build_openmm_engine(dct)
         assert isinstance(engine, ops_openmm.Engine)
         snap = ops_openmm.tools.ops_load_trajectory('ad.pdb')[0]
         engine.current_snapshot = snap

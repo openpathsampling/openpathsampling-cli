@@ -8,7 +8,7 @@ except ImportError:
 else:
     HAS_OPENMM = True
 
-def load_openmm_xml(filename, named_objs):
+def load_openmm_xml(filename):
     if not HAS_OPENMM:  # pragma: no cover
         raise RuntimeError("OpenMM does not seem to be installed")
 
@@ -30,8 +30,8 @@ OPENMM_ATTRS = {
     'topology': build_topology,
     'system': load_openmm_xml,
     'integrator': load_openmm_xml,
-    'n_steps_per_frame': lambda v, _: int(v),
-    'n_frames_max': lambda v, _: int(v)
+    'n_steps_per_frame': int,
+    'n_frames_max': int,
 }
 
 build_openmm_engine = InstanceBuilder(

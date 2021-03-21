@@ -1,16 +1,17 @@
 import os
 from .errors import InputError
 
-def get_topology_from_engine(dct, named_objs):
+def get_topology_from_engine(dct):
     """If given the name of an engine, use that engine's topology"""
-    if dct in named_objs:
-        engine = named_objs[dct]
+    from paths_cli.parsing.engines import engine_parser
+    if dct in engine_parser.named_objs:
+        engine = enginer_parser.named_objs[dct]
         try:
             return engine.topology
         except AttributeError:
             pass
 
-def get_topology_from_file(dct, named_objs):
+def get_topology_from_file(dct):
     """If given the name of a file, use that to create the topology"""
     if os.path.exists(dct):
         import mdtraj as md
@@ -25,9 +26,9 @@ class MultiStrategyBuilder:
         self.strategies = strategies
         self.label = label
 
-    def __call__(self, dct, named_objs):
+    def __call__(self, dct):
         for strategy in self.strategies:
-            result = strategy(dct, named_objs)
+            result = strategy(dct)
             if result is not None:
                 return result
 

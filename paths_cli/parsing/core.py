@@ -94,7 +94,7 @@ class InstanceBuilder:
             defaults = {}
         self.defaults = defaults
 
-    def select_builder(self, dct, named_objs):
+    def select_builder(self, dct):
         if self.module is not None:
             builder = getattr(importlib.import_module(self.module), self.builder)
         else:
@@ -102,16 +102,16 @@ class InstanceBuilder:
         return builder
 
 
-    def __call__(self, dct, named_objs):
+    def __call__(self, dct):
         # TODO: support aliases in dct[attr]
         input_dct = self.defaults.copy().update(dct)
         # new_dct = {attr: func(dct[attr], named_objs)
                    # for attr, func in self.attribute_table.items()}
         new_dct = {}
         for attr, func in self.attribute_table.items():
-            new_dct[attr] = func(dct[attr], named_objs)
+            new_dct[attr] = func(dct[attr])
         ops_dct = self.remapper(new_dct)
-        builder = self.select_builder(dct, named_objs)
+        builder = self.select_builder(dct)
         return builder(**ops_dct)
 
 
@@ -122,7 +122,7 @@ class Parser:
         self.label = label
         self.named_objs = {}
 
-    def _parse_str(self, name, named_objs):
+    def _parse_str(self, name):
         try:
             return self.named_objs[name]
         except KeyError as e:
@@ -141,11 +141,11 @@ class Parser:
 
         # return obj
 
-    def _parse_dict(self, dct, named_objs):
+    def _parse_dict(self, dct):
         dct = dct.copy()  # make a local copy
         name = dct.pop('name', None)
         type_name = dct.pop('type')
-        obj = self.type_dispatch[type_name](dct, named_objs)
+        obj = self.type_dispatch[type_name](dct)
         # return obj.named(name)
         if name is not None:
             if name in self.named_objs:
@@ -154,15 +154,15 @@ class Parser:
             self.named_objs[name] = obj
 
 
-    def parse(self, dct, named_objs):
+    def parse(self, dct):
         if isinstance(dct, str):
-            return self._parse_str(dct, named_objs)
+            return self._parse_str(dct)
         else:
-            return self._parse_dict(dct, named_objs)
+            return self._parse_dict(dct)
 
-    def __call__(self, dct, named_objs):
+    def __call__(self, dct):
         dcts, listified = listify(dct)
-        objs = [self.parse(d, named_objs) for d in dcts]
+        objs = [self.parse(d) for d in dcts]
         results = unlistify(objs, listified)
         return results
 
