@@ -110,8 +110,8 @@ class InstanceBuilder:
         new_dct = {}
         for attr, func in self.attribute_table.items():
             new_dct[attr] = func(dct[attr])
+        builder = self.select_builder(new_dct)
         ops_dct = self.remapper(new_dct)
-        builder = self.select_builder(dct)
         return builder(**ops_dct)
 
 
