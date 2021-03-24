@@ -4,6 +4,8 @@ import yaml
 
 from collections import namedtuple, abc
 
+import logging
+
 from .errors import InputError
 from .tools import custom_eval
 
@@ -92,6 +94,7 @@ class InstanceBuilder:
         if defaults is None:
             defaults = {}
         self.defaults = defaults
+        self.logger = logging.getLogger(f"parser.InstanceBuilder[{builder}]")
 
     def select_builder(self, dct):
         if self.module is not None:
@@ -108,10 +111,15 @@ class InstanceBuilder:
                    # for attr, func in self.attribute_table.items()}
         new_dct = {}
         for attr, func in self.attribute_table.items():
+            self.logger.debug(f"{attr}: {dct[attr]}")
             new_dct[attr] = func(dct[attr])
         builder = self.select_builder(new_dct)
         ops_dct = self.remapper(new_dct)
-        return builder(**ops_dct)
+        self.logger.debug("Building...")
+        self.logger.debug(ops_dct)
+        obj =  builder(**ops_dct)
+        self.logger.debug(obj)
+        return obj
 
 
 class Parser:
@@ -120,8 +128,11 @@ class Parser:
         self.type_dispatch = type_dispatch
         self.label = label
         self.named_objs = {}
+        logger_name = f"parser.Parser[{label}]"
+        self.logger = logging.getLogger(logger_name)
 
     def _parse_str(self, name):
+        self.logger.debug(f"Looking for '{name}'")
         try:
             return self.named_objs[name]
         except KeyError as e:
@@ -144,13 +155,14 @@ class Parser:
         dct = dct.copy()  # make a local copy
         name = dct.pop('name', None)
         type_name = dct.pop('type')
+        self.logger.info(f"Creating {type_name} named {name}")
         obj = self.type_dispatch[type_name](dct)
-        # return obj.named(name)
         if name is not None:
             if name in self.named_objs:
                 raise RuntimeError("Same name twice")  # TODO improve
             obj = obj.named(name)
             self.named_objs[name] = obj
+        return obj.named(name)
 
 
     def parse(self, dct):
