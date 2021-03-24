@@ -20,63 +20,62 @@ def unlistify(obj, listified):
         obj = obj[0]
     return obj
 
+# class NamedObjects(abc.MutableMapping):
+    # """Class to track named objects and their descriptions"""
+    # def __init__(self, global_dct):
+        # names, dcts = self.all_name_descriptions(global_dct)
+        # self.objects = {name: None for name in names}
+        # self.descriptions = {name: dct for name, dct in zip(names, dcts)}
 
-class NamedObjects(abc.MutableMapping):
-    """Class to track named objects and their descriptions"""
-    def __init__(self, global_dct):
-        names, dcts = self.all_name_descriptions(global_dct)
-        self.objects = {name: None for name in names}
-        self.descriptions = {name: dct for name, dct in zip(names, dcts)}
+    # def __getitem__(self, key):
+        # return self.objects[key]
 
-    def __getitem__(self, key):
-        return self.objects[key]
+    # def __setitem__(self, key, value):
+        # self.objects[key] = value
 
-    def __setitem__(self, key, value):
-        self.objects[key] = value
+    # def __delitem__(self, key):
+        # del self.objects[key]
 
-    def __delitem__(self, key):
-        del self.objects[key]
+    # def __iter__(self):
+        # return iter(self.objects)
 
-    def __iter__(self):
-        return iter(self.objects)
+    # def __len__(self):
+        # return len(self.objects)
 
-    def __len__(self):
-        return len(self.objects)
+    # @staticmethod
+    # def all_name_descriptions(dct):
+        # """Find all the named objets and their dict descriptions
 
-    @staticmethod
-    def all_name_descriptions(dct):
-        """Find all the named objets and their dict descriptions
+        # Parameters
+        # ----------
+        # dct : dict
+            # output from loading YAML
+        # """
+        # names = []
+        # dcts = []
+        # name = None
+        # if isinstance(dct, list):
+            # for item in dct:
+                # name_list, dct_list = \
+                        # NamedObjects.all_name_descriptions(item)
+                # names.extend(name_list)
+                # dcts.extend(dct_list)
+        # elif isinstance(dct, dict):
+            # for k, v in dct.items():
+                # if isinstance(v, (dict, list)):
+                    # name_list, dct_list = \
+                            # NamedObjects.all_name_descriptions(v)
+                    # names.extend(name_list)
+                    # dcts.extend(dct_list)
+            # try:
+                # name = dct['name']
+            # except KeyError:
+                # pass
+            # else:
+                # names.append(name)
+                # dcts.append(dct)
 
-        Parameters
-        ----------
-        dct : dict
-            output from loading YAML
-        """
-        names = []
-        dcts = []
-        name = None
-        if isinstance(dct, list):
-            for item in dct:
-                name_list, dct_list = \
-                        NamedObjects.all_name_descriptions(item)
-                names.extend(name_list)
-                dcts.extend(dct_list)
-        elif isinstance(dct, dict):
-            for k, v in dct.items():
-                if isinstance(v, (dict, list)):
-                    name_list, dct_list = \
-                            NamedObjects.all_name_descriptions(v)
-                    names.extend(name_list)
-                    dcts.extend(dct_list)
-            try:
-                name = dct['name']
-            except KeyError:
-                pass
-            else:
-                names.append(name)
-                dcts.append(dct)
-
-        return names, dcts
+        # return names, dcts
 
 
 class InstanceBuilder:
