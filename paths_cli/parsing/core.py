@@ -22,71 +22,17 @@ def unlistify(obj, listified):
         obj = obj[0]
     return obj
 
-# class NamedObjects(abc.MutableMapping):
-    # """Class to track named objects and their descriptions"""
-    # def __init__(self, global_dct):
-        # names, dcts = self.all_name_descriptions(global_dct)
-        # self.objects = {name: None for name in names}
-        # self.descriptions = {name: dct for name, dct in zip(names, dcts)}
-
-    # def __getitem__(self, key):
-        # return self.objects[key]
-
-    # def __setitem__(self, key, value):
-        # self.objects[key] = value
-
-    # def __delitem__(self, key):
-        # del self.objects[key]
-
-    # def __iter__(self):
-        # return iter(self.objects)
-
-    # def __len__(self):
-        # return len(self.objects)
-
-    # @staticmethod
-    # def all_name_descriptions(dct):
-        # """Find all the named objets and their dict descriptions
-
-        # Parameters
-        # ----------
-        # dct : dict
-            # output from loading YAML
-        # """
-        # names = []
-        # dcts = []
-        # name = None
-        # if isinstance(dct, list):
-            # for item in dct:
-                # name_list, dct_list = \
-                        # NamedObjects.all_name_descriptions(item)
-                # names.extend(name_list)
-                # dcts.extend(dct_list)
-        # elif isinstance(dct, dict):
-            # for k, v in dct.items():
-                # if isinstance(v, (dict, list)):
-                    # name_list, dct_list = \
-                            # NamedObjects.all_name_descriptions(v)
-                    # names.extend(name_list)
-                    # dcts.extend(dct_list)
-            # try:
-                # name = dct['name']
-            # except KeyError:
-                # pass
-            # else:
-                # names.append(name)
-                # dcts.append(dct)
-
-        # return names, dcts
-
-
 class InstanceBuilder:
     # TODO: add schema as an input so we can autogenerate our JSON schema!
-    def __init__(self, builder, attribute_table, defaults=None, module=None,
-                 remapper=None):
+    def __init__(self, builder, attribute_table, optional_attributes=None,
+                 defaults=None, module=None, remapper=None):
         self.module = module
         self.builder = builder
+        self.builder_name = str(self.builder)
         self.attribute_table = attribute_table
+        if optional_attributes is None:
+            optional_attributes = {}
+        self.optional_attributes = optional_attributes
         # TODO use none_to_default
         if remapper is None:
              remapper = lambda x: x
@@ -94,7 +40,7 @@ class InstanceBuilder:
         if defaults is None:
             defaults = {}
         self.defaults = defaults
-        self.logger = logging.getLogger(f"parser.InstanceBuilder[{builder}]")
+        self.logger = logging.getLogger(f"parser.InstanceBuilder.{builder}")
 
     def select_builder(self, dct):
         if self.module is not None:
@@ -103,16 +49,30 @@ class InstanceBuilder:
             builder = self.builder
         return builder
 
-
-    def __call__(self, dct):
+    def _parse_attrs(self, dct):
         # TODO: support aliases in dct[attr]
-        input_dct = self.defaults.copy().update(dct)
-        # new_dct = {attr: func(dct[attr], named_objs)
-                   # for attr, func in self.attribute_table.items()}
+        input_dct = self.defaults.copy()
+        self.logger.debug(f"defaults: {input_dct}")
+        input_dct.update(dct)
+        self.logger.debug(f"effective input: {input_dct}")
+
         new_dct = {}
         for attr, func in self.attribute_table.items():
-            self.logger.debug(f"{attr}: {dct[attr]}")
-            new_dct[attr] = func(dct[attr])
+            try:
+                value = input_dct[attr]
+            except KeyError:
+                raise InputError(f"'{self.builder_name}' missing required "
+                                 f"parameter '{attr}'")
+            self.logger.debug(f"{attr}: {input_dct[attr]}")
+            new_dct[attr] = func(input_dct[attr])
+
+        optionals = set(self.optional_attributes) & set(dct)
+        for attr in optionals:
+            new_dct[attr] = self.attribute_table[attr](dct[attr])
+
+        return new_dct
+
+    def _build(self, new_dct):
         builder = self.select_builder(new_dct)
         ops_dct = self.remapper(new_dct)
         self.logger.debug("Building...")
@@ -120,6 +80,10 @@ class InstanceBuilder:
         obj =  builder(**ops_dct)
         self.logger.debug(obj)
         return obj
+
+    def __call__(self, dct):
+        new_dct = self._parse_attrs(dct)
+        return self._build(new_dct)
 
 
 class Parser:
