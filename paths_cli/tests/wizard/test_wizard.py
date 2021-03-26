@@ -197,7 +197,7 @@ class TestWizard:
         assert line == expected
 
     def test_save_to_file(self):
-        pass
+        pytest.skip()
 
     @pytest.mark.parametrize('req,count,expected', [
         (('cvs', 1, 1), 0, (True, True)),
@@ -222,5 +222,8 @@ class TestWizard:
         if len(inputs) > 1:
             assert "Sorry" in console.log_text
 
+    def test_do_one(self):
+        pytest.skip()
+
     def test_run_wizard(self):
-        pass
+        pytest.skip()
