@@ -9,7 +9,7 @@ from paths_cli.wizard.errors import (
     FILE_LOADING_ERROR_MSG, RestartObjectException
 )
 from paths_cli.wizard.joke import name_joke
-from paths_cli.parsing.core import custom_eval
+from paths_cli.parsing.tools import custom_eval
 
 import shutil
 
