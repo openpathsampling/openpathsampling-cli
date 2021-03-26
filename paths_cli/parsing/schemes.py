@@ -20,11 +20,14 @@ class StrategySchemeInstanceBuilder(InstanceBuilder):
     """
     Variant of the InstanceBuilder that appends strategies to a MoveScheme
     """
-    def __init__(self, builder, attribute_table, defaults=None, module=None,
-                 remapper=None, default_global_strategy=False):
+    def __init__(self, builder, attribute_table, optional_attributes=None,
+                 defaults=None, module=None, remapper=None,
+                 default_global_strategy=False):
         from openpathsampling import strategies
-        super().__init__(builder, attribute_table, defaults=defaults,
-                         module=module, remapper=remapper)
+        super().__init__(builder, attribute_table,
+                         optional_attributes=optional_attributes,
+                         defaults=defaults, module=module,
+                         remapper=remapper)
         if default_global_strategy is True:
             self.default_global = [strategies.OrganizeByMoveGroupStrategy()]
         elif default_global_strategy is False:
@@ -33,9 +36,9 @@ class StrategySchemeInstanceBuilder(InstanceBuilder):
             self.default_global= [default_global_strategy]
 
     def __call__(self, dct):
-        new_dct = self._parse_attrs(dct)
-        strategies = new_dct.pop('strategies')
-        scheme = self._build(new_dct)
+        new_dct = self.parse_attrs(dct)
+        strategies = new_dct.pop('strategies', [])
+        scheme = self.build(new_dct)
         for strat in strategies + self.default_global:
             scheme.append(strat)
 
@@ -50,8 +53,10 @@ build_one_way_shooting_scheme = StrategySchemeInstanceBuilder(
         'network': network_parser,
         'selector': shooting_selector_parser,
         'engine': engine_parser,
+    },
+    optional_attributes={
         'strategies': strategy_parser,
-    }
+    },
 )
 
 build_scheme = StrategySchemeInstanceBuilder(

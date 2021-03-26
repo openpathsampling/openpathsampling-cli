@@ -49,7 +49,20 @@ class InstanceBuilder:
             builder = self.builder
         return builder
 
-    def _parse_attrs(self, dct):
+    def parse_attrs(self, dct):
+        """Parse the user input dictionary to mapping of name to object.
+
+        Parameters
+        ----------
+        dct: Dict
+            User input dictionary (from YAML, JSON, etc.)
+
+        Returns
+        -------
+        Dict :
+            Mapping with the keys relevant to the input dictionary, but
+            values are now appropriate inputs for the builder.
+        """
         # TODO: support aliases in dct[attr]
         input_dct = self.defaults.copy()
         self.logger.debug(f"defaults: {input_dct}")
@@ -72,7 +85,20 @@ class InstanceBuilder:
 
         return new_dct
 
-    def _build(self, new_dct):
+    def build(self, new_dct):
+        """Build the object from a dictionary with objects as values.
+
+        Parameters
+        ----------
+        new_dct : Dict
+            The output of :method:`.parse_attrs`. This is a mapping of the
+            relevant keys to instantiated objects.
+
+        Returns
+        -------
+        Any :
+            The instance for this dictionary.
+        """
         builder = self.select_builder(new_dct)
         ops_dct = self.remapper(new_dct)
         self.logger.debug("Building...")
@@ -82,8 +108,8 @@ class InstanceBuilder:
         return obj
 
     def __call__(self, dct):
-        new_dct = self._parse_attrs(dct)
-        return self._build(new_dct)
+        new_dct = self.parse_attrs(dct)
+        return self.build(new_dct)
 
 
 class Parser:
@@ -92,6 +118,7 @@ class Parser:
         self.type_dispatch = type_dispatch
         self.label = label
         self.named_objs = {}
+        self.all_objs = []
         logger_name = f"parser.Parser[{label}]"
         self.logger = logging.getLogger(logger_name)
 
@@ -102,31 +129,24 @@ class Parser:
         except KeyError as e:
             raise e  # TODO: replace with better error
 
-    # def _parse_str(self, name, named_objs):
-        # obj = named_objs[name]
-        # if obj is None:
-            # try:
-                # definition = named_objs.definitions[name]
-            # except KeyError:
-                # raise InputError.unknown_name(self.label, name)
-            # else:
-                # obj = self(definition, named_objects)
-            # named_objs[name] = obj
-
-        # return obj
-
     def _parse_dict(self, dct):
         dct = dct.copy()  # make a local copy
         name = dct.pop('name', None)
         type_name = dct.pop('type')
         self.logger.info(f"Creating {type_name} named {name}")
         obj = self.type_dispatch[type_name](dct)
+        obj = self.register(obj, name)
+        return obj
+
+    def register(self, obj, name):
         if name is not None:
             if name in self.named_objs:
                 raise RuntimeError("Same name twice")  # TODO improve
             obj = obj.named(name)
             self.named_objs[name] = obj
-        return obj.named(name)
+        obj = obj.named(name)
+        self.all_objs.append(obj)
+        return obj
 
 
     def parse(self, dct):
