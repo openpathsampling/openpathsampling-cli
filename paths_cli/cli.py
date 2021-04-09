@@ -34,7 +34,7 @@ class OpenPathSamplingCLI(click.MultiCommand):
             FilePluginLoader(commands),
             FilePluginLoader(app_dir_plugins(posix=False)),
             FilePluginLoader(app_dir_plugins(posix=True)),
-            NamespacePluginLoader('paths_cli.plugins')
+            NamespacePluginLoader('paths_cli_plugins')
         ]
 
         plugins = sum([loader() for loader in self.plugin_loaders], [])

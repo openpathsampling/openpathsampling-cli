@@ -120,11 +120,15 @@ class NamespacePluginLoader(CLIPluginLoader):
             return pkgutil.iter_modules(ns_pkg.__path__,
                                         ns_pkg.__name__ + ".")
 
-        ns = importlib.import_module(self.search_path)
-        candidates = [
-            importlib.import_module(name)
-            for _, name, _ in iter_namespace(ns)
-        ]
+        try:
+            ns = importlib.import_module(self.search_path)
+        except ModuleNotFoundError:
+            candidates = []
+        else:
+            candidates = [
+                importlib.import_module(name)
+                for _, name, _ in iter_namespace(ns)
+            ]
         return candidates
 
     @staticmethod
