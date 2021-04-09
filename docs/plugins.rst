@@ -89,7 +89,7 @@ If the plugin is part of a larger Python package, or if it is important to
 track version numbers or to be able to change which plugins are installed
 in particular Python environments, the namespace distribution mechanism is a
 better choice. We use `native namespace packages`_, which is a standard way
-of making plugins in Python. Plugins should be in the ``paths_cli.plugins``
+of making plugins in Python. Plugins should be in the ``paths_cli_plugins``
 namespace.
 
 .. _native namespace packages:
