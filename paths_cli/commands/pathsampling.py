@@ -40,3 +40,7 @@ def pathsampling_main(output_storage, scheme, init_conds, n_steps):
 CLI = pathsampling
 SECTION = "Simulation"
 REQUIRES_OPS = (1, 0)
+
+# pathsampling_plugin = paths_cli.CommandPlugin(command=pathsampling,
+                                              # section="Simulation",
+                                              # requires_ops=(1, 0))

@@ -7,6 +7,45 @@ OPSPlugin = collections.namedtuple(
     "OPSPlugin", ['name', 'location', 'func', 'section', 'plugin_type']
 )
 
+
+class Plugin(object):
+    """Generic OPS plugin object"""
+    def __init__(self, requires_ops, requires_cli):
+        self.requires_ops = requires_ops
+        self.requires_cli = requires_cli
+
+
+class CommandPlugin(Plugin):
+    """Plugin for subcommands to the OPS CLI"""
+    def __init__(self, command, section, requires_ops=(1, 0),
+                 requires_cli=(0, 1)):
+        self.command = command
+        self.section = section
+        super().__init__(requires_ops, requires_cli)
+
+    @property
+    def name(self):
+        return self.command.name
+
+
+class ParserPlugin(Plugin):
+    """Plugin to add a new Parser (top-level stage in YAML parsing"""
+    def __init__(self, parser, requires_ops=(1,0), requires_cli=(0,3)):
+        self.parser = parser
+        super().__init__(requires_ops, requires_cli)
+
+
+class InstanceBuilderPlugin(Plugin):
+    """
+    Plugin to add a new object type (InstanceBuilder) to YAML parsing.
+    """
+    def __init__(self, yaml_name, instance_builder, requires_ops=(1,0),
+                 requires_cli=(0,3)):
+        self.yaml_name = yaml_name
+        self.instance_builder = instance_builder
+        super().__init__(requires_ops, requires_cli)
+
+
 class CLIPluginLoader(object):
     """Abstract object for CLI plugins
 
