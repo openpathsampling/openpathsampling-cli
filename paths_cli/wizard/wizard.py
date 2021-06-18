@@ -217,7 +217,7 @@ class Wizard:
             for obj in store.values():
                 storage.save(obj)
 
-        self.say("Success! Everthing has been stored in your file.")
+        self.say("Success! Everything has been stored in your file.")
 
     def _req_do_another(self, req):
         store, min_, max_ = req

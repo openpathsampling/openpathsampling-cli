@@ -11,6 +11,49 @@ from openpathsampling.experimental.storage.collective_variables import \
 from paths_cli.wizard.wizard import *
 from paths_cli.wizard.steps import SINGLE_ENGINE_STEP
 
+import openpathsampling as paths
+
+class MockStore:
+    def __init__(self):
+        self.all_entries = []
+        self.name_dict = {}
+
+    def register(self, obj):
+        self.all_entries.append(obj)
+        if obj.is_named:
+            self.name_dict[obj.name] = obj
+
+    def __getitem__(self, key):
+        if isinstance(key, int):
+            return self.all_entries[key]
+        else:
+            return self.name_dict[key]
+
+    def __len__(self):
+        return len(self.all_entries)
+
+class MockStorage:
+    def __init__(self):
+        self.engines = MockStore()
+        self.volumes = MockStore()
+        self.cvs = MockStore()
+        self.networks = MockStore()
+        self.schemes = MockStore()
+
+    def save(self, obj):
+        class_to_store = {
+            paths.engines.DynamicsEngine: self.engines,
+            paths.Volume: self.volumes,
+            CoordinateFunctionCV: self.cvs,
+            paths.TransitionNetwork: self.networks,
+            paths.MoveScheme: self.schemes,
+        }
+        for cls in class_to_store:
+            if isinstance(obj, cls):
+                store = class_to_store[cls]
+                break
+
+        store.register(obj)
 
 
 class TestWizard:
@@ -196,8 +239,17 @@ class TestWizard:
         line = self.wizard._storage_description_line('cvs')
         assert line == expected
 
-    def test_save_to_file(self):
-        pytest.skip()
+    def test_save_to_file(self, toy_engine):
+        console = MockConsole([])
+        self.wizard.console = console
+        self.wizard.register(toy_engine, 'Engine', 'engines')
+        storage = MockStorage()
+        self.wizard.save_to_file(storage)
+        assert len(storage.cvs) == len(storage.volumes) == 0
+        assert len(storage.networks) == len(storage.schemes) == 0
+        assert len(storage.engines) == 1
+        assert storage.engines[toy_engine.name] == toy_engine
+        assert "Everything has been stored" in self.wizard.console.log_text
 
     @pytest.mark.parametrize('req,count,expected', [
         (('cvs', 1, 1), 0, (True, True)),
@@ -222,8 +274,48 @@ class TestWizard:
         if len(inputs) > 1:
             assert "Sorry" in console.log_text
 
-    def test_do_one(self):
-        pytest.skip()
+    @pytest.mark.parametrize('min_max,do_another', [
+        ((1, 1), False), ((2, float('inf')), True), ((1, 2), 'asked')
+    ])
+    def test_do_one(self, toy_engine, min_max, do_another):
+        step = mock.Mock(
+            func=mock.Mock(return_value=toy_engine),
+            display_name='Engine',
+            store_name='engines'
+        )
+        req = ('engines', *min_max)
+        # mock user interaction with response 'asked'
+        with mock.patch.object(Wizard, '_ask_do_another',
+                               return_value='asked'):
+            result = self.wizard._do_one(step, req)
 
-    def test_run_wizard(self):
-        pytest.skip()
+        assert result == do_another
+        assert self.wizard.engines[toy_engine.name] == toy_engine
+
+    def test_do_one_restart(self):
+        step = mock.Mock(
+            func=mock.Mock(side_effect=RestartObjectException()),
+            display_name='Engine', store_name='engines'
+        )
+        req = ('engines', 1, 1)
+        result = self.wizard._do_one(step, req)
+        assert result is True
+        assert len(self.wizard.engines) == 0
+
+    def test_run_wizard(self, toy_engine):
+        step = mock.Mock(
+            func=mock.Mock(return_value=toy_engine),
+            display_name='Engine',
+            store_name='engines',
+            minimum=1,
+            maximum=1
+        )
+        self.wizard.steps = [step]
+        storage = MockStorage()
+        with mock.patch.object(Wizard, 'get_storage',
+                               mock.Mock(return_value=storage)):
+            self.wizard.run_wizard()
+        assert len(storage.cvs) == len(storage.volumes) == 0
+        assert len(storage.networks) == len(storage.schemes) == 0
+        assert len(storage.engines) == 1
+        assert storage.engines[toy_engine.name] == toy_engine
