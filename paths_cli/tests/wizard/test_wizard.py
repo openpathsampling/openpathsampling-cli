@@ -1,5 +1,5 @@
 import pytest
-import mock
+from unittest import mock
 from paths_cli.tests.wizard.mock_wizard import (
     MockConsole, make_mock_wizard, make_mock_retry_wizard
 )

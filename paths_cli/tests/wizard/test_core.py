@@ -1,5 +1,5 @@
 import pytest
-import mock
+from unittest import mock
 
 from openpathsampling.experimental.storage.collective_variables import \
         CoordinateFunctionCV
