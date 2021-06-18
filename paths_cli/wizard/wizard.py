@@ -9,7 +9,7 @@ from paths_cli.wizard.errors import (
     FILE_LOADING_ERROR_MSG, RestartObjectException
 )
 from paths_cli.wizard.joke import name_joke
-from paths_cli.parsing.core import custom_eval
+from paths_cli.parsing.tools import custom_eval
 
 import shutil
 
@@ -217,7 +217,7 @@ class Wizard:
             for obj in store.values():
                 storage.save(obj)
 
-        self.say("Success! Everthing has been stored in your file.")
+        self.say("Success! Everything has been stored in your file.")
 
     def _req_do_another(self, req):
         store, min_, max_ = req
@@ -242,6 +242,22 @@ class Wizard:
                 self.bad_input("Sorry, I didn't understand that.")
         return do_another
 
+    def _do_one(self, step, req):
+        try:
+            obj = step.func(self)
+        except RestartObjectException:
+            self.say("Okay, let's try that again.")
+            return True
+        self.register(obj, step.display_name, step.store_name)
+        requires_another, allows_another = self._req_do_another(req)
+        if requires_another:
+            do_another = True
+        elif not requires_another and allows_another:
+            do_another = self._ask_do_another(step.display_name)
+        else:
+            do_another = False
+        return do_another
+
     def run_wizard(self):
         self.start("Hi! I'm the OpenPathSampling Wizard.")
         # TODO: next line is only temporary
@@ -251,20 +267,7 @@ class Wizard:
             req = step.store_name, step.minimum, step.maximum
             do_another = True
             while do_another:
-                try:
-                    obj = step.func(self)
-                except RestartObjectException:
-                    self.say("Okay, let's try that again.")
-                    continue
-                self.register(obj, step.display_name, step.store_name)
-                requires_another, allows_another = self._req_do_another(req)
-                if requires_another:
-                    do_another = True
-                elif not requires_another and allows_another:
-                    do_another = self._ask_do_another(step.display_name)
-                else:
-                    do_another = False
-
+                do_another = self._do_one(step, req)
         storage = self.get_storage()
         self.save_to_file(storage)
 

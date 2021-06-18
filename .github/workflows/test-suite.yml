@@ -57,6 +57,8 @@ jobs:
           fi
           python autorelease_check.py --branch $BRANCH --even ${EVENT}
       - name: "Unit tests"
+        env:
+          PY_COLORS: "1"
         run: |
           python -c "import paths_cli"
           py.test -vv --cov --cov-report xml:cov.xml
