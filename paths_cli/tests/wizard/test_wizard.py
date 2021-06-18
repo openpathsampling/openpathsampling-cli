@@ -303,6 +303,9 @@ class TestWizard:
         assert len(self.wizard.engines) == 0
 
     def test_run_wizard(self, toy_engine):
+        # skip patching the wizard; we never actually use the saving
+        # mechanisms and don't want to unpatch after
+        self.wizard._patched = True
         step = mock.Mock(
             func=mock.Mock(return_value=toy_engine),
             display_name='Engine',
