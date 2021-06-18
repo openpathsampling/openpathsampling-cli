@@ -1,5 +1,5 @@
 from paths_cli.wizard.wizard import Wizard
-import mock
+from unittest import mock
 
 def make_mock_wizard(inputs):
     wizard = Wizard([])
