@@ -1,5 +1,6 @@
 import click
 from paths_cli.parameters import INPUT_FILE
+from paths_cli import OPSCommandPlugin
 
 UNNAMED_SECTIONS = ['steps', 'movechanges', 'samplesets', 'trajectories',
                     'snapshots']
@@ -115,3 +116,10 @@ def get_section_string_nameable(section, store, get_named):
 CLI = contents
 SECTION = "Miscellaneous"
 REQUIRES_OPS = (1, 0)
+
+plugin = OPSCommandPlugin(
+    command=contents,
+    section="Miscellaneous",
+    requires_ops=(1, 0),
+    requires_cli=(0, 4)
+)

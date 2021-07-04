@@ -3,22 +3,43 @@ import pkgutil
 import importlib
 import os
 
+# TODO: this should be removed
 OPSPlugin = collections.namedtuple(
     "OPSPlugin", ['name', 'location', 'func', 'section', 'plugin_type']
 )
 
+class PluginRegistrationError(RuntimeError):
+    pass
 
+# TODO: make more generic than OPS (requires_ops => requires_lib)
 class Plugin(object):
     """Generic OPS plugin object"""
     def __init__(self, requires_ops, requires_cli):
         self.requires_ops = requires_ops
         self.requires_cli = requires_cli
+        self.location = None
+        self.plugin_type = None
+
+    def attach_metadata(self, location, plugin_type):
+        # error is already registered and data doesn't match
+        error_condition = (
+            (self.location is not None or self.plugin_type is not None)
+            and (self.location != location
+                 or self.plugin_type != plugin_type)
+        )
+        if error_condition:  # -no-cov-
+            raise PluginRegistrationError(
+                "The plugin " + repr(self) + "has been previously "
+                "registered with different metadata."
+            )
+        self.location = location
+        self.plugin_type = plugin_type
 
 
-class CommandPlugin(Plugin):
+class OPSCommandPlugin(Plugin):
     """Plugin for subcommands to the OPS CLI"""
     def __init__(self, command, section, requires_ops=(1, 0),
-                 requires_cli=(0, 1)):
+                 requires_cli=(0, 4)):
         self.command = command
         self.section = section
         super().__init__(requires_ops, requires_cli)
@@ -27,20 +48,29 @@ class CommandPlugin(Plugin):
     def name(self):
         return self.command.name
 
+    @property
+    def func(self):
+        # TODO: this is temporary to minimally change the API
+        # (this is what calling functions ask for
+        return self.command
 
-class ParserPlugin(Plugin):
+    def __repr__(self):
+        return "OPSCommandPlugin(" + self.name + ")"
+
+
+class OPSParserPlugin(Plugin):
     """Plugin to add a new Parser (top-level stage in YAML parsing"""
-    def __init__(self, parser, requires_ops=(1,0), requires_cli=(0,3)):
+    def __init__(self, parser, requires_ops=(1, 0), requires_cli=(0, 4)):
         self.parser = parser
         super().__init__(requires_ops, requires_cli)
 
 
-class InstanceBuilderPlugin(Plugin):
+class OPSInstanceBuilderPlugin(Plugin):
     """
     Plugin to add a new object type (InstanceBuilder) to YAML parsing.
     """
-    def __init__(self, yaml_name, instance_builder, requires_ops=(1,0),
-                 requires_cli=(0,3)):
+    def __init__(self, yaml_name, instance_builder, requires_ops=(1, 0),
+                 requires_cli=(0, 3)):
         self.yaml_name = yaml_name
         self.instance_builder = instance_builder
         super().__init__(requires_ops, requires_cli)
@@ -60,10 +90,12 @@ class CLIPluginLoader(object):
     Details on steps 1, 2, and 4 differ based on whether this is a
     filesystem-based plugin or a namespace-based plugin.
     """
-    def __init__(self, plugin_type, search_path):
+    def __init__(self, plugin_type, search_path, plugin_class=Plugin):
         self.plugin_type = plugin_type
         self.search_path = search_path
+        self.plugin_class = plugin_class
 
+    # TODO: this should be _find_candidate_modules
     def _find_candidates(self):
         raise NotImplementedError()
 
@@ -71,6 +103,7 @@ class CLIPluginLoader(object):
     def _make_nsdict(candidate):
         raise NotImplementedError()
 
+    # TODO: this should validate with an isinstance of the plugin class
     @staticmethod
     def _validate(nsdict):
         for attr in ['CLI', 'SECTION']:
@@ -81,6 +114,7 @@ class CLIPluginLoader(object):
     def _get_command_name(self, candidate):
         raise NotImplementedError()
 
+    # TODO: this should return the actual plugin objects
     def _find_valid(self):
         candidates = self._find_candidates()
         namespaces = {cand: self._make_nsdict(cand) for cand in candidates}
@@ -88,17 +122,35 @@ class CLIPluginLoader(object):
                  if self._validate(ns)}
         return valid
 
+    def _find_candidate_namespaces(self):
+        candidates = self._find_candidates()
+        namespaces = {cand: self._make_nsdict(cand) for cand in candidates}
+        return namespaces
+
+    def _is_my_plugin(self, obj):
+        return isinstance(obj, self.plugin_class)
+
+    def _find_plugins(self, namespaces):
+        for loc, ns in namespaces.items():
+            for obj in ns.values():
+                if self._is_my_plugin(obj):
+                    obj.attach_metadata(loc, self.plugin_type)
+                    yield obj
+
     def __call__(self):
-        valid = self._find_valid()
-        plugins = [
-            OPSPlugin(name=self._get_command_name(cand),
-                      location=cand,
-                      func=ns['CLI'],
-                      section=ns['SECTION'],
-                      plugin_type=self.plugin_type)
-            for cand, ns in valid.items()
-        ]
+        namespaces = self._find_candidate_namespaces()
+        plugins = list(self._find_plugins(namespaces))
         return plugins
+        # valid = self._find_valid()
+        # plugins = [
+            # OPSPlugin(name=self._get_command_name(cand),
+                      # location=cand,
+                      # func=ns['CLI'],
+                      # section=ns['SECTION'],
+                      # plugin_type=self.plugin_type)
+            # for cand, ns in valid.items()
+        # ]
+        # return plugins
 
 
 class FilePluginLoader(CLIPluginLoader):
@@ -175,8 +227,8 @@ class NamespacePluginLoader(CLIPluginLoader):
         return vars(candidate)
 
     def _get_command_name(self, candidate):
-        # +1 for the dot
         command_name = candidate.__name__
+        # +1 for the dot
         command_name = command_name[len(self.search_path) + 1:]
         command_name = command_name.replace('_', '-')  # commands use -
         return command_name
