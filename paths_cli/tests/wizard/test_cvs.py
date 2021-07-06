@@ -30,8 +30,7 @@ def test_get_topology(ad_engine, n_engines):
     patch_loc = 'paths_cli.wizard.engines.engines'
     with mock.patch(patch_loc, new=mock_engines):
         topology = _get_topology(wizard)
-    assert isinstance(topology,
-                      paths.engines.openmm.topology.MDTrajTopology)
+    assert isinstance(topology, paths.engines.MDTrajTopology)
 
 @pytest.mark.parametrize('inputs', [
     (['[[1, 2]]']), (['1, 2']),

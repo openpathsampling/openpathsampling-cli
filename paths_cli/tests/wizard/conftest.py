@@ -35,7 +35,7 @@ def ad_openmm(tmpdir):
 def ad_engine(ad_openmm):
     with ad_openmm.as_cwd():
         pdb = md.load('ad.pdb')
-        topology = paths.engines.openmm.topology.MDTrajTopology(
+        topology = paths.engines.MDTrajTopology(
             pdb.topology
         )
         engine = paths.engines.openmm.Engine(

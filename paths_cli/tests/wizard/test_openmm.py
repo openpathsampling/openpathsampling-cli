@@ -42,7 +42,7 @@ def test_load_topology(ad_openmm, setup):
     with ad_openmm.as_cwd():
         top = _load_topology(wizard)
 
-    assert isinstance(top, paths.engines.openmm.topology.MDTrajTopology)
+    assert isinstance(top, paths.engines.MDTrajTopology)
     assert wizard.console.input_call_count == len(inputs)
     assert expected_text in wizard.console.log_text
 
