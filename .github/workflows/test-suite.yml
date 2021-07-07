@@ -31,7 +31,7 @@ jobs:
         INTEGRATIONS: [""]
         include:
           - CONDA_PY: 3.9
-            INTEGRATIONS: ['all-optionals']
+            INTEGRATIONS: 'all-optionals'
 
     steps:
       - uses: actions/checkout@v2
