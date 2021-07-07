@@ -43,7 +43,7 @@ jobs:
       - name: "Install testing tools"
         run: python -m pip install -r ./devtools/tests_require.txt
       - name: "Install integrations"
-        if: matrinx.INTEGRATIONS == 'all-optionals'
+        if: matrix.INTEGRATIONS == 'all-optionals'
         run: conda install -c conda-forge -y openmm openmmtools mdtraj
       - name: "Install"
         run: |
