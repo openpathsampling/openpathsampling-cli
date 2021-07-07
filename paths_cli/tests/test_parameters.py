@@ -38,6 +38,7 @@ def undo_monkey_patch(stored_functions):
     import importlib
     importlib.reload(paths.netcdfplus)
     importlib.reload(paths.collectivevariable)
+    importlib.reload(paths.collectivevariables)
     importlib.reload(paths)
 
 
