@@ -9,7 +9,7 @@ import numpy as np
 
 try:
     import mdtraj as md
-except ImportError:
+except ImportError:  # no-cov
     HAS_MDTRAJ = False
 else:
     HAS_MDTRAJ = True

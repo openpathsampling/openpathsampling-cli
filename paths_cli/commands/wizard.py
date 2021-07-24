@@ -5,7 +5,7 @@ from paths_cli.wizard.two_state_tps import TWO_STATE_TPS_WIZARD
     'wizard',
     short_help="run wizard for setting up simulations",
 )
-def wizard():
+def wizard():  # no-cov
     TWO_STATE_TPS_WIZARD.run_wizard()
 
 CLI = wizard

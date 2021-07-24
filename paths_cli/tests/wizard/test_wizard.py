@@ -72,7 +72,14 @@ class TestWizard:
         assert 'bar' in console.log_text
 
     def test_ask_help(self):
-        pass
+        console = MockConsole(['?helpme', 'foo'])
+        self.wizard.console = console
+        def helper(wizard, result):
+            wizard.say(f"You said: {result[1:]}")
+
+        result = self.wizard.ask('bar', helper=helper)
+        assert result == 'foo'
+        assert 'You said: helpme' in console.log_text
 
     def _generic_speak_test(self, func_name):
         console = MockConsole()
