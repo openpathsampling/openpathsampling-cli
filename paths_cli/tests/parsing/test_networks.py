@@ -7,26 +7,8 @@ import openpathsampling as paths
 
 from paths_cli.parsing.networks import *
 
-def test_mistis_trans_info(cv_and_states):
-    cv, state_A, state_B = cv_and_states
-    dct = {
-        'transitions': [{
-            'initial_state': "A",
-            'final_state': "B",
-            'interface_set': {
-                'cv': 'cv',
-                'minvals': 'float("-inf")',
-                'maxvals': "np.array([0, 0.1, 0.2]) * np.pi"
-            }
-        }]
-    }
-    patch_base = 'paths_cli.parsing.networks'
 
-    with mock.patch.dict(f"{patch_base}.volume_parser.named_objs",
-                          {"A": state_A, "B": state_B}), \
-          mock.patch.dict(f"{patch_base}.cv_parser.named_objs",
-                          {'cv': cv}):
-        results = mistis_trans_info(dct)
+def check_unidirectional_tis(results, state_A, state_B, cv):
     assert len(results) == 1
     trans_info = results['trans_info']
     assert len(trans_info) == 1
@@ -43,8 +25,53 @@ def test_mistis_trans_info(cv_and_states):
                                [0, np.pi / 10.0, np.pi / 5.0])
 
 
-def test_tis_trans_info():
-    pytest.skip()
+def test_mistis_trans_info(cv_and_states):
+    cv, state_A, state_B = cv_and_states
+    dct = {
+        'transitions': [{
+            'initial_state': "A",
+            'final_state': "B",
+            'interfaces': {
+                'cv': 'cv',
+                'minvals': 'float("-inf")',
+                'maxvals': "np.array([0, 0.1, 0.2]) * np.pi"
+            }
+        }]
+    }
+    patch_base = 'paths_cli.parsing.networks'
+
+    with mock.patch.dict(f"{patch_base}.volume_parser.named_objs",
+                          {"A": state_A, "B": state_B}), \
+          mock.patch.dict(f"{patch_base}.cv_parser.named_objs",
+                          {'cv': cv}):
+        results = mistis_trans_info(dct)
+
+    check_unidirectional_tis(results, state_A, state_B, cv)
+    paths.InterfaceSet._reset()
+
+
+def test_tis_trans_info(cv_and_states):
+    cv, state_A, state_B = cv_and_states
+    dct = {
+        'initial_state': "A",
+        'final_state': "B",
+        'interfaces': {
+            'cv': 'cv',
+            'minvals': 'float("-inf")',
+            'maxvals': 'np.array([0, 0.1, 0.2]) * np.pi',
+        }
+    }
+
+    patch_base = 'paths_cli.parsing.networks'
+    with mock.patch.dict(f"{patch_base}.volume_parser.named_objs",
+                          {"A": state_A, "B": state_B}), \
+          mock.patch.dict(f"{patch_base}.cv_parser.named_objs",
+                          {'cv': cv}):
+        results = tis_trans_info(dct)
+
+    check_unidirectional_tis(results, state_A, state_B, cv)
+    paths.InterfaceSet._reset()
+
 
 def test_build_tps_network(cv_and_states):
     _, state_A, state_B = cv_and_states

@@ -19,7 +19,7 @@ def mistis_trans_info(dct):
     trans_info = [
         (
             volume_parser(trans['initial_state']),
-            build_interface_set(trans['interface_set']),
+            build_interface_set(trans['interfaces']),
             volume_parser(trans['final_state'])
         )
         for trans in transitions
@@ -32,11 +32,11 @@ def tis_trans_info(dct):
     dct = dct.copy()
     initial_state = dct.pop('initial_state')
     final_state = dct.pop('final_state')
-    interface_set = dct.pop('interface_set')
+    interface_set = dct.pop('interfaces')
     dct['transitions'] = [{'initial_state': initial_state,
                            'final_state': final_state,
-                           'interface_set': interface_set}]
-    return mistis_remapper(dct)
+                           'interfaces': interface_set}]
+    return mistis_trans_info(dct)
 
 build_tps_network = InstanceBuilder(
     module='openpathsampling',

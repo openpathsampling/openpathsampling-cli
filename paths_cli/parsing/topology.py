@@ -5,10 +5,12 @@ def get_topology_from_engine(dct):
     """If given the name of an engine, use that engine's topology"""
     from paths_cli.parsing.engines import engine_parser
     if dct in engine_parser.named_objs:
-        engine = enginer_parser.named_objs[dct]
+        engine = engine_parser.named_objs[dct]
         try:
             return engine.topology
-        except AttributeError:
+        except AttributeError:  # no-cov
+            # how could this happen? passing is correct, to raise the
+            # InputError from MultiStrategyBuilder, but how to test?
             pass
 
 def get_topology_from_file(dct):

@@ -24,6 +24,7 @@ class TestMDTrajFunctionCV:
         self.kwargs = "indices: [[4, 6, 8, 14]]"
 
     def test_build_mdtraj_function_cv(self):
+        _ = pytest.importorskip('simtk.unit')
         yml = self.yml.format(kwargs=self.kwargs, func="compute_dihedrals")
         dct = yaml.load(yml, Loader=yaml.FullLoader)
         cv = build_mdtraj_function_cv(dct)
