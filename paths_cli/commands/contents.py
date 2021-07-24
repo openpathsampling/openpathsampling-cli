@@ -113,13 +113,10 @@ def get_section_string_nameable(section, store, get_named):
                     + _item_or_items(n_unnamed))
     return out_str
 
-CLI = contents
-SECTION = "Miscellaneous"
-REQUIRES_OPS = (1, 0)
 
-plugin = OPSCommandPlugin(
+PLUGIN = OPSCommandPlugin(
     command=contents,
     section="Miscellaneous",
     requires_ops=(1, 0),
-    requires_cli=(0, 4)
+    requires_cli=(0, 3)
 )
