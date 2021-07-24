@@ -61,8 +61,9 @@ class PluginLoaderTest(object):
     def test_make_nsdict(self, command):
         candidate = self._make_candidate(command)
         nsdict = self.loader._make_nsdict(candidate)
-        assert nsdict['SECTION'] == self.expected_section[command]
-        assert isinstance(nsdict['CLI'], click.Command)
+        plugin = nsdict['PLUGIN']
+        assert plugin.section == self.expected_section[command]
+        assert isinstance(plugin.command, click.Command)
 
     @pytest.mark.parametrize('command', ['pathsampling', 'contents'])
     def test_call(self, command):
@@ -82,7 +83,7 @@ class TestFilePluginLoader(PluginLoaderTest):
         # use our own commands dir as a file-based plugin
         cmds_init = pathlib.Path(paths_cli.commands.__file__).resolve()
         self.commands_dir = cmds_init.parent
-        self.loader = FilePluginLoader(self.commands_dir)
+        self.loader = FilePluginLoader(self.commands_dir, OPSCommandPlugin)
         self.plugin_type = 'file'
 
     def _make_candidate(self, command):
@@ -99,7 +100,7 @@ class TestNamespacePluginLoader(PluginLoaderTest):
     def setup(self):
         super().setup()
         self.namespace = "paths_cli.commands"
-        self.loader = NamespacePluginLoader(self.namespace)
+        self.loader = NamespacePluginLoader(self.namespace, OPSCommandPlugin)
         self.plugin_type = 'namespace'
 
     def _make_candidate(self, command):
@@ -107,7 +108,7 @@ class TestNamespacePluginLoader(PluginLoaderTest):
         return importlib.import_module(name)
 
     def test_get_command_name(self):
-        loader = NamespacePluginLoader('foo.bar')
+        loader = NamespacePluginLoader('foo.bar', OPSCommandPlugin)
         candidate = MagicMock(__name__="foo.bar.baz_qux")
         expected = "baz-qux"
         assert loader._get_command_name(candidate) == expected

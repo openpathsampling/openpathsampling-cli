@@ -161,8 +161,9 @@ class FilePluginLoader(CLIPluginLoader):
     search_path : str
         path to the directory that contains plugins (OS-dependent format)
     """
-    def __init__(self, search_path):
-        super().__init__(plugin_type="file", search_path=search_path)
+    def __init__(self, search_path, plugin_class):
+        super().__init__(plugin_type="file", search_path=search_path,
+                         plugin_class=plugin_class)
 
     def _find_candidates(self):
         def is_plugin(filename):
@@ -202,8 +203,9 @@ class NamespacePluginLoader(CLIPluginLoader):
     search_path : str
         namespace (dot-separated) where plugins can be found
     """
-    def __init__(self, search_path):
-        super().__init__(plugin_type="namespace", search_path=search_path)
+    def __init__(self, search_path, plugin_class):
+        super().__init__(plugin_type="namespace", search_path=search_path,
+                         plugin_class=plugin_class)
 
     def _find_candidates(self):
         # based on https://packaging.python.org/guides/creating-and-discovering-plugins/#using-namespace-packages
