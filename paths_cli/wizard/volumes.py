@@ -49,7 +49,7 @@ def cv_defined_volume(wizard):
     import openpathsampling as paths
     wizard.say("A CV-defined volume allows an interval in a CV.")
     cv = wizard.obj_selector('cvs', "CV", cvs)
-    period_min = period_max = lambda_min = lambda_max = None
+    lambda_min = lambda_max = None
     is_periodic = cv.is_periodic
     volume_bound_str = ("What is the {bound} allowed value for "
                         f"'{cv.name}' in this volume?")

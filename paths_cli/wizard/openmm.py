@@ -1,5 +1,6 @@
 from paths_cli.wizard.errors import FILE_LOADING_ERROR_MSG, not_installed
 from paths_cli.wizard.core import get_object
+
 try:
     from simtk import openmm as mm
     import mdtraj as md
@@ -8,6 +9,100 @@ except ImportError:
 else:
     HAS_OPENMM = True
 
+
+from paths_cli.wizard.parameters import (
+    SimpleParameter, InstanceBuilder, load_custom_eval, CUSTOM_EVAL_ERROR
+)
+
+### TOPOLOGY
+
+def _topology_loader(filename):
+    import openpathsampling as paths
+    return paths.engines.openmm.snapshot_from_pdb(filename).topology
+
+topology_parameter = SimpleParameter(
+    name='topology',
+    ask="Where is a PDB file describing your system?",
+    loader=_topology_loader,
+    helper=None,  # TODO
+    error=FILE_LOADING_ERROR_MSG,
+)
+
+### INTEGRATOR/SYSTEM (XML FILES)
+
+_where_is_xml = "Where is the XML file for your OpenMM {obj_type}?"
+_xml_help = (
+    "You can write OpenMM objects like systems and integrators to XML "
+    "files using the XMLSerializer class. Learn more here:\n"
+    "http://docs.openmm.org/latest/api-python/generated/"
+    "simtk.openmm.openmm.XmlSerializer.html"
+)
+# TODO: switch to using load_openmm_xml from input file setup
+def _openmm_xml_loader(xml):
+    with open(xml, 'r') as xml_f:
+        data = xml_f.read()
+    return mm.XmlSerializer.deserialize(data)
+
+integrator_parameter = SimpleParameter(
+    name='integrator',
+    ask=_where_is_xml.format(obj_type='integrator'),
+    loader=_openmm_xml_loader,
+    helper=_xml_help,
+    error=FILE_LOADING_ERROR_MSG
+)
+
+system_parameter = SimpleParameter(
+    name='system',
+    ask=_where_is_xml.format(obj_type='system'),
+    loader=_openmm_xml_loader,
+    helper=_xml_help,
+    error=FILE_LOADING_ERROR_MSG
+)
+
+# these two are generic, and should be kept somewhere where they can be
+# reused
+n_steps_per_frame_parameter = SimpleParameter(
+    name="n_steps_per_frame",
+    ask="How many MD steps per saved frame?",
+    loader=load_custom_eval(int),
+    error=CUSTOM_EVAL_ERROR,
+)
+
+n_frames_max_parameter = SimpleParameter(
+    name='n_frames_max',
+    ask="How many frames before aborting a trajectory?",
+    loader=load_custom_eval(int),
+    error=CUSTOM_EVAL_ERROR,
+)
+
+# this is taken directly from the input files setup; should find a universal
+# place for this (and probably other loaders)
+def openmm_options(dct):
+    n_steps_per_frame = dct.pop('n_steps_per_frame')
+    n_frames_max = dct.pop('n_frames_max')
+    options = {'n_steps_per_frame': n_steps_per_frame,
+               'n_frames_max': n_frames_max}
+    dct['options'] = options
+    return dct
+
+openmm_builder = InstanceBuilder(
+    parameters=[
+        topology_parameter,
+        system_parameter,
+        integrator_parameter,
+        n_steps_per_frame_parameter,
+        n_frames_max_parameter,
+    ],
+    category='engine',
+    cls='openpathsampling.engines.openmm.Engine',
+    intro="You're doing an OpenMM engine",
+    help_str=None,
+    remapper=openmm_options
+)
+
+
+
+#####################################################################
 
 def _openmm_serialization_helper(wizard, user_input):  # no-cov
     wizard.say("You can write OpenMM objects like systems and integrators "
@@ -77,4 +172,10 @@ def openmm(wizard):
     )
     return engine
 
-SUPPORTED = {"OpenMM": openmm} if HAS_OPENMM else {}
+SUPPORTED = {"OpenMM": openmm_builder} if HAS_OPENMM else {}
+
+if __name__ == "__main__":
+    from paths_cli.wizard.wizard import Wizard
+    wizard = Wizard([])
+    engine = openmm_builder(wizard)
+    print(engine)

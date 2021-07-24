@@ -14,6 +14,23 @@ except ImportError:
 else:
     HAS_MDTRAJ = True
 
+_ATOM_INDICES_HELP_STR = (
+    "You should specify atom indicies enclosed in double brackets, e.g. "
+    "[{list_range_natoms}]"
+)
+
+def _atom_indices_parameter(kwarg_name, cv_does_str, cv_uses_str, n_atoms):
+    return Parameter(
+        name=kwarg_name,
+        ask=f"Which atoms do you want to {cv_user_str}?",
+        loader=...,
+        helper=_ATOM_INDICES_HELP_STR.format(
+            list_range_natoms=str(list(range(n_atoms)))
+        ),
+        error="Sorry, I didn't understand '{user_str}'.",
+        autohelp=True
+    )
+
 def mdtraj_atom_helper(wizard, user_input, n_atoms):  # no-cov
     wizard.say("You should specify atom indices enclosed in double "
                "brackets, e.g, [" + str(list(range(n_atoms))) + "]")
