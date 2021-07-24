@@ -57,25 +57,6 @@ class OPSCommandPlugin(Plugin):
     def __repr__(self):
         return "OPSCommandPlugin(" + self.name + ")"
 
-
-class OPSParserPlugin(Plugin):
-    """Plugin to add a new Parser (top-level stage in YAML parsing"""
-    def __init__(self, parser, requires_ops=(1, 0), requires_cli=(0, 4)):
-        self.parser = parser
-        super().__init__(requires_ops, requires_cli)
-
-
-class OPSInstanceBuilderPlugin(Plugin):
-    """
-    Plugin to add a new object type (InstanceBuilder) to YAML parsing.
-    """
-    def __init__(self, yaml_name, instance_builder, requires_ops=(1, 0),
-                 requires_cli=(0, 3)):
-        self.yaml_name = yaml_name
-        self.instance_builder = instance_builder
-        super().__init__(requires_ops, requires_cli)
-
-
 class CLIPluginLoader(object):
     """Abstract object for CLI plugins
 
@@ -103,25 +84,6 @@ class CLIPluginLoader(object):
     def _make_nsdict(candidate):
         raise NotImplementedError()
 
-    # TODO: this should validate with an isinstance of the plugin class
-    @staticmethod
-    def _validate(nsdict):
-        for attr in ['CLI', 'SECTION']:
-            if attr not in nsdict:
-                return False
-        return True
-
-    def _get_command_name(self, candidate):
-        raise NotImplementedError()
-
-    # TODO: this should return the actual plugin objects
-    def _find_valid(self):
-        candidates = self._find_candidates()
-        namespaces = {cand: self._make_nsdict(cand) for cand in candidates}
-        valid = {cand: ns for cand, ns in namespaces.items()
-                 if self._validate(ns)}
-        return valid
-
     def _find_candidate_namespaces(self):
         candidates = self._find_candidates()
         namespaces = {cand: self._make_nsdict(cand) for cand in candidates}
@@ -141,16 +103,6 @@ class CLIPluginLoader(object):
         namespaces = self._find_candidate_namespaces()
         plugins = list(self._find_plugins(namespaces))
         return plugins
-        # valid = self._find_valid()
-        # plugins = [
-            # OPSPlugin(name=self._get_command_name(cand),
-                      # location=cand,
-                      # func=ns['CLI'],
-                      # section=ns['SECTION'],
-                      # plugin_type=self.plugin_type)
-            # for cand, ns in valid.items()
-        # ]
-        # return plugins
 
 
 class FilePluginLoader(CLIPluginLoader):
@@ -188,12 +140,6 @@ class FilePluginLoader(CLIPluginLoader):
             eval(code, ns, ns)
         return ns
 
-    def _get_command_name(self, candidate):
-        _, command_name = os.path.split(candidate)
-        command_name = command_name[:-3]  # get rid of .py
-        command_name = command_name.replace('_', '-')  # commands use -
-        return command_name
-
 
 class NamespacePluginLoader(CLIPluginLoader):
     """Load namespace plugins (plugins for wide distribution)
@@ -227,11 +173,3 @@ class NamespacePluginLoader(CLIPluginLoader):
     @staticmethod
     def _make_nsdict(candidate):
         return vars(candidate)
-
-    def _get_command_name(self, candidate):
-        command_name = candidate.__name__
-        # +1 for the dot
-        command_name = command_name[len(self.search_path) + 1:]
-        command_name = command_name.replace('_', '-')  # commands use -
-        return command_name
-
