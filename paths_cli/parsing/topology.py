@@ -17,7 +17,7 @@ def get_topology_from_file(dct):
         import mdtraj as md
         import openpathsampling as paths
         trj = md.load(dct)
-        return paths.engines.openmm.topology.MDTrajTopology(trj.topology)
+        return paths.engines.MDTrajTopology(trj.topology)
 
 
 class MultiStrategyBuilder:
