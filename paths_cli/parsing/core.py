@@ -135,10 +135,10 @@ class Parser:
         type_name = dct.pop('type')
         self.logger.info(f"Creating {type_name} named {name}")
         obj = self.type_dispatch[type_name](dct)
-        obj = self.register(obj, name)
+        obj = self.register_object(obj, name)
         return obj
 
-    def register(self, obj, name):
+    def register_object(self, obj, name):
         if name is not None:
             if name in self.named_objs:
                 raise RuntimeError("Same name twice")  # TODO improve
@@ -148,6 +148,11 @@ class Parser:
         self.all_objs.append(obj)
         return obj
 
+    def register_builder(self, builder, name):
+        if name in self.type_dispatch:
+            raise RuntimeError(f"'{builder.name}' is already registered "
+                               f"with {self.label}")
+        self.type_dispatch[name] = builder
 
     def parse(self, dct):
         if isinstance(dct, str):
@@ -160,18 +165,3 @@ class Parser:
         objs = [self.parse(d) for d in dcts]
         results = unlistify(objs, listified)
         return results
-
-    def add_type(self, type_name, type_function):
-        if type_name in self.type_dispatch:
-            raise RuntimeError("Already exists")
-        self.type_dispatch[type_name] = type_function
-
-
-
-CATEGORY_ALIASES = {
-    "cv": ["cvs"],
-    "volume": ["states", "initial_state", "final_state"],
-    "engine": ["engines"],
-}
-
-CANONICAL_CATEGORY = {e: k for k, v in CATEGORY_ALIASES.items() for e in v}

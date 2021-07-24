@@ -45,4 +45,4 @@ TYPE_MAPPING = {
     'openmm': build_openmm_engine,
 }
 
-engine_parser = Parser(TYPE_MAPPING, label="engine")
+engine_parser = Parser(TYPE_MAPPING, label="engines")

@@ -8,21 +8,23 @@ build_interface_set = InstanceBuilder(
     builder='VolumeInterfaceSet',
     attribute_table={
         'cv': cv_parser,
-        'min_lambdas': custom_eval,
-        'max_lambdas': custom_eval,
+        'minvals': custom_eval,
+        'maxvals': custom_eval,
     }
 )
 
 def mistis_trans_info(dct):
     dct = dct.copy()
-    transitions = dct.pop(transitions)
+    transitions = dct.pop('transitions')
     trans_info = [
-        tuple(volume_parser(trans['initial_state']),
-              build_interface_set(trans['interface_set']),
-              volume_parser(trans['final_state']))
+        (
+            volume_parser(trans['initial_state']),
+            build_interface_set(trans['interface_set']),
+            volume_parser(trans['final_state'])
+        )
         for trans in transitions
     ]
-    dct['trans_info'] = transitions
+    dct['trans_info'] = trans_info
     return dct
 
 def tis_trans_info(dct):
@@ -63,4 +65,4 @@ TYPE_MAPPING = {
     'mistis': build_mistis_network,
 }
 
-network_parser = Parser(TYPE_MAPPING, label="network")
+network_parser = Parser(TYPE_MAPPING, label="networks")

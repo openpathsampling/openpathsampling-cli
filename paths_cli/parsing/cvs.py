@@ -72,4 +72,4 @@ TYPE_MAPPING = {
     'mdtraj': build_mdtraj_function_cv,
 }
 
-cv_parser = Parser(TYPE_MAPPING, label="CV")
+cv_parser = Parser(TYPE_MAPPING, label="CVs")

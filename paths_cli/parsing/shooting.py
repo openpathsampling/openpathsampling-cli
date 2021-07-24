@@ -27,5 +27,5 @@ shooting_selector_parser = Parser(
         'uniform': build_uniform_selector,
         'gaussian': build_gaussian_selector,
     },
-    label='shooting_selector'
+    label='shooting selectors'
 )

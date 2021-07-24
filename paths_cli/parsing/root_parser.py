@@ -15,6 +15,10 @@ TYPE_MAPPING = {
     'moveschemes': scheme_parser,
 }
 
+def register_builder(parser_name, name, builder):
+    parser = TYPE_MAPPING[parser_name]
+    parser.register_builder(builder, name)
+
 def parse(dct):
     objs = []
     for category, func in TYPE_MAPPING.items():

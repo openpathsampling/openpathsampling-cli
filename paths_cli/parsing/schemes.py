@@ -76,6 +76,6 @@ scheme_parser = Parser(
         'scheme': build_scheme,
         'default-tis': ...,
     },
-    label='movescheme'
+    label='move schemes'
 )
 

@@ -15,10 +15,16 @@ def flat_engine():
     return engine
 
 @pytest.fixture
-def tps_network_and_traj():
+def cv_and_states():
     cv = paths.CoordinateFunctionCV("x", lambda s: s.xyz[0][0])
     state_A = paths.CVDefinedVolume(cv, float("-inf"), 0).named("A")
     state_B = paths.CVDefinedVolume(cv, 1, float("inf")).named("B")
+    return cv, state_A, state_B
+
+
+@pytest.fixture
+def tps_network_and_traj(cv_and_states):
+    _, state_A, state_B = cv_and_states
     network = paths.TPSNetwork(state_A, state_B)
     init_traj = make_1d_traj([-0.1, 0.1, 0.3, 0.5, 0.7, 0.9, 1.1],
                              [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0])

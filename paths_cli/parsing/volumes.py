@@ -5,7 +5,8 @@ from .core import Parser, InstanceBuilder, custom_eval
 from .cvs import cv_parser
 
 class CVVolumeInstanceBuilder(InstanceBuilder):
-    # subclass to handle periodic cv voluAmes
+    # subclass to handle periodic cv volumes
+    # TODO: this will be removed after OPS 2.0 is released
     def select_builder(self, dct):
         import openpathsampling as paths
         cv = dct['cv']
@@ -54,5 +55,5 @@ TYPE_MAPPING = {
     'intersection': build_intersection_volume,
 }
 
-volume_parser = Parser(TYPE_MAPPING, label="volume")
+volume_parser = Parser(TYPE_MAPPING, label="volumes")
 
