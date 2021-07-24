@@ -1,8 +1,9 @@
 import pytest
-import mock
+from unittest import mock
 
 import yaml
 import openpathsampling as paths
+from openpathsampling.tests.test_helpers import make_1d_traj
 
 from paths_cli.parsing.volumes import *
 
@@ -17,14 +18,7 @@ class TestBuildCVVolume:
                     'type': 'bar',
                     'func': 'foo_func'}
         }
-        mock_named_objs = mock.MagicMock()
-        mock_named_objs.__getitem__ = mock.Mock(return_value=self.mock_cv)
-        mock_named_objs.descriptions = self.named_objs_dict
 
-        self.named_objs = {
-            'inline': ...,
-            'external': mock_named_objs
-        }
         self.func = {
             'inline': "\n  ".join(["name: foo", "type: mdtraj"]),  # TODO
             'external': 'foo'
@@ -59,10 +53,58 @@ class TestBuildCVVolume:
         assert isinstance(vol, expected_class)
 
 
-class TestBuildIntersectionVolume:
+class TestBuildCombinationVolume:
     def setup(self):
-        self.yml = "\n".join([
-            'type: intersection', 'name: inter', 'subvolumes:',
-            '  - type: cv-volume',
-        ])
-        pass
+        from  openpathsampling.experimental.storage.collective_variables \
+                import CollectiveVariable
+        self.cv = CollectiveVariable(lambda s: s.xyz[0][0]).named('foo')
+
+    def _vol_and_yaml(self, lambda_min, lambda_max, name):
+        yml = ['- type: cv-volume', '  cv: foo',
+               f"  lambda_min: {lambda_min}",
+               f"  lambda_max: {lambda_max}"]
+        vol = paths.CVDefinedVolume(self.cv, lambda_min, lambda_max).named(name)
+        description = {'name': name,
+                       'type': 'cv-volume',
+                       'cv': 'foo',
+                       'lambda_min': lambda_min,
+                       'lambda_max': lambda_max}
+        return vol, yml, description
+
+    @pytest.mark.parametrize('combo', ['union', 'intersection'])
+    @pytest.mark.parametrize('inline', [True, False])
+    def test_build_combo_volume(self, combo, inline):
+        vol_A, yaml_A, desc_A = self._vol_and_yaml(0.0, 0.55, "A")
+        vol_B, yaml_B, desc_B = self._vol_and_yaml(0.45, 1.0, "B")
+        if inline:
+            named_volumes_dict = {}
+            descriptions = {}
+            subvol_yaml = ['  ' + line for line in yaml_A + yaml_B]
+        else:
+            named_volumes_dict = {v.name: v for v in [vol_A, vol_B]}
+            descriptions = {"A": desc_A, "B": desc_B}
+            subvol_yaml = ['  - A', '  - B']
+
+        yml = "\n".join(["type: {combo}", "name: bar", "subvolumes:"]
+                        + subvol_yaml)
+
+        combo_class = {'union': paths.UnionVolume,
+                       'intersection': paths.IntersectionVolume}[combo]
+        builder = {'union': build_union_volume,
+                   'intersection': build_intersection_volume}[combo]
+
+        true_vol = combo_class(vol_A, vol_B)
+        dct = yaml.load(yml, yaml.FullLoader)
+        this_mod = 'paths_cli.parsing.volumes.'
+        patchloc = 'paths_cli.parsing.volumes.volume_parser.named_objs'
+        with \
+                mock.patch.dict(this_mod + 'cv_parser.named_objs',
+                              {'foo': self.cv}) as cv_patch, \
+                mock.patch.dict(this_mod + 'volume_parser.named_objs',
+                                named_volumes_dict) as vol_patch:
+            vol = builder(dct)
+
+        traj = make_1d_traj([0.5, 2.0, 0.2])
+        assert vol(traj[0])
+        assert not vol(traj[1])
+        assert vol(traj[2]) == (combo == 'union')

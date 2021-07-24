@@ -56,14 +56,13 @@ build_mdtraj_function_cv = InstanceBuilder(
     remapper = cv_prepare_dict,
 )
 
-# Mock for integration testing
-def mock_cv_builder(dct):
-    from mock import Mock
-    from openpathsampling.experimental.storage.collective_varibles import \
-            FunctionCV
-    mock = Mock(return_value=dct['return_value'])
-    return FunctionCV(mock)
-
+# TODO: this should replace TYPE_MAPPING and cv_parser
+# MDTRAJ_PLUGIN = CVParserPlugin(
+    # type_name='mdtraj',
+    # instance_builder=build_mdtraj_function_cv,
+    # requires_ops=(1, 0),
+    # requires_cli=(0, 4),
+# )
 
 
 # Main CV parser
