@@ -60,16 +60,20 @@ class OPSCommandPlugin(Plugin):
 class CLIPluginLoader(object):
     """Abstract object for CLI plugins
 
-    The overall approach involves 5 steps, each of which can be overridden:
+    The overall approach involves 3 steps:
 
-    1. Find candidate plugins (which must be Python modules)
+    1. Find modules in the relevant locations
     2. Load the namespaces associated into a dict (nsdict)
-    3. Based on those namespaces, validate that the module *is* a plugin
-    4. Get the associated command name
-    5. Return an OPSPlugin object for each plugin
+    3. Find all objects in those namespaces that are plugins
 
-    Details on steps 1, 2, and 4 differ based on whether this is a
-    filesystem-based plugin or a namespace-based plugin.
+    Additionally, we attach metadata about where the plugin was found and
+    what mechamism it was loaded with.
+
+    Details on steps 1 and 2 differ based on whether this is a
+    filesystem-based plugin or a namespace-based plugin, and details on step
+    3 can depend on the specific instance created. By default, it looks for
+    instances of :class:`.Plugin` (given as ``plugin_class``) but the
+    ``isinstance`` check can be overridden in subclasses.
     """
     def __init__(self, plugin_type, search_path, plugin_class=Plugin):
         self.plugin_type = plugin_type
