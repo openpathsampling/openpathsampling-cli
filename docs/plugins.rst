@@ -8,23 +8,33 @@ There are two possible ways to distribute plugins (file plugins and
 namespace plugins), but a given plugin script could be distributed either
 way. 
 
-Writing a plugin script
------------------------
+Writing a command plugin
+------------------------
 
-An OPS plugin is simply a Python module that follows a few rules.
+To write an OPS command plugin, you simply need to create an instance of
+:class:`paths_cli.OPSCommandPlugin` and to install the module in a location
+where the CLI knows to look for it. The input parameters to
+``OPSCommandPlugin`` are:
 
-* It must define a variable ``CLI`` that is the main CLI function is
-  assigned to.
-* It must define a variable ``SECTION`` to determine where to show it in
-  help (what kind of command it is). Valid values are ``"Simulation"``,
-  ``"Analysis"``, ``"Miscellaneous"``, or ``"Workflow"``. If ``SECTION`` is
-  defined but doesn't have one of these values, it won't show in
-  ``openpathsampling --help``, but might still be usable. If your command
-  doesn't show in the help, carefully check your spelling of the ``SECTION``
-  variable.
-* The main CLI function must be decorated as a ``click.command``.
-* (If distributed as a file plugin) It must be possible to ``exec`` it in an
-  empty namespace (mainly, this can mean no relative imports).
+* ``command``: This is the main CLI function for the subcommand. It must be
+  decorated as a ``click.Command``.
+* ``section``: This is a string to determine where to show it in help (what
+  kind of command it is).  Valid values are ``"Simulation"``,
+  ``"Analysis"``, ``"Miscellaneous"``, or ``"Workflow"``. If ``section``
+  doesn't have one of these values, it won't show in ``openpathsampling
+  --help``, but might still be usable. If your command doesn't show in the
+  help, carefully check your spelling of the ``section`` variable.
+* ``requires_ops`` (optional, default ``(1, 0)``): Minimum allowed version
+  of OpenPathSampling. Note that this is currently informational only, and
+  has no effect on functionality.
+* ``requires_cli`` (optional, default ``(0, 3)``): Minimum allowed version
+  of the OpenPathSampling CLI.  Note that this is currently informational
+  only, and has no effect on functionality.
+
+
+If you distribute your plugin as a file-based plugin, be aware that it must
+be possible to ``exec`` it in an empty namespace (mainly, this can mean no
+relative imports).
 
 As a suggestion, I (DWHS) tend to structure my plugins as follows:
 
@@ -41,16 +51,15 @@ As a suggestion, I (DWHS) tend to structure my plugins as follows:
         ...
         return final_status, simulation
 
-    CLI = plugin
-    SECTION = "MySection"
+    PLUGIN = OPSCommandPlugin(command=plugin, section="MySection")
 
 The basic idea is that there's a ``plugin_main`` function that is based on
 pure OPS, using only inputs that OPS can immediately understand (no need to
 process the command line). This is easy to develop/test with OPS. Then
 there's a wrapper function whose sole purpose is to convert the command line
 parameters to something OPS can understand (using the ``get`` method). This
-wrapper is the ``CLI`` variable. Give it an allowed ``SECTION``, and the
-plugin is ready!
+wrapper is the ``command`` in you ``OPSCommandPlugin``. Also provide an
+allowed ``section``, and the plugin is ready!
 
 The result is that plugins are astonishingly easy to develop, once you have
 the scientific code implemented in a library. This structure also makes it

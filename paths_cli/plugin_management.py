@@ -47,14 +47,14 @@ class OPSPlugin(Plugin):
     Really just to rename ``requires_lib`` to ``requires_ops``.
     """
     def __init__(self, requires_ops, requires_cli):
-        super(OPSPlugin, self).__init__(requires_ops, requires_cli)
+        super().__init__(requires_ops, requires_cli)
 
     @property
     def requires_ops(self):
         return self.requires_lib
 
 
-class OPSCommandPlugin(Plugin):
+class OPSCommandPlugin(OPSPlugin):
     """Plugin for subcommands to the OPS CLI
 
     Parameters

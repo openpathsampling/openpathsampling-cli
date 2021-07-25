@@ -10,6 +10,12 @@ from paths_cli.plugin_management import *
 # need to check that CLI is assigned to correct type
 import click
 
+def test_ops_plugin():
+    plugin = OPSPlugin(requires_ops=(1,2), requires_cli=(0,4))
+    assert plugin.requires_ops == (1, 2)
+    assert plugin.requires_cli == (0, 4)
+    assert plugin.requires_lib == (1, 2)
+
 class PluginLoaderTest(object):
     def setup(self):
         self.expected_section = {'pathsampling': "Simulation",
