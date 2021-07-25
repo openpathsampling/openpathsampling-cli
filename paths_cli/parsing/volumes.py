@@ -31,9 +31,6 @@ build_cv_volume = CVVolumeInstanceBuilder(
     remapper=cv_volume_remapper,
 )
 
-def parse_subvolumes(dct):
-    return [volumes_parser(d) for d in dct]
-
 def _use_parser(dct):
     # this is a hack to get around circular definitions
     return volume_parser(dct)

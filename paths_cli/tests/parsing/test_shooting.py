@@ -9,7 +9,7 @@ from openpathsampling.tests.test_helpers import make_1d_traj
 def test_remapping_gaussian_stddev(cv_and_states):
     cv, _, _ = cv_and_states
     dct = {'cv': cv, 'mean': 1.0, 'stddev': 2.0}
-    expected = {'collectivevariable': cv, 'mean': 1.0, 'alpha': 0.125}
+    expected = {'collectivevariable': cv, 'l_0': 1.0, 'alpha': 0.125}
     results = remapping_gaussian_stddev(dct)
     assert results == expected
 
