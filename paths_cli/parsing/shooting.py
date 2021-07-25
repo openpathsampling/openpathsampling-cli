@@ -11,11 +11,13 @@ build_uniform_selector = InstanceBuilder(
 
 def remapping_gaussian_stddev(dct):
     dct['alpha'] = 0.5 / dct.pop('stddev')**2
+    dct['collectivevariable'] = dct.pop('cv')
+    dct['l_0'] = dct.pop('mean')
     return dct
 
 build_gaussian_selector = InstanceBuilder(
     module='openpathsampling',
-    builder='GaussianSelector',
+    builder='GaussianBiasSelector',
     attribute_table={'cv': cv_parser,
                      'mean': custom_eval,
                      'stddev': custom_eval},
