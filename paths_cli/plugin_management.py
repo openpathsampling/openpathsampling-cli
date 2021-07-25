@@ -3,11 +3,6 @@ import pkgutil
 import importlib
 import os
 
-# TODO: this should be removed
-OPSPlugin = collections.namedtuple(
-    "OPSPlugin", ['name', 'location', 'func', 'section', 'plugin_type']
-)
-
 class PluginRegistrationError(RuntimeError):
     pass
 
