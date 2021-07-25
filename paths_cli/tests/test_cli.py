@@ -3,7 +3,6 @@ from unittest.mock import patch, MagicMock
 from click.testing import CliRunner
 
 from paths_cli.cli import *
-# from paths_cli.plugin_management import OPSPlugin
 from .null_command import NullCommandContext
 
 

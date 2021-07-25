@@ -8,9 +8,19 @@ class PluginRegistrationError(RuntimeError):
 
 # TODO: make more generic than OPS (requires_ops => requires_lib)
 class Plugin(object):
-    """Generic OPS plugin object"""
-    def __init__(self, requires_ops, requires_cli):
-        self.requires_ops = requires_ops
+    """Generic plugin object
+
+    parameters
+    ----------
+    requires_lib: tuple
+        tuple representing the minimum allowed version of the underlying
+        library
+    requires_cli: tuple
+        tuple representing hte minimum allowed version of the command line
+        interface application
+    """
+    def __init__(self, requires_lib, requires_cli):
+        self.requires_lib = requires_lib
         self.requires_cli = requires_cli
         self.location = None
         self.plugin_type = None
@@ -31,8 +41,33 @@ class Plugin(object):
         self.plugin_type = plugin_type
 
 
+class OPSPlugin(Plugin):
+    """Generic OPS plugin object.
+
+    Really just to rename ``requires_lib`` to ``requires_ops``.
+    """
+    def __init__(self, requires_ops, requires_cli):
+        super(OPSPlugin, self).__init__(requires_ops, requires_cli)
+
+    @property
+    def requires_ops(self):
+        return self.requires_lib
+
+
 class OPSCommandPlugin(Plugin):
-    """Plugin for subcommands to the OPS CLI"""
+    """Plugin for subcommands to the OPS CLI
+
+    Parameters
+    ----------
+    command: :class:`click.Command`
+        the ``click``-wrapped command for this command
+    section: str
+        the section of the help where this command should appear
+    requires_ops: tuple
+        the minimum allowed version of OPS
+    requires_cli: tuple
+        the minimum allowed version of the OPS CLI
+    """
     def __init__(self, command, section, requires_ops=(1, 0),
                  requires_cli=(0, 4)):
         self.command = command
@@ -69,6 +104,16 @@ class CLIPluginLoader(object):
     3 can depend on the specific instance created. By default, it looks for
     instances of :class:`.Plugin` (given as ``plugin_class``) but the
     ``isinstance`` check can be overridden in subclasses.
+
+    Parameters
+    ----------
+    plugin_type : Literal["file", "namespace"]
+        the type of file
+    search_path : str
+        the directory or namespace to search for plugins
+    plugin_class: type
+        plugins are identified as instances of this class (override in
+        ``_is_my_plugin``)
     """
     def __init__(self, plugin_type, search_path, plugin_class=Plugin):
         self.plugin_type = plugin_type
@@ -111,6 +156,9 @@ class FilePluginLoader(CLIPluginLoader):
     ----------
     search_path : str
         path to the directory that contains plugins (OS-dependent format)
+    plugin_class: type
+        plugins are identified as instances of this class (override in
+        ``_is_my_plugin``)
     """
     def __init__(self, search_path, plugin_class):
         super().__init__(plugin_type="file", search_path=search_path,
@@ -147,6 +195,9 @@ class NamespacePluginLoader(CLIPluginLoader):
     ----------
     search_path : str
         namespace (dot-separated) where plugins can be found
+    plugin_class: type
+        plugins are identified as instances of this class (override in
+        ``_is_my_plugin``)
     """
     def __init__(self, search_path, plugin_class):
         super().__init__(plugin_type="namespace", search_path=search_path,
