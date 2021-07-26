@@ -9,7 +9,7 @@ def named_objs_helper(storage, store_name):
         store = getattr(storage, store_name)
         names = [obj for obj in store if obj.is_named]
         outstr = "\n".join(['* ' + obj.name for obj in names])
-        wizard.say("Here's what I found:\n\n" + outstr)
+        wizard.say(f"Here's what I found:\n\n{outstr})
 
     return list_items
 

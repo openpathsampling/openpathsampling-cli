@@ -36,15 +36,9 @@ def _joke4(name, obj_type):  # no-cov
                                        a_an_thing=a_an_thing)
 
 def name_joke(name, obj_type):  # no-cov
-    rnd = random.random()
-    if rnd < 0.25:
-        joke = _joke1
-    elif rnd < 0.50:
-        joke = _joke2
-    elif rnd < 0.65:
-        joke = _joke3
-    else:
-        joke = _joke4
+    jokes = [_joke1, _joke2, _joke3, _joke4]
+    weights = [5, 5, 3, 7]
+    joke = random.choices(jokes, weights=weights)[0]
     return joke(name, obj_type)
 
 if __name__ == "__main__":

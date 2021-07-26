@@ -48,4 +48,3 @@ def test_get_missing_object(length, expected):
     result = get_missing_object(wizard, dct, display_name='string',
                                 fallback_func=fallback)
     assert result == expected
-    pass

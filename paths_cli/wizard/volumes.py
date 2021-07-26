@@ -17,12 +17,12 @@ def _vol_intro(wizard, as_state):
 def _binary_func_volume(wizard, op):
     wizard.say("Let's make the first constituent volume:")
     vol1 = volumes(wizard)
-    wizard.say(f"The first volume is:\n{str(vol1)}")
+    wizard.say(f"The first volume is:\n{vol1}")
     wizard.say("Let's make the second constituent volume:")
     vol2 = volumes(wizard)
-    wizard.say(f"The second volume is:\n{str(vol2)}")
+    wizard.say(f"The second volume is:\n{vol2}")
     vol = op(vol1, vol2)
-    wizard.say(f"Created a volume:\n{str(vol)}")
+    wizard.say(f"Created a volume:\n{vol}")
     return vol
 
 def intersection_volume(wizard):
@@ -42,7 +42,7 @@ def negated_volume(wizard):
     wizard.say("Let's make the subvolume.")
     subvol = volumes(wizard)
     vol = ~subvol
-    wizard.say(f"Created a volume:\n{str(vol)}")
+    wizard.say(f"Created a volume:\n{vol}")
     return vol
 
 def cv_defined_volume(wizard):
