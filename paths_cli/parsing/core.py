@@ -1,4 +1,5 @@
 import os
+import json
 import importlib
 import yaml
 
@@ -22,14 +23,67 @@ def unlistify(obj, listified):
         obj = obj[0]
     return obj
 
+class Parameter:
+    SCHEMA = "http://openpathsampling.org/schemas/sim-setup/draft01.json"
+    def __init__(self, name, loader, required=True, json_type=None,
+                 description=None):
+        json_type = self._get_from_loader(loader, 'json_type', json_type)
+        description = self._get_from_loader(loader, 'description',
+                                            description)
+        if isinstance(json_type, str):
+            try:
+                json_type = json.loads(json_type)
+            except json.decoder.JSONDecodeError:
+                # TODO: maybe log this in case it represents an issue?
+                pass
+
+        self.name = name
+        self.loader = loader
+        self.json_type = json_type
+        self.description = description
+        self.required = required
+
+    @staticmethod
+    def _get_from_loader(loader, attr_name, attr):
+        if attr is None:
+            try:
+                attr = getattr(loader, attr_name)
+            except AttributeError:
+                pass
+        return attr
+
+
+    def __call__(self, *args, **kwargs):
+        # check correct call signature here
+        return self.loader(*args, **kwargs)
+
+    def to_json_schema(self, schema_context=None):
+        dct = {
+            'type': self.json_type,
+            'description': self.description,
+        }
+        return self.name, dct
+
+
 class InstanceBuilder:
-    # TODO: add schema as an input so we can autogenerate our JSON schema!
+    SCHEMA = "http://openpathsampling.org/schemas/sim-setup/draft01.json"
     def __init__(self, builder, attribute_table, optional_attributes=None,
-                 defaults=None, module=None, remapper=None):
+                 defaults=None, module=None, remapper=None, parameters=None,
+                 object_type=None, name=None):
+        # temporary apporach to override attribute_table
+        if attribute_table is None and parameters is not None:
+            attribute_table = {p.name: p.loader for p in parameters
+                               if p.required}
+        if optional_attributes is None and parameters is not None:
+            optional_attributes = {p.name: p.loader for p in parameters
+                                   if not p.required}
+        self.object_type = object_type
+        self.name = name
         self.module = module
         self.builder = builder
         self.builder_name = str(self.builder)
         self.attribute_table = attribute_table
+        self.parameters = parameters
         if optional_attributes is None:
             optional_attributes = {}
         self.optional_attributes = optional_attributes
@@ -41,6 +95,29 @@ class InstanceBuilder:
             defaults = {}
         self.defaults = defaults
         self.logger = logging.getLogger(f"parser.InstanceBuilder.{builder}")
+
+    @property
+    def schema_name(self):
+        if not self.name.endswith(self.object_type):
+            schema_name = f"{self.name}-{self.object_type}"
+        else:
+            schema_name = name
+        return schema_name
+
+    def to_json_schema(self, schema_context=None):
+        parameters = dict(p.to_json_schema() for p in self.parameters)
+        properties = {
+            'name': {'type': 'string'},
+            'type': {'type': 'string',
+                     'enum': [self.name]},
+        }
+        properties.update(parameters)
+        required = [p.name for p in self.parameters if p.required]
+        dct = {
+            'properties': properties,
+            'required': required,
+        }
+        return self.schema_name, dct
 
     def select_builder(self, dct):
         if self.module is not None:

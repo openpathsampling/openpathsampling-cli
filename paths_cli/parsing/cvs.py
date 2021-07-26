@@ -1,7 +1,7 @@
 import os
 import importlib
 
-from .core import Parser, InstanceBuilder, custom_eval
+from .core import Parser, InstanceBuilder, custom_eval, Parameter
 from .topology import build_topology
 from .errors import InputError
 
@@ -27,33 +27,31 @@ def cv_prepare_dict(dct):
 # MDTraj-specific
 
 mdtraj_source = AllowedPackageHandler("mdtraj")
-MDTRAJ_ATTRS = {
-    'topology': build_topology,
-    'func': mdtraj_source,
-    'kwargs': lambda kwargs: {key: custom_eval(arg)
-                              for key, arg in kwargs.items()},
-}
+# MDTRAJ_ATTRS = {
+    # 'topology': build_topology,
+    # 'func': mdtraj_source,
+    # 'kwargs': lambda kwargs: {key: custom_eval(arg)
+                              # for key, arg in kwargs.items()},
+# }
 
-MDTRAJ_SCHEMA = {
-    'topology': {
-        'type': 'string',
-        'description': 'topology from file or engine name',
-    },
-    'func': {
-        'type': 'string',
-        'description': 'MDTraj function, e.g., ``compute_distances``',
-    },
-    'kwargs': {
-        'type': 'object',
-        'description': 'keyword arguments for ``func``',
-    },
-}
+MDTRAJ_PARAMETERS = [
+    Parameter('topology', build_topology),
+    Parameter('func', mdtraj_source, json_type='string',
+              description="MDTraj function, e.g., ``compute_distances``"),
+    Parameter('kwargs', lambda kwargs: {key: custom_eval(arg)
+                                        for key, arg in kwargs.items()},
+              json_type='object',
+              description="keyword arguments for ``func``",
+              required=True),  # TODO: bug in current: shoudl be req=False
+]
 
 build_mdtraj_function_cv = InstanceBuilder(
+    attribute_table=None,  # temp
     module='openpathsampling.experimental.storage.collective_variables',
     builder='MDTrajFunctionCV',
-    attribute_table=MDTRAJ_ATTRS,
-    remapper = cv_prepare_dict,
+    # attribute_table=MDTRAJ_ATTRS,
+    parameters=MDTRAJ_PARAMETERS,
+    remapper=cv_prepare_dict,
 )
 
 # TODO: this should replace TYPE_MAPPING and cv_parser

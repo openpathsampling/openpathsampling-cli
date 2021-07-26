@@ -24,9 +24,11 @@ def get_topology_from_file(dct):
 
 class MultiStrategyBuilder:
     # move to core
-    def __init__(self, strategies, label):
+    def __init__(self, strategies, label, description=None, json_type=None):
         self.strategies = strategies
         self.label = label
+        self.description = description
+        self.json_type = json_type
 
     def __call__(self, dct):
         for strategy in self.strategies:
@@ -37,6 +39,9 @@ class MultiStrategyBuilder:
         # only get here if we failed
         raise InputError.invalid_input(dct, self.label)
 
-build_topology = MultiStrategyBuilder([get_topology_from_file,
-                                       get_topology_from_engine],
-                                      label='topology')
+build_topology = MultiStrategyBuilder(
+    [get_topology_from_file, get_topology_from_engine],
+    label='topology',
+    description="topology from file or engine name",
+    json_type='string'
+)
