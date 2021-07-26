@@ -34,7 +34,7 @@ class Plugin(object):
         )
         if error_condition:  # -no-cov-
             raise PluginRegistrationError(
-                "The plugin " + repr(self) + "has been previously "
+                f"The plugin {repr(self)} has been previously "
                 "registered with different metadata."
             )
         self.location = location
@@ -85,7 +85,7 @@ class OPSCommandPlugin(OPSPlugin):
         return self.command
 
     def __repr__(self):
-        return "OPSCommandPlugin(" + self.name + ")"
+        return f"OPSCommandPlugin({self.name})"
 
 class CLIPluginLoader(object):
     """Abstract object for CLI plugins

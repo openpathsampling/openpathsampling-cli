@@ -17,7 +17,7 @@ where the CLI knows to look for it. The input parameters to
 ``OPSCommandPlugin`` are:
 
 * ``command``: This is the main CLI function for the subcommand. It must be
-  decorated as a ``click.Command``.
+  decorated as a ``click.command``.
 * ``section``: This is a string to determine where to show it in help (what
   kind of command it is).  Valid values are ``"Simulation"``,
   ``"Analysis"``, ``"Miscellaneous"``, or ``"Workflow"``. If ``section``
@@ -103,5 +103,4 @@ namespace.
 
 .. _native namespace packages:
   https://packaging.python.org/guides/packaging-namespace-packages/#native-namespace-packages
-
 
