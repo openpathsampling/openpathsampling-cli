@@ -52,6 +52,8 @@ build_mdtraj_function_cv = InstanceBuilder(
     # attribute_table=MDTRAJ_ATTRS,
     parameters=MDTRAJ_PARAMETERS,
     remapper=cv_prepare_dict,
+    name="mdtraj",
+    object_type="cv"
 )
 
 # TODO: this should replace TYPE_MAPPING and cv_parser
