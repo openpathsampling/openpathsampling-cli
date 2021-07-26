@@ -12,7 +12,7 @@ def test_a_an(word, expected):
 
 @pytest.mark.parametrize('user_inp,expected', [
     ('y', True), ('n', False),
-    # ('Y', True), ('N', False), ('yes', True), ('no', False)
+    ('Y', True), ('N', False), ('yes', True), ('no', False)
 ])
 def test_yes_no(user_inp, expected):
     assert yes_no(user_inp) == expected

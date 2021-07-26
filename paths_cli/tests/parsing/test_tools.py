@@ -1,10 +1,14 @@
 import pytest
 import numpy.testing as npt
+import numpy as np
+import math
 
 from paths_cli.parsing.tools import *
 
 @pytest.mark.parametrize('expr,expected', [
-    ('1+1', 2)
+    ('1+1', 2),
+    ('np.pi / 2', np.pi / 2),
+    ('math.cos(1.5)', math.cos(1.5)),
 ])
 def test_custom_eval(expr, expected):
     npt.assert_allclose(custom_eval(expr), expected)

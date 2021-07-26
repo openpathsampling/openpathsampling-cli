@@ -8,13 +8,15 @@ except ImportError:
 else:
     HAS_OPENMM = True
 
+OPENMM_SERIALIZATION_URL=(
+    "http://docs.openmm.org/latest/api-python/generated/"
+    "simtk.openmm.openmm.XmlSerializer.html"
+)
 
 def _openmm_serialization_helper(wizard, user_input):  # no-cov
     wizard.say("You can write OpenMM objects like systems and integrators "
                "to XML files using the XMLSerializer class. Learn more "
-               "here: \n"
-               "http://docs.openmm.org/latest/api-python/generated/"
-               "simtk.openmm.openmm.XmlSerializer.html")
+               f"here: \n{OPENMM_SERIALIZATION_URL}")
 
 
 @get_object

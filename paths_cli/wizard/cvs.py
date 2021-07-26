@@ -78,12 +78,12 @@ def _mdtraj_function_cv(wizard, cv_does_str, cv_user_prompt, func,
     indices = _get_atom_indices(wizard, topology, n_atoms=n_atoms,
                                 cv_user_str=cv_user_prompt)
     kwargs = {kwarg_name: indices}
+    atoms_str = " ".join([str(topology.mdtraj.atom(i)) for i in indices[0]])
 
     summary = ("Here's what we'll create:\n"
                f"  Function: {func.__name__}\n"
-               f"     Atoms: {" ".join([str(topology.mdtraj.atom(i))
-                                        for i in indices[0]])} \n"
-               f"  Topology: {repr(topology.mdtraj))}"
+               f"     Atoms: {atoms_str}\n"
+               f"  Topology: {repr(topology.mdtraj)}")
     wizard.say(summary)
 
     return MDTrajFunctionCV(func, topology, period_min=period_min,
