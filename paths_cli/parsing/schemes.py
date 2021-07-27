@@ -27,37 +27,6 @@ build_spring_shooting_scheme = InstanceBuilder(
     ]
 )
 
-class StrategySchemeInstanceBuilder(InstanceBuilder):
-    """
-    Variant of the InstanceBuilder that appends strategies to a MoveScheme
-    """
-    def __init__(self, builder, attribute_table, optional_attributes=None,
-                 defaults=None, module=None, remapper=None,
-                 default_global_strategy=False):
-        from openpathsampling import strategies
-        super().__init__(builder, attribute_table,
-                         optional_attributes=optional_attributes,
-                         defaults=defaults, module=module,
-                         remapper=remapper)
-        if default_global_strategy is True:
-            self.default_global = [strategies.OrganizeByMoveGroupStrategy()]
-        elif default_global_strategy is False:
-            self.default_global = []
-        else:
-            self.default_global= [default_global_strategy]
-
-    def __call__(self, dct):
-        new_dct = self.parse_attrs(dct)
-        strategies = new_dct.pop('strategies', [])
-        if strategies is None:
-            strategies = []
-        scheme = self.build(new_dct)
-        for strat in strategies + self.default_global:
-            scheme.append(strat)
-
-        self.logger.debug(f"strategies: {scheme.strategies}")
-        return scheme
-
 class BuildSchemeStrategy:
     def __init__(self, scheme_class, default_global_strategy):
         self.scheme_class = scheme_class

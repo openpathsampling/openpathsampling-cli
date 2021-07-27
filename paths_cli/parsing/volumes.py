@@ -4,25 +4,7 @@ import functools
 from .core import Parser, InstanceBuilder, custom_eval, Parameter
 from .cvs import cv_parser
 
-class CVVolumeInstanceBuilder(InstanceBuilder):
-    # subclass to handle periodic cv volumes
-    # TODO: this will be removed after OPS 2.0 is released
-    def select_builder(self, dct):
-        import openpathsampling as paths
-        cv = dct['cv']
-        builder = paths.CVDefinedVolume
-        if cv.period_min is not None:
-            builder = paths.PeriodicCVDefinedVolume
-        if cv.period_max is not None:
-            builder = paths.PeriodicCVDefinedVolume
-        return builder
-
-def cv_volume_remapper(dct):
-    dct['collectivevariable'] = dct.pop('cv')
-    return dct
-
 # TODO: extra function for volumes should not be necessary as of OPS 2.0
-# TODO: things below should get rid of Builder and cv_volume_remapper
 def cv_volume_build_func(**dct):
     # TODO: this should take dict, not kwargs
     import openpathsampling as paths
