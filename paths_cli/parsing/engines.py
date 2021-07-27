@@ -1,5 +1,8 @@
 from .topology import build_topology
-from .core import Parser, InstanceBuilder, custom_eval
+from .core import Parser, InstanceBuilder, custom_eval, Builder
+from .tools import custom_eval_int
+
+from paths_cli.errors import MissingIntegrationError
 
 try:
     from simtk import openmm as mm
@@ -34,11 +37,32 @@ OPENMM_ATTRS = {
     'n_frames_max': int,
 }
 
+from paths_cli.parsing.core import Parameter
+
+OPENMM_PARAMETERS = [
+    Parameter('topology', build_topology, json_type='string',
+              description=("File describing the topoplogy of this system; "
+                           "PDB recommended")),
+    Parameter('system', load_openmm_xml, json_type='string',
+              description="XML file with the OpenMM system"),
+    Parameter('integrator', load_openmm_xml, json_type='string',
+              description="XML file with the OpenMM integrator"),
+    Parameter('n_steps_per_frame', custom_eval_int,
+              description="number of MD steps per saved frame"),
+    Parameter("n_frames_max", custom_eval_int,
+              description=("maximum number of frames before aborting "
+                           "trajectory")),
+]
+
 build_openmm_engine = InstanceBuilder(
-    module='openpathsampling.engines.openmm',
-    builder='Engine',
-    attribute_table=OPENMM_ATTRS,
-    remapper=openmm_options
+    # module='openpathsampling.engines.openmm',
+    # builder='Engine',
+    builder=Builder('openpathsampling.engines.openmm.Engine',
+                    remapper=openmm_options),
+    attribute_table=None,
+    # attribute_table=OPENMM_ATTRS,
+    parameters=OPENMM_PARAMETERS,
+    # remapper=openmm_options
 )
 
 TYPE_MAPPING = {

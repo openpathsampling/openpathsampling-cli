@@ -21,15 +21,30 @@ def cv_volume_remapper(dct):
     dct['collectivevariable'] = dct.pop('cv')
     return dct
 
-build_cv_volume = CVVolumeInstanceBuilder(
-    builder=None,
+# TODO: extra function for volumes should not be necessary as of OPS 2.0
+# TODO: things below should get rid of Builder and cv_volume_remapper
+def cv_volume_build_func(**dct):
+    # TODO: this should take dict, not kwargs
+    import openpathsampling as paths
+    cv = dct['cv']
+    builder = paths.CVDefinedVolume
+    if cv.period_min is not None or cv.period_max is not None:
+        builder = paths.PeriodicCVDefinedVolume
+
+    dct['collectivevariable'] = dct.pop('cv')
+    # TODO: wrap this with some logging
+    return builder(**dct)
+
+build_cv_volume = InstanceBuilder(
+    # builder=None,
     # attribute_table={
         # 'cv': cv_parser,
         # 'lambda_min': custom_eval,
         # 'lambda_max': custom_eval,
     # },
     attribute_table=None,
-    remapper=cv_volume_remapper,
+    builder=cv_volume_build_func,
+    # remapper=cv_volume_remapper,
     parameters=[
         Parameter('cv', cv_parser,
                   description="CV that defines this volume"),

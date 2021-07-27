@@ -18,6 +18,10 @@ def custom_eval(obj, named_objs=None):
     }
     return eval(string, namespace)
 
+def custom_eval_int(obj, named_objs=None):
+    val = custom_eval(obj, named_objs)
+    return int(val)
+
 
 class UnknownAtomsError(RuntimeError):
     pass

@@ -1,3 +1,6 @@
+import importlib
+
+
 def tag_final_result(result, storage, tag='final_conditions'):
     """Save results to a tag in storage.
 
@@ -14,3 +17,10 @@ def tag_final_result(result, storage, tag='final_conditions'):
         print("Saving results to output file....")
         storage.save(result)
         storage.tags[tag] = result
+
+
+def import_thing(module, obj=None):
+    result = importlib.import_module(module)
+    if obj is not None:
+        result = getattr(result, obj)
+    return result

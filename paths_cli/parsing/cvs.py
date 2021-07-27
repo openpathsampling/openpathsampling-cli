@@ -1,9 +1,10 @@
 import os
 import importlib
 
-from .core import Parser, InstanceBuilder, custom_eval, Parameter
+from .core import Parser, InstanceBuilder, custom_eval, Parameter, Builder
 from .topology import build_topology
 from .errors import InputError
+from paths_cli.utils import import_thing
 
 
 class AllowedPackageHandler:
@@ -12,8 +13,7 @@ class AllowedPackageHandler:
 
     def __call__(self, source):
         try:
-            pkg = importlib.import_module(self.package)
-            func = getattr(pkg, source)
+            func = import_thing(self.package, source)
         except AttributeError:
             raise InputError(f"No function called {source} in {self.package}")
         # on ImportError, we leave the error unchanged
@@ -40,18 +40,28 @@ MDTRAJ_PARAMETERS = [
               description="MDTraj function, e.g., ``compute_distances``"),
     Parameter('kwargs', lambda kwargs: {key: custom_eval(arg)
                                         for key, arg in kwargs.items()},
-              json_type='object',
-              description="keyword arguments for ``func``",
-              required=True),  # TODO: bug in current: shoudl be req=False
+              json_type='object', default=None,
+              description="keyword arguments for ``func``"),
+    Parameter('period_min', custom_eval, default=None,
+              description=("minimum value for a periodic function, None if "
+                           "not periodic")),
+    Parameter('period_max', custom_eval, default=None,
+              description=("maximum value for a periodic function, None if "
+                           "not periodic")),
+
 ]
 
+# TODO: actually, the InstanceBuilder should BE the plugin
 build_mdtraj_function_cv = InstanceBuilder(
     attribute_table=None,  # temp
-    module='openpathsampling.experimental.storage.collective_variables',
-    builder='MDTrajFunctionCV',
+    # module='openpathsampling.experimental.storage.collective_variables',
+    # builder='MDTrajFunctionCV',
     # attribute_table=MDTRAJ_ATTRS,
+    builder=Builder('openpathsampling.experimental.storage.'
+                    'collective_variables.MDTrajFunctionCV',
+                    remapper=cv_prepare_dict),
     parameters=MDTRAJ_PARAMETERS,
-    remapper=cv_prepare_dict,
+    # remapper=cv_prepare_dict,
     name="mdtraj",
     object_type="cv"
 )

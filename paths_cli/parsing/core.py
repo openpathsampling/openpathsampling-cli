@@ -9,6 +9,7 @@ import logging
 
 from .errors import InputError
 from .tools import custom_eval
+from paths_cli.utils import import_thing
 
 def listify(obj):
     listified = False
@@ -23,10 +24,12 @@ def unlistify(obj, listified):
         obj = obj[0]
     return obj
 
+REQUIRED_PARAMETER = object()
+
 class Parameter:
     SCHEMA = "http://openpathsampling.org/schemas/sim-setup/draft01.json"
-    def __init__(self, name, loader, required=True, json_type=None,
-                 description=None):
+    def __init__(self, name, loader, *, json_type=None, description=None,
+                 default=REQUIRED_PARAMETER):
         json_type = self._get_from_loader(loader, 'json_type', json_type)
         description = self._get_from_loader(loader, 'description',
                                             description)
@@ -41,7 +44,11 @@ class Parameter:
         self.loader = loader
         self.json_type = json_type
         self.description = description
-        self.required = required
+        self.default = default
+
+    @property
+    def required(self):
+        return self.default is REQUIRED_PARAMETER
 
     @staticmethod
     def _get_from_loader(loader, attr_name, attr):
@@ -51,7 +58,6 @@ class Parameter:
             except AttributeError:
                 pass
         return attr
-
 
     def __call__(self, *args, **kwargs):
         # check correct call signature here
@@ -63,6 +69,30 @@ class Parameter:
             'description': self.description,
         }
         return self.name, dct
+
+
+class Builder:
+    def __init__(self, builder, *, remapper=None, after_build=None):
+        if remapper is None:
+            remapper = lambda dct: dct
+        if after_build is None:
+            after_build = lambda obj, dct: obj
+        self.remapper = remapper
+        self.after_build = after_build
+        self.builder = builder
+
+    def __call__(self, **dct):
+        # TODO: change this InstanceBuilder.build to make this better
+        if isinstance(self.builder, str):
+            module, _, func = self.builder.rpartition('.')
+            builder = import_thing(module, func)
+        else:
+            builder = self.builder
+
+        ops_dct = self.remapper(dct.copy())
+        obj = builder(**ops_dct)
+        after = self.after_build(obj, dct.copy())
+        return after
 
 
 class InstanceBuilder:
@@ -77,6 +107,9 @@ class InstanceBuilder:
         if optional_attributes is None and parameters is not None:
             optional_attributes = {p.name: p.loader for p in parameters
                                    if not p.required}
+        if defaults is None and parameters is not None:
+            defaults = {p.name: p.default for p in parameters
+                        if not p.required}
         self.object_type = object_type
         self.name = name
         self.module = module
@@ -158,7 +191,7 @@ class InstanceBuilder:
 
         optionals = set(self.optional_attributes) & set(dct)
         for attr in optionals:
-            new_dct[attr] = self.attribute_table[attr](dct[attr])
+            new_dct[attr] = self.optional_attributes[attr](dct[attr])
 
         return new_dct
 
