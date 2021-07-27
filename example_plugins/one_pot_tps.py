@@ -1,4 +1,5 @@
 import click
+from paths_cli import OPSCommandPlugin
 from paths_cli.parameters import (INPUT_FILE, OUTPUT_FILE, ENGINE, STATES,
                                   N_STEPS_MC, INIT_SNAP)
 from paths_cli.commands.visit_all import visit_all_main
@@ -44,6 +45,15 @@ def one_pot_tps_main(output_storage, states, engine, engine_hot,
                                     equil_multiplier, equil_extra)
     return pathsampling_main(output_storage, scheme, equil_set, nsteps)
 
+# these lines enable this plugin to support OPS CLI < 0.3
 CLI = one_pot_tps
 SECTION = "Workflow"
 REQUIRES_OPS = (1, 2)
+
+# these lines enable this plugin to support OPS CLI >= 0.3
+PLUGIN = OPSCommandPlugin(
+    command=one_pot_tps,
+    section="Workflow",
+    requires_ops=(1, 2),
+    requires_cli=(0, 3)
+)

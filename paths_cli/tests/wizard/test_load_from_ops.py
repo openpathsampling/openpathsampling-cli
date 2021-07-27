@@ -94,5 +94,3 @@ def test_load_from_ops(ops_file_fixture):
 
     assert isinstance(obj, NamedObj)
     assert obj.name == 'bar'
-
-    pass

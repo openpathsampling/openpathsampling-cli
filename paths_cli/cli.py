@@ -13,7 +13,8 @@ import click
 # import click_completion
 # click_completion.init()
 
-from .plugin_management import FilePluginLoader, NamespacePluginLoader
+from .plugin_management import (FilePluginLoader, NamespacePluginLoader,
+                                OPSCommandPlugin)
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
@@ -31,10 +32,10 @@ class OpenPathSamplingCLI(click.MultiCommand):
             ).resolve() / 'cli-plugins')
 
         self.plugin_loaders = [
-            FilePluginLoader(commands),
-            FilePluginLoader(app_dir_plugins(posix=False)),
-            FilePluginLoader(app_dir_plugins(posix=True)),
-            NamespacePluginLoader('paths_cli_plugins')
+            FilePluginLoader(commands, OPSCommandPlugin),
+            FilePluginLoader(app_dir_plugins(posix=False), OPSCommandPlugin),
+            FilePluginLoader(app_dir_plugins(posix=True), OPSCommandPlugin),
+            NamespacePluginLoader('paths_cli_plugins', OPSCommandPlugin)
         ]
 
         plugins = sum([loader() for loader in self.plugin_loaders], [])

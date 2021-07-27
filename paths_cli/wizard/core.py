@@ -13,12 +13,12 @@ def interpret_req(req):
         return str(min_)
 
     if min_ >= 1:
-        string += "at least " + str(min_)
+        string += f"at least {min_}"
 
     if max_ < float("inf"):
-        if string != "":
+        if string:
             string += " and "
-        string += "at most " + str(max_)
+        string += f"at most {max_}"
 
     return string
 
@@ -43,5 +43,4 @@ def get_object(func):
             obj = func(*args, **kwargs)
         return obj
     return inner
-
 

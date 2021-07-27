@@ -1,6 +1,7 @@
 import click
 # import openpathsampling as paths
 
+from paths_cli import OPSCommandPlugin
 from paths_cli.parameters import (
     INPUT_FILE, OUTPUT_FILE, INIT_CONDS, SCHEME
 )
@@ -58,6 +59,10 @@ def equilibrate_main(output_storage, scheme, init_conds, multiplier,
     return simulation.sample_set, simulation
 
 
-CLI = equilibrate
-SECTION = "Simulation"
-REQUIRES_OPS = (1, 2)
+PLUGIN = OPSCommandPlugin(
+    command=equilibrate,
+    section="Simulation",
+    requires_ops=(1, 2),
+    requires_cli=(0, 3)
+)
+
