@@ -3,31 +3,39 @@ from unittest.mock import patch, MagicMock
 from click.testing import CliRunner
 
 from paths_cli.cli import *
-from paths_cli.plugin_management import OPSPlugin
 from .null_command import NullCommandContext
 
 
 class TestOpenPathSamplingCLI(object):
     def setup(self):
-        def make_mock(name, helpless=False):
-            mock = MagicMock(return_value=name)
+        def make_mock(name, helpless=False, return_val=None):
+            if return_val is None:
+                return_val = name
+            mock = MagicMock(return_value=return_val)
+            mock.name = name
             if helpless:
                 mock.short_help = None
             else:
                 mock.short_help = name + " help"
             return mock
 
+        foo_plugin = OPSCommandPlugin(
+            command=make_mock('foo'),
+            section="Simulation"
+        )
+        foo_plugin.attach_metadata(location="foo.py",
+                                   plugin_type='file')
+        foobar_plugin = OPSCommandPlugin(
+            command=make_mock('foo-bar', helpless=True,
+                              return_val='foobar'),
+            section="Miscellaneous"
+        )
+        foobar_plugin.attach_metadata(location='foo_bar.py',
+                                      plugin_type='file')
+
         self.plugin_dict = {
-            'foo': OPSPlugin(name='foo',
-                             location='foo.py',
-                             func=make_mock('foo'),
-                             section='Simulation',
-                             plugin_type='file'),
-            'foo-bar': OPSPlugin(name='foo-bar',
-                                 location='foo_bar.py',
-                                 func=make_mock('foobar', helpless=True),
-                                 section='Miscellaneous',
-                                 plugin_type="file")
+            'foo': foo_plugin,
+            'foo-bar': foobar_plugin,
         }
         self.plugins = list(self.plugin_dict.values())
         self.cli = OpenPathSamplingCLI()
