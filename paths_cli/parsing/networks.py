@@ -6,9 +6,6 @@ from paths_cli.parsing.volumes import volume_parser
 from paths_cli.parsing.cvs import cv_parser
 
 build_interface_set = InstanceBuilder(
-    # module='openpathsampling',
-    # builder='VolumeInterfaceSet',
-    attribute_table=None,
     builder=Builder('openpathsampling.VolumeInterfaceSet'),
     parameters=[
         Parameter('cv', cv_parser, description="the collective variable "
@@ -16,11 +13,6 @@ build_interface_set = InstanceBuilder(
         Parameter('minvals', custom_eval), # TODO fill in JSON types
         Parameter('maxvals', custom_eval), # TODO fill in JSON types
     ]
-    # attribute_table={
-        # 'cv': cv_parser,
-        # 'minvals': custom_eval,
-        # 'maxvals': custom_eval,
-    # }
 )
 
 def mistis_trans_info(dct):
@@ -49,38 +41,23 @@ def tis_trans_info(dct):
     return mistis_trans_info(dct)
 
 build_tps_network = InstanceBuilder(
-    # module='openpathsampling',
-    # builder='TPSNetwork',
     builder=Builder('openpathsampling.TPSNetwork'),
-    attribute_table=None,
     parameters=[
         Parameter('initial_states', volume_parser,
                   description="initial states for this transition"),
         Parameter('final_states', volume_parser,
                   description="final states for this transition")
     ]
-    # attribute_table={
-        # 'initial_states': volume_parser,
-        # 'final_states': volume_parser,
-    # }
 )
 
 build_mistis_network = InstanceBuilder(
-    # module='openpathsampling',
-    # builder='MISTISNetwork',
-    attribute_table=None,
     parameters=[Parameter('trans_info', mistis_trans_info)],
     builder=Builder('openpathsampling.MISTISNetwork'),
-    # attribute_table={'trans_info': mistis_trans_info},
 )
 
 build_tis_network = InstanceBuilder(
-    # module='openpathsampling',
-    # builder='MISTISNetwork',
-    builder='openpathsampling.MISTISNetwork',
-    attribute_table=None,
+    builder=Builder('openpathsampling.MISTISNetwork'),
     parameters=[Parameter('trans_info', tis_trans_info)],
-    # attribute_table={'trans_info': tis_trans_info},
 )
 
 TYPE_MAPPING = {

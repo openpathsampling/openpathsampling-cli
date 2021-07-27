@@ -97,36 +97,18 @@ class Builder:
 
 class InstanceBuilder:
     SCHEMA = "http://openpathsampling.org/schemas/sim-setup/draft01.json"
-    def __init__(self, builder, attribute_table, optional_attributes=None,
-                 defaults=None, module=None, remapper=None, parameters=None,
-                 object_type=None, name=None):
-        # temporary apporach to override attribute_table
-        if attribute_table is None and parameters is not None:
-            attribute_table = {p.name: p.loader for p in parameters
-                               if p.required}
-        if optional_attributes is None and parameters is not None:
-            optional_attributes = {p.name: p.loader for p in parameters
-                                   if not p.required}
-        if defaults is None and parameters is not None:
-            defaults = {p.name: p.default for p in parameters
-                        if not p.required}
+    def __init__(self, builder, parameters, object_type=None, name=None):
+        self.attribute_table = {p.name: p.loader for p in parameters
+                                if p.required}
+        self.optional_attributes = {p.name: p.loader for p in parameters
+                                    if not p.required}
+        self.defaults = {p.name: p.default for p in parameters
+                         if not p.required}
         self.object_type = object_type
         self.name = name
-        self.module = module
         self.builder = builder
         self.builder_name = str(self.builder)
-        self.attribute_table = attribute_table
         self.parameters = parameters
-        if optional_attributes is None:
-            optional_attributes = {}
-        self.optional_attributes = optional_attributes
-        # TODO use none_to_default
-        if remapper is None:
-             remapper = lambda x: x
-        self.remapper = remapper
-        if defaults is None:
-            defaults = {}
-        self.defaults = defaults
         self.logger = logging.getLogger(f"parser.InstanceBuilder.{builder}")
 
     @property
@@ -151,13 +133,6 @@ class InstanceBuilder:
             'required': required,
         }
         return self.schema_name, dct
-
-    def select_builder(self, dct):
-        if self.module is not None:
-            builder = getattr(importlib.import_module(self.module), self.builder)
-        else:
-            builder = self.builder
-        return builder
 
     def parse_attrs(self, dct):
         """Parse the user input dictionary to mapping of name to object.
@@ -195,31 +170,13 @@ class InstanceBuilder:
 
         return new_dct
 
-    def build(self, new_dct):
-        """Build the object from a dictionary with objects as values.
-
-        Parameters
-        ----------
-        new_dct : Dict
-            The output of :method:`.parse_attrs`. This is a mapping of the
-            relevant keys to instantiated objects.
-
-        Returns
-        -------
-        Any :
-            The instance for this dictionary.
-        """
-        builder = self.select_builder(new_dct)
-        ops_dct = self.remapper(new_dct)
+    def __call__(self, dct):
+        ops_dct = self.parse_attrs(dct)
         self.logger.debug("Building...")
         self.logger.debug(ops_dct)
-        obj =  builder(**ops_dct)
+        obj =  self.builder(**ops_dct)
         self.logger.debug(obj)
         return obj
-
-    def __call__(self, dct):
-        new_dct = self.parse_attrs(dct)
-        return self.build(new_dct)
 
 
 class Parser:

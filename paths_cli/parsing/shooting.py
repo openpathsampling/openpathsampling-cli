@@ -1,12 +1,13 @@
-from paths_cli.parsing.core import InstanceBuilder, Parser
+from paths_cli.parsing.core import (
+    InstanceBuilder, Parser, Builder, Parameter
+)
 from paths_cli.parsing.cvs import cv_parser
 from paths_cli.parsing.tools import custom_eval
 import numpy as np
 
 build_uniform_selector = InstanceBuilder(
-    module='openpathsampling',
-    builder='UniformSelector',
-    attribute_table={}
+    builder=Builder('openpathsampling.UniformSelector'),
+    parameters=[]
 )
 
 def remapping_gaussian_stddev(dct):
@@ -16,12 +17,13 @@ def remapping_gaussian_stddev(dct):
     return dct
 
 build_gaussian_selector = InstanceBuilder(
-    module='openpathsampling',
-    builder='GaussianBiasSelector',
-    attribute_table={'cv': cv_parser,
-                     'mean': custom_eval,
-                     'stddev': custom_eval},
-    remapper=remapping_gaussian_stddev
+    builder=Builder('openpathsampling.GaussianBiasSelector',
+                    remapper=remapping_gaussian_stddev),
+    parameters=[
+        Parameter('cv', cv_parser),
+        Parameter('mean', custom_eval),
+        Parameter('stddev', custom_eval),
+    ]
 )
 
 shooting_selector_parser = Parser(

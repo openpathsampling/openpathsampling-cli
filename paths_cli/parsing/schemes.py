@@ -1,19 +1,30 @@
-from paths_cli.parsing.core import InstanceBuilder, Parser
+from paths_cli.parsing.core import (
+    InstanceBuilder, Parser, Builder, Parameter
+)
 from paths_cli.parsing.tools import custom_eval
 from paths_cli.parsing.shooting import shooting_selector_parser
 from paths_cli.parsing.engines import engine_parser
 from paths_cli.parsing.networks import network_parser
-from paths_cli.parsing.strategies import strategy_parser
+from paths_cli.parsing.strategies import (
+    strategy_parser, SP_SELECTOR_PARAMETER
+)
+
+
+NETWORK_PARAMETER = Parameter('network', network_parser)
+
+ENGINE_PARAMETER = Parameter('engine', engine_parser)  # reuse elsewhere?
+
+STRATEGIES_PARAMETER = Parameter('strategies', strategy_parser, default=None)
+
 
 build_spring_shooting_scheme = InstanceBuilder(
-    module='openpathsampling',
-    builder='SpringShootingMoveScheme',
-    attribute_table={
-        'network': network_parser,
-        'k_spring': custom_eval,
-        'delta_max': custom_eval,
-        'engine': engine_parser,
-    }
+    builder=Builder('openpathsampling.SpringShootingMoveScheme'),
+    parameters=[
+        NETWORK_PARAMETER,
+        Parameter('k_spring', custom_eval),
+        Parameter('delta_max', custom_eval),
+        ENGINE_PARAMETER
+    ]
 )
 
 class StrategySchemeInstanceBuilder(InstanceBuilder):
@@ -38,6 +49,8 @@ class StrategySchemeInstanceBuilder(InstanceBuilder):
     def __call__(self, dct):
         new_dct = self.parse_attrs(dct)
         strategies = new_dct.pop('strategies', [])
+        if strategies is None:
+            strategies = []
         scheme = self.build(new_dct)
         for strat in strategies + self.default_global:
             scheme.append(strat)
@@ -45,28 +58,45 @@ class StrategySchemeInstanceBuilder(InstanceBuilder):
         self.logger.debug(f"strategies: {scheme.strategies}")
         return scheme
 
+class BuildSchemeStrategy:
+    def __init__(self, scheme_class, default_global_strategy):
+        self.scheme_class = scheme_class
+        self.default_global_strategy = default_global_strategy
 
-build_one_way_shooting_scheme = StrategySchemeInstanceBuilder(
-    module='openpathsampling',
-    builder='OneWayShootingMoveScheme',
-    attribute_table={
-        'network': network_parser,
-        'selector': shooting_selector_parser,
-        'engine': engine_parser,
-    },
-    optional_attributes={
-        'strategies': strategy_parser,
-    },
+    def __call__(self, dct):
+        from openpathsampling import strategies
+        if self.default_global_strategy:
+            global_strategy = [strategies.OrganizeByMoveGroupStrategy()]
+        else:
+            global_strategy = []
+
+        builder = Builder(self.scheme_class)
+        strategies = dct.pop('strategies', []) + global_strategy
+        scheme = builder(dct)
+        for strat in strategies:
+            scheme.append(strat)
+        # self.logger.debug(f"strategies: {scheme.strategies}")
+        return scheme
+
+
+build_one_way_shooting_scheme = InstanceBuilder(
+    builder=BuildSchemeStrategy('openpathsampling.OneWayShootingMoveScheme',
+                                default_global_strategy=False),
+    parameters=[
+        NETWORK_PARAMETER,
+        SP_SELECTOR_PARAMETER,
+        ENGINE_PARAMETER,
+        STRATEGIES_PARAMETER,
+    ]
 )
 
-build_scheme = StrategySchemeInstanceBuilder(
-    module='openpathsampling',
-    builder='MoveScheme',
-    attribute_table={
-        'network': network_parser,
-        'strategies': strategy_parser,
-    },
-    default_global_strategy=True,
+build_scheme = InstanceBuilder(
+    builder=BuildSchemeStrategy('openpathsampling.MoveScheme',
+                                default_global_strategy=True),
+    parameters=[
+        NETWORK_PARAMETER,
+        STRATEGIES_PARAMETER,
+    ]
 )
 
 scheme_parser = Parser(

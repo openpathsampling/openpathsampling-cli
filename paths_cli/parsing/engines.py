@@ -55,14 +55,9 @@ OPENMM_PARAMETERS = [
 ]
 
 build_openmm_engine = InstanceBuilder(
-    # module='openpathsampling.engines.openmm',
-    # builder='Engine',
     builder=Builder('openpathsampling.engines.openmm.Engine',
                     remapper=openmm_options),
-    attribute_table=None,
-    # attribute_table=OPENMM_ATTRS,
     parameters=OPENMM_PARAMETERS,
-    # remapper=openmm_options
 )
 
 TYPE_MAPPING = {

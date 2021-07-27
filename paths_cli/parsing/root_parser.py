@@ -3,7 +3,7 @@ from paths_cli.parsing.engines import engine_parser
 from paths_cli.parsing.cvs import cv_parser
 from paths_cli.parsing.volumes import volume_parser
 from paths_cli.parsing.networks import network_parser
-from paths_cli.parsing.schemes import scheme_parser
+# from paths_cli.parsing.schemes import scheme_parser
 
 
 TYPE_MAPPING = {
@@ -12,7 +12,7 @@ TYPE_MAPPING = {
     'volumes': volume_parser,
     'states': volume_parser,
     'networks': network_parser,
-    'moveschemes': scheme_parser,
+    # 'moveschemes': scheme_parser,
 }
 
 def register_builder(parser_name, name, builder):

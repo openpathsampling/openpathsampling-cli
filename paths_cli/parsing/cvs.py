@@ -53,15 +53,10 @@ MDTRAJ_PARAMETERS = [
 
 # TODO: actually, the InstanceBuilder should BE the plugin
 build_mdtraj_function_cv = InstanceBuilder(
-    attribute_table=None,  # temp
-    # module='openpathsampling.experimental.storage.collective_variables',
-    # builder='MDTrajFunctionCV',
-    # attribute_table=MDTRAJ_ATTRS,
     builder=Builder('openpathsampling.experimental.storage.'
                     'collective_variables.MDTrajFunctionCV',
                     remapper=cv_prepare_dict),
     parameters=MDTRAJ_PARAMETERS,
-    # remapper=cv_prepare_dict,
     name="mdtraj",
     object_type="cv"
 )

@@ -36,15 +36,7 @@ def cv_volume_build_func(**dct):
     return builder(**dct)
 
 build_cv_volume = InstanceBuilder(
-    # builder=None,
-    # attribute_table={
-        # 'cv': cv_parser,
-        # 'lambda_min': custom_eval,
-        # 'lambda_max': custom_eval,
-    # },
-    attribute_table=None,
     builder=cv_volume_build_func,
-    # remapper=cv_volume_remapper,
     parameters=[
         Parameter('cv', cv_parser,
                   description="CV that defines this volume"),
@@ -70,8 +62,6 @@ VOL_ARRAY_TYPE = {
 build_intersection_volume = InstanceBuilder(
     builder=lambda subvolumes: functools.reduce(operator.__and__,
                                                 subvolumes),
-    # attribute_table={'subvolumes': _use_parser},
-    attribute_table=None,
     parameters=[
         Parameter('subvolumes', _use_parser,
                   json_type=VOL_ARRAY_TYPE,
@@ -84,8 +74,6 @@ build_intersection_volume = InstanceBuilder(
 build_union_volume = InstanceBuilder(
     builder=lambda subvolumes: functools.reduce(operator.__or__,
                                                 subvolumes),
-    # attribute_table={'subvolumes': _use_parser},
-    attribute_table=None,
     parameters=[
         Parameter('subvolumes', _use_parser,
                   json_type=VOL_ARRAY_TYPE,
