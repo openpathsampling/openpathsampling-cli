@@ -3,7 +3,7 @@ import pytest
 from paths_cli.parsing.shooting import *
 import openpathsampling as paths
 
-from mock import patch
+from unittest.mock import patch
 from openpathsampling.tests.test_helpers import make_1d_traj
 
 def test_remapping_gaussian_stddev(cv_and_states):
