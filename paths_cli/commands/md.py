@@ -1,6 +1,7 @@
 import click
 
 import paths_cli.utils
+from paths_cli import OPSCommandPlugin
 from paths_cli.parameters import (INPUT_FILE, OUTPUT_FILE, ENGINE,
                                   MULTI_ENSEMBLE, INIT_SNAP)
 
@@ -197,7 +198,10 @@ def md_main(output_storage, engine, ensembles, nsteps, initial_frame):
                                      'final_conditions')
     return trajectory, None
 
-CLI = md
-SECTION = "Simulation"
-REQUIRES_OPS = (1, 0)
 
+PLUGIN = OPSCommandPlugin(
+    command=md,
+    section="Simulation",
+    requires_ops=(1, 0),
+    requires_cli=(0, 3)
+)

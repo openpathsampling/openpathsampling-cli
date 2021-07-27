@@ -1,6 +1,7 @@
 import click
 
 import paths_cli.utils
+from paths_cli import OPSCommandPlugin
 from paths_cli.parameters import (INPUT_FILE, OUTPUT_FILE, ENGINE, STATES,
                                   INIT_SNAP)
 
@@ -41,6 +42,9 @@ def visit_all_main(output_storage, states, engine, initial_frame):
     return trajectory, None  # no simulation object to return here
 
 
-CLI = visit_all
-SECTION = "Simulation"
-REQUIRES_OPS = (1, 0)
+PLUGIN = OPSCommandPlugin(
+    command=visit_all,
+    section="Simulation",
+    requires_ops=(1, 0),
+    requires_cli=(0, 3)
+)
