@@ -42,7 +42,6 @@ def undo_monkey_patch(stored_functions):
     importlib.reload(paths)
 
 
-
 class ParameterTest(object):
     def test_parameter(self):
         # this is just a smoke test to contrast with the ValueError case

@@ -7,3 +7,4 @@ exclude_lines =
     no-cov
     def __repr__
     raise NotImplementedError
+    __name__ == "__main__":
