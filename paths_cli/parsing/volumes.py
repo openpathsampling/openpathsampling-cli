@@ -3,6 +3,7 @@ import functools
 
 from .core import Parser, InstanceBuilder, custom_eval, Parameter
 from .cvs import cv_parser
+from paths_cli.parsing.plugins import VolumeParserPlugin
 
 # TODO: extra function for volumes should not be necessary as of OPS 2.0
 def cv_volume_build_func(**dct):
@@ -17,7 +18,7 @@ def cv_volume_build_func(**dct):
     # TODO: wrap this with some logging
     return builder(**dct)
 
-build_cv_volume = InstanceBuilder(
+build_cv_volume = VolumeParserPlugin(
     builder=cv_volume_build_func,
     parameters=[
         Parameter('cv', cv_parser,
@@ -28,7 +29,6 @@ build_cv_volume = InstanceBuilder(
                   description="Upper bound for this volume")
     ],
     name='cv-volume',
-    object_type='volume'
 )
 
 def _use_parser(dct):
@@ -41,7 +41,7 @@ VOL_ARRAY_TYPE = {
     'items': {"$ref": "#/definitions/volume_type"}
 }
 
-build_intersection_volume = InstanceBuilder(
+build_intersection_volume = VolumeParserPlugin(
     builder=lambda subvolumes: functools.reduce(operator.__and__,
                                                 subvolumes),
     parameters=[
@@ -50,10 +50,9 @@ build_intersection_volume = InstanceBuilder(
                   description="List of the volumes to intersect")
     ],
     name='intersection',
-    object_type='volume'
 )
 
-build_union_volume = InstanceBuilder(
+build_union_volume = VolumeParserPlugin(
     builder=lambda subvolumes: functools.reduce(operator.__or__,
                                                 subvolumes),
     parameters=[
@@ -62,7 +61,6 @@ build_union_volume = InstanceBuilder(
                   description="List of the volumes to join into a union")
     ],
     name='union',
-    object_type='volume'
 )
 
 TYPE_MAPPING = {

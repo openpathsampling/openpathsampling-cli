@@ -66,7 +66,7 @@ class TestOpenMMEngineBuilder(object):
         self._create_files(tmpdir)
         os.chdir(tmpdir)
         dct = yaml.load(self.yml, yaml.FullLoader)
-        engine = build_openmm_engine(dct)
+        engine = OPENMM_PLUGIN(dct)
         assert isinstance(engine, ops_openmm.Engine)
         snap = ops_openmm.tools.ops_load_trajectory('ad.pdb')[0]
         engine.current_snapshot = snap

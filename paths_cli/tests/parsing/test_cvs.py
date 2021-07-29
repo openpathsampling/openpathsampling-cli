@@ -27,7 +27,7 @@ class TestMDTrajFunctionCV:
         _ = pytest.importorskip('simtk.unit')
         yml = self.yml.format(kwargs=self.kwargs, func="compute_dihedrals")
         dct = yaml.load(yml, Loader=yaml.FullLoader)
-        cv = build_mdtraj_function_cv(dct)
+        cv = MDTRAJ_CV_PLUGIN(dct)
         assert isinstance(cv, MDTrajFunctionCV)
         assert cv.func == md.compute_dihedrals
         md_trj = md.load(self.ad_pdb)
@@ -40,4 +40,4 @@ class TestMDTrajFunctionCV:
         yml = self.yml.format(kwargs=self.kwargs, func="foo")
         dct = yaml.load(yml, Loader=yaml.FullLoader)
         with pytest.raises(InputError):
-            cv = build_mdtraj_function_cv(dct)
+            cv = MDTRAJ_CV_PLUGIN(dct)

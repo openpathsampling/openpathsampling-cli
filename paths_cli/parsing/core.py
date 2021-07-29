@@ -10,6 +10,7 @@ import logging
 from .errors import InputError
 from .tools import custom_eval
 from paths_cli.utils import import_thing
+from paths_cli.plugin_management import OPSPlugin
 
 def listify(obj):
     listified = False
@@ -29,7 +30,7 @@ REQUIRED_PARAMETER = object()
 class Parameter:
     SCHEMA = "http://openpathsampling.org/schemas/sim-setup/draft01.json"
     def __init__(self, name, loader, *, json_type=None, description=None,
-                 default=REQUIRED_PARAMETER):
+                 default=REQUIRED_PARAMETER, aliases=None):
         json_type = self._get_from_loader(loader, 'json_type', json_type)
         description = self._get_from_loader(loader, 'description',
                                             description)
@@ -95,16 +96,19 @@ class Builder:
         return after
 
 
-class InstanceBuilder:
+class InstanceBuilder(OPSPlugin):
     SCHEMA = "http://openpathsampling.org/schemas/sim-setup/draft01.json"
-    def __init__(self, builder, parameters, object_type=None, name=None):
+    parser_name = None
+    def __init__(self, builder, parameters, name=None, aliases=None,
+                 requires_ops=(1, 0), requires_cli=(0, 3)):
+        super().__init__(requires_ops, requires_cli)
+        self.aliases = aliases
         self.attribute_table = {p.name: p.loader for p in parameters
                                 if p.required}
         self.optional_attributes = {p.name: p.loader for p in parameters
                                     if not p.required}
         self.defaults = {p.name: p.default for p in parameters
                          if not p.required}
-        self.object_type = object_type
         self.name = name
         self.builder = builder
         self.builder_name = str(self.builder)
@@ -113,7 +117,7 @@ class InstanceBuilder:
 
     @property
     def schema_name(self):
-        if not self.name.endswith(self.object_type):
+        if not self.name.endswith(self.parser_name):
             schema_name = f"{self.name}-{self.object_type}"
         else:
             schema_name = name

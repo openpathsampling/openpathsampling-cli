@@ -1,6 +1,8 @@
 from .topology import build_topology
 from .core import Parser, InstanceBuilder, custom_eval, Builder
+from paths_cli.parsing.core import Parameter
 from .tools import custom_eval_int
+from paths_cli.parsing.plugins import EngineParserPlugin
 
 from paths_cli.errors import MissingIntegrationError
 
@@ -29,16 +31,6 @@ def openmm_options(dct):
     return dct
 
 
-OPENMM_ATTRS = {
-    'topology': build_topology,
-    'system': load_openmm_xml,
-    'integrator': load_openmm_xml,
-    'n_steps_per_frame': int,
-    'n_frames_max': int,
-}
-
-from paths_cli.parsing.core import Parameter
-
 OPENMM_PARAMETERS = [
     Parameter('topology', build_topology, json_type='string',
               description=("File describing the topoplogy of this system; "
@@ -54,14 +46,15 @@ OPENMM_PARAMETERS = [
                            "trajectory")),
 ]
 
-build_openmm_engine = InstanceBuilder(
+OPENMM_PLUGIN = EngineParserPlugin(
     builder=Builder('openpathsampling.engines.openmm.Engine',
                     remapper=openmm_options),
     parameters=OPENMM_PARAMETERS,
+    name='openmm',
 )
 
 TYPE_MAPPING = {
-    'openmm': build_openmm_engine,
+    'openmm': OPENMM_PLUGIN,
 }
 
 engine_parser = Parser(TYPE_MAPPING, label="engines")
