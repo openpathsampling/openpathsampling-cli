@@ -12,7 +12,8 @@ build_interface_set = InstanceBuilder(
                   "for this interface set"),
         Parameter('minvals', custom_eval), # TODO fill in JSON types
         Parameter('maxvals', custom_eval), # TODO fill in JSON types
-    ]
+    ],
+    name='volume-interface-set'
 )
 
 def mistis_trans_info(dct):
@@ -47,17 +48,20 @@ build_tps_network = InstanceBuilder(
                   description="initial states for this transition"),
         Parameter('final_states', volume_parser,
                   description="final states for this transition")
-    ]
+    ],
+    name='tps'
 )
 
 build_mistis_network = InstanceBuilder(
     parameters=[Parameter('trans_info', mistis_trans_info)],
     builder=Builder('openpathsampling.MISTISNetwork'),
+    name='mistis'
 )
 
 build_tis_network = InstanceBuilder(
     builder=Builder('openpathsampling.MISTISNetwork'),
     parameters=[Parameter('trans_info', tis_trans_info)],
+    name='tis'
 )
 
 TYPE_MAPPING = {

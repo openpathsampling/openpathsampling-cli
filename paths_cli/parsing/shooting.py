@@ -7,7 +7,8 @@ import numpy as np
 
 build_uniform_selector = InstanceBuilder(
     builder=Builder('openpathsampling.UniformSelector'),
-    parameters=[]
+    parameters=[],
+    name='uniform',
 )
 
 def remapping_gaussian_stddev(dct):
@@ -23,7 +24,8 @@ build_gaussian_selector = InstanceBuilder(
         Parameter('cv', cv_parser),
         Parameter('mean', custom_eval),
         Parameter('stddev', custom_eval),
-    ]
+    ],
+    name='gaussian',
 )
 
 shooting_selector_parser = Parser(

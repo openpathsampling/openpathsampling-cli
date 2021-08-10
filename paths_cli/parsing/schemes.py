@@ -24,7 +24,8 @@ build_spring_shooting_scheme = InstanceBuilder(
         Parameter('k_spring', custom_eval),
         Parameter('delta_max', custom_eval),
         ENGINE_PARAMETER
-    ]
+    ],
+    name='spring-shooting',
 )
 
 class BuildSchemeStrategy:
@@ -56,7 +57,8 @@ build_one_way_shooting_scheme = InstanceBuilder(
         SP_SELECTOR_PARAMETER,
         ENGINE_PARAMETER,
         STRATEGIES_PARAMETER,
-    ]
+    ],
+    name='one-way-shooting',
 )
 
 build_scheme = InstanceBuilder(
@@ -65,7 +67,8 @@ build_scheme = InstanceBuilder(
     parameters=[
         NETWORK_PARAMETER,
         STRATEGIES_PARAMETER,
-    ]
+    ],
+    name='scheme'
 )
 
 scheme_parser = Parser(

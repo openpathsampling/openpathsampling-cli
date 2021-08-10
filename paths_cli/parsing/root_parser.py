@@ -1,9 +1,10 @@
-from paths_cli.parsing.core import Parser
+from paths_cli.parsing.core import Parser, InstanceBuilder
 from paths_cli.parsing.engines import engine_parser
 from paths_cli.parsing.cvs import cv_parser
 from paths_cli.parsing.volumes import volume_parser
 from paths_cli.parsing.networks import network_parser
 from paths_cli.parsing.schemes import scheme_parser
+from paths_cli.parsing.plugins import ParserPlugin
 
 
 TYPE_MAPPING = {
@@ -49,7 +50,7 @@ def _get_parser(parser_name):
     """
     parser = PARSERS.get(parser_name, None)
     if parser is None:
-        parser = Parser(None, parse_name)
+        parser = Parser(None, parser_name)
         PARSERS[parser_name] = parser
     return parser
 
@@ -62,7 +63,8 @@ def _get_registration_names(plugin):
     """
     ordered_names = []
     found_names = set([])
-    for name in [plugin.name] + plugin.aliases:
+    aliases = [] if plugin.aliases is None else plugin.aliases
+    for name in [plugin.name] + aliases:
         if name not in found_names:
             ordered_names.append(name)
             found_names.add(name)

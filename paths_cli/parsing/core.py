@@ -4,6 +4,7 @@ import importlib
 import yaml
 
 from collections import namedtuple, abc
+import warnings
 
 import logging
 
@@ -217,7 +218,10 @@ class InstanceBuilder(OPSPlugin):
 
 class Parser:
     """Generic parse class; instances for each category"""
+    error_on_duplicate = False  # TODO: temporary
     def __init__(self, type_dispatch, label):
+        if type_dispatch is None:
+            type_dispatch = {}
         self.type_dispatch = type_dispatch
         self.label = label
         self.named_objs = {}
@@ -253,8 +257,12 @@ class Parser:
 
     def register_builder(self, builder, name):
         if name in self.type_dispatch:
-            raise RuntimeError(f"'{builder.name}' is already registered "
-                               f"with {self.label}")
+            msg = (f"'{builder.name}' is already registered "
+                   f"with {self.label}")
+            if self.error_on_duplicate:
+                raise RuntimeError(msg)
+            else:
+                warnings.warn(msg)
         self.type_dispatch[name] = builder
 
     def parse(self, dct):
