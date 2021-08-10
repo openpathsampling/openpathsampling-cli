@@ -1,8 +1,9 @@
 from paths_cli.parsing.core import (
-    InstanceBuilder, Parser, Builder, Parameter
+    Parser, Builder, Parameter
 )
 from paths_cli.parsing.shooting import shooting_selector_parser
 from paths_cli.parsing.engines import engine_parser
+from paths_cli.parsing.plugins import StrategyParserPlugin, ParserPlugin
 
 def _strategy_name(class_name):
     return f"openpathsampling.strategies.{class_name}"
@@ -27,7 +28,7 @@ REPLACE_FALSE_PARAMETER = Parameter('replace', bool, default=False)
 
 
 
-build_one_way_shooting_strategy = InstanceBuilder(
+build_one_way_shooting_strategy = StrategyParserPlugin(
     builder=Builder(_strategy_name("OneWayShootingStrategy")),
     parameters=[
         SP_SELECTOR_PARAMETER,
@@ -35,9 +36,10 @@ build_one_way_shooting_strategy = InstanceBuilder(
         SHOOTING_GROUP_PARAMETER,
         Parameter('replace', bool, default=True)
     ],
+    name='one-way-shooting',
 )
 
-build_two_way_shooting_strategy = InstanceBuilder(
+build_two_way_shooting_strategy = StrategyParserPlugin(
     builder=Builder(_strategy_name("TwoWayShootingStrategy")),
     parameters = [
         Parameter('modifier', ...),
@@ -46,50 +48,57 @@ build_two_way_shooting_strategy = InstanceBuilder(
         SHOOTING_GROUP_PARAMETER,
         REPLACE_TRUE_PARAMETER,
     ],
+    name='two-way-shooting',
 )
 
-build_nearest_neighbor_repex_strategy = InstanceBuilder(
+build_nearest_neighbor_repex_strategy = StrategyParserPlugin(
     builder=Builder(_strategy_name("NearestNeighborRepExStrategy")),
     parameters=[
         REPEX_GROUP_PARAMETER,
         REPLACE_TRUE_PARAMETER
     ],
+    name='nearest-neighbor=repex',
 )
 
-build_all_set_repex_strategy = InstanceBuilder(
+build_all_set_repex_strategy = StrategyParserPlugin(
     builder=Builder(_strategy_name("AllSetRepExStrategy")),
     parameters=[
         REPEX_GROUP_PARAMETER,
         REPLACE_TRUE_PARAMETER
     ],
+    name='all-set-repex',
 )
 
-build_path_reversal_strategy = InstanceBuilder(
+build_path_reversal_strategy = StrategyParserPlugin(
     builder=Builder(_strategy_name("PathReversalStrategy")),
     parameters=[
         _group_parameter('pathreversal'),
         REPLACE_TRUE_PARAMETER,
-    ]
+    ],
+    name='path-reversal',
 )
 
-build_minus_move_strategy = InstanceBuilder(
+build_minus_move_strategy = StrategyParserPlugin(
     builder=Builder(_strategy_name("MinusMoveStrategy")),
     parameters=[
         ENGINE_PARAMETER,
         MINUS_GROUP_PARAMETER,
         REPLACE_TRUE_PARAMETER,
     ],
+    name='minus',
 )
 
-build_single_replica_minus_move_strategy = InstanceBuilder(
+build_single_replica_minus_move_strategy = StrategyParserPlugin(
     builder=Builder(_strategy_name("SingleReplicaMinusMoveStrategy")),
     parameters=[
         ENGINE_PARAMETER,
         MINUS_GROUP_PARAMETER,
         REPLACE_TRUE_PARAMETER,
     ],
+    name='single-replica-minus',
 )
 
+STRATEGY_PARSER = ParserPlugin(StrategyParserPlugin, aliases=['strategies'])
 strategy_parser = Parser(
     type_dispatch={
         'one-way-shooting': build_one_way_shooting_strategy,

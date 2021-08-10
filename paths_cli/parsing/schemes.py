@@ -8,6 +8,7 @@ from paths_cli.parsing.networks import network_parser
 from paths_cli.parsing.strategies import (
     strategy_parser, SP_SELECTOR_PARAMETER
 )
+from paths_cli.parsing.plugins import SchemeParserPlugin, ParserPlugin
 
 
 NETWORK_PARAMETER = Parameter('network', network_parser)
@@ -17,7 +18,7 @@ ENGINE_PARAMETER = Parameter('engine', engine_parser)  # reuse elsewhere?
 STRATEGIES_PARAMETER = Parameter('strategies', strategy_parser, default=None)
 
 
-build_spring_shooting_scheme = InstanceBuilder(
+build_spring_shooting_scheme = SchemeParserPlugin(
     builder=Builder('openpathsampling.SpringShootingMoveScheme'),
     parameters=[
         NETWORK_PARAMETER,
@@ -49,7 +50,7 @@ class BuildSchemeStrategy:
         return scheme
 
 
-build_one_way_shooting_scheme = InstanceBuilder(
+build_one_way_shooting_scheme = SchemeParserPlugin(
     builder=BuildSchemeStrategy('openpathsampling.OneWayShootingMoveScheme',
                                 default_global_strategy=False),
     parameters=[
@@ -61,7 +62,7 @@ build_one_way_shooting_scheme = InstanceBuilder(
     name='one-way-shooting',
 )
 
-build_scheme = InstanceBuilder(
+build_scheme = SchemeParserPlugin(
     builder=BuildSchemeStrategy('openpathsampling.MoveScheme',
                                 default_global_strategy=True),
     parameters=[
@@ -71,6 +72,7 @@ build_scheme = InstanceBuilder(
     name='scheme'
 )
 
+SCHEME_PARSER = ParserPlugin(SchemeParserPlugin, aliases=['schemes'])
 scheme_parser = Parser(
     type_dispatch={
         'one-way-shooting': build_one_way_shooting_scheme,

@@ -41,7 +41,7 @@ def parser_for(parser_name):
         the name of the parser to use
     """
     def load_and_call_parser(*args, **kwargs):
-        return PARSER[parser_name](*args, **kwargs)
+        return PARSERS[parser_name](*args, **kwargs)
     return load_and_call_parser
 
 def _get_parser(parser_name):

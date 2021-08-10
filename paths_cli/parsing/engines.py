@@ -1,5 +1,5 @@
 from .topology import build_topology
-from .core import Parser, InstanceBuilder, custom_eval, Builder
+from .core import Parser, custom_eval, Builder
 from paths_cli.parsing.core import Parameter
 from .tools import custom_eval_int
 from paths_cli.parsing.plugins import EngineParserPlugin, ParserPlugin

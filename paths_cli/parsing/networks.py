@@ -4,6 +4,7 @@ from paths_cli.parsing.core import (
 from paths_cli.parsing.tools import custom_eval
 from paths_cli.parsing.volumes import volume_parser
 from paths_cli.parsing.cvs import cv_parser
+from paths_cli.parsing.plugins import NetworkParserPlugin, ParserPlugin
 
 build_interface_set = InstanceBuilder(
     builder=Builder('openpathsampling.VolumeInterfaceSet'),
@@ -13,7 +14,7 @@ build_interface_set = InstanceBuilder(
         Parameter('minvals', custom_eval), # TODO fill in JSON types
         Parameter('maxvals', custom_eval), # TODO fill in JSON types
     ],
-    name='volume-interface-set'
+    name='interface-set'
 )
 
 def mistis_trans_info(dct):
@@ -41,7 +42,7 @@ def tis_trans_info(dct):
                            'interfaces': interface_set}]
     return mistis_trans_info(dct)
 
-build_tps_network = InstanceBuilder(
+build_tps_network = NetworkParserPlugin(
     builder=Builder('openpathsampling.TPSNetwork'),
     parameters=[
         Parameter('initial_states', volume_parser,
@@ -52,13 +53,13 @@ build_tps_network = InstanceBuilder(
     name='tps'
 )
 
-build_mistis_network = InstanceBuilder(
+build_mistis_network = NetworkParserPlugin(
     parameters=[Parameter('trans_info', mistis_trans_info)],
     builder=Builder('openpathsampling.MISTISNetwork'),
     name='mistis'
 )
 
-build_tis_network = InstanceBuilder(
+build_tis_network = NetworkParserPlugin(
     builder=Builder('openpathsampling.MISTISNetwork'),
     parameters=[Parameter('trans_info', tis_trans_info)],
     name='tis'
@@ -70,4 +71,5 @@ TYPE_MAPPING = {
     'mistis': build_mistis_network,
 }
 
+NETWORK_PARSER = ParserPlugin(NetworkParserPlugin, aliases=['networks'])
 network_parser = Parser(TYPE_MAPPING, label="networks")

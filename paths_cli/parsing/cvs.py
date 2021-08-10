@@ -5,7 +5,7 @@ from .core import Parser, InstanceBuilder, custom_eval, Parameter, Builder
 from .topology import build_topology
 from .errors import InputError
 from paths_cli.utils import import_thing
-from paths_cli.parsing.plugins import CVParserPlugin
+from paths_cli.parsing.plugins import CVParserPlugin, ParserPlugin
 
 
 class AllowedPackageHandler:
@@ -57,4 +57,5 @@ TYPE_MAPPING = {
     'mdtraj': MDTRAJ_CV_PLUGIN,
 }
 
+CV_PARSER = ParserPlugin(CVParserPlugin, aliases=['cvs'])
 cv_parser = Parser(TYPE_MAPPING, label="CVs")
