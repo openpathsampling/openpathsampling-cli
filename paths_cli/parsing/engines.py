@@ -2,7 +2,7 @@ from .topology import build_topology
 from .core import Parser, InstanceBuilder, custom_eval, Builder
 from paths_cli.parsing.core import Parameter
 from .tools import custom_eval_int
-from paths_cli.parsing.plugins import EngineParserPlugin
+from paths_cli.parsing.plugins import EngineParserPlugin, ParserPlugin
 
 from paths_cli.errors import MissingIntegrationError
 
@@ -57,4 +57,5 @@ TYPE_MAPPING = {
     'openmm': OPENMM_PLUGIN,
 }
 
+ENGINE_PARSER = ParserPlugin(EngineParserPlugin, aliases=['engines'])
 engine_parser = Parser(TYPE_MAPPING, label="engines")

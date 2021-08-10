@@ -31,9 +31,6 @@ class Parameter:
     SCHEMA = "http://openpathsampling.org/schemas/sim-setup/draft01.json"
     def __init__(self, name, loader, *, json_type=None, description=None,
                  default=REQUIRED_PARAMETER, aliases=None):
-        json_type = self._get_from_loader(loader, 'json_type', json_type)
-        description = self._get_from_loader(loader, 'description',
-                                            description)
         if isinstance(json_type, str):
             try:
                 json_type = json.loads(json_type)
@@ -43,13 +40,23 @@ class Parameter:
 
         self.name = name
         self.loader = loader
-        self.json_type = json_type
-        self.description = description
+        self._json_type = json_type
+        self._description = description
         self.default = default
 
     @property
     def required(self):
         return self.default is REQUIRED_PARAMETER
+
+    @property
+    def json_type(self):
+        return self._get_from_loader(self.loader, 'json_type',
+                                     self._json_type)
+
+    @property
+    def description(self):
+        return self._get_from_loader(self.loader, 'description',
+                                     self._description)
 
     @staticmethod
     def _get_from_loader(loader, attr_name, attr):
@@ -73,6 +80,30 @@ class Parameter:
 
 
 class Builder:
+    """Builder is a wrapper class to simplify writing builder functions.
+
+    When the parsed parameters dictionary matches the kwargs for your class,
+    you can create a valid delayed builder function with
+
+    .. code:
+
+        builder = Builder('import_path.for_the.ClassToBuild')
+
+    Additionally, this class provides hooks for functions that run before or
+    after the main builder function. This allows many objects to be built by
+    implementing simple functions and hooking themn together with Builder.
+
+    Parameters
+    ----------
+    builder : Union[Callable, str]
+        primary callable to build an object, or string representing the
+        fully-qualified path to a callable
+    remapper : Callable[[Dict], Dict], optional
+        callable to remap the the mapping of ???
+    after_build : Callable[[Any, Dict], Any], optional
+        ccallable to update the created object with any additional
+        information from the original dictionary.
+    """
     def __init__(self, builder, *, remapper=None, after_build=None):
         if remapper is None:
             remapper = lambda dct: dct
@@ -99,6 +130,7 @@ class Builder:
 class InstanceBuilder(OPSPlugin):
     SCHEMA = "http://openpathsampling.org/schemas/sim-setup/draft01.json"
     parser_name = None
+    error_on_duplicate = False  # TODO: temporary
     def __init__(self, builder, parameters, name=None, aliases=None,
                  requires_ops=(1, 0), requires_cli=(0, 3)):
         super().__init__(requires_ops, requires_cli)

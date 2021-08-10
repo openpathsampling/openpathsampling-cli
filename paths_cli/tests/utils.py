@@ -1,4 +1,5 @@
 import urllib.request
+import pytest
 
 try:
     urllib.request.urlopen('https://www.google.com')
