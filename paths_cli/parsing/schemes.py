@@ -3,19 +3,17 @@ from paths_cli.parsing.core import (
 )
 from paths_cli.parsing.tools import custom_eval
 from paths_cli.parsing.shooting import shooting_selector_parser
-from paths_cli.parsing.networks import network_parser
-from paths_cli.parsing.strategies import (
-    strategy_parser, SP_SELECTOR_PARAMETER
-)
+from paths_cli.parsing.strategies import SP_SELECTOR_PARAMETER
 from paths_cli.parsing.plugins import SchemeParserPlugin, ParserPlugin
 from paths_cli.parsing.root_parser import parser_for
 
 
-NETWORK_PARAMETER = Parameter('network', network_parser)
+NETWORK_PARAMETER = Parameter('network', parser_for('network'))
 
 ENGINE_PARAMETER = Parameter('engine', parser_for('engine'))  # reuse elsewhere?
 
-STRATEGIES_PARAMETER = Parameter('strategies', strategy_parser, default=None)
+STRATEGIES_PARAMETER = Parameter('strategies', parser_for('strategy'),
+                                 default=None)
 
 
 build_spring_shooting_scheme = SchemeParserPlugin(
@@ -73,13 +71,3 @@ build_scheme = SchemeParserPlugin(
 )
 
 SCHEME_PARSER = ParserPlugin(SchemeParserPlugin, aliases=['schemes'])
-scheme_parser = Parser(
-    type_dispatch={
-        'one-way-shooting': build_one_way_shooting_scheme,
-        'spring-shooting': build_spring_shooting_scheme,
-        'scheme': build_scheme,
-        'default-tis': ...,
-    },
-    label='move schemes'
-)
-

@@ -99,15 +99,3 @@ build_single_replica_minus_move_strategy = StrategyParserPlugin(
 )
 
 STRATEGY_PARSER = ParserPlugin(StrategyParserPlugin, aliases=['strategies'])
-strategy_parser = Parser(
-    type_dispatch={
-        'one-way-shooting': build_one_way_shooting_strategy,
-        'two-way-shooting': build_two_way_shooting_strategy,
-        'nearest-neighbor-repex': build_nearest_neighbor_repex_strategy,
-        'all-set-repex': build_all_set_repex_strategy,
-        'path-reversal': build_path_reversal_strategy,
-        'minus': build_minus_move_strategy,
-        'single-rep-minux': build_single_replica_minus_move_strategy,
-    },
-    label="strategy"
-)

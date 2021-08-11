@@ -65,11 +65,4 @@ build_tis_network = NetworkParserPlugin(
     name='tis'
 )
 
-TYPE_MAPPING = {
-    'tps': build_tps_network,
-    'tis': build_tis_network,
-    'mistis': build_mistis_network,
-}
-
 NETWORK_PARSER = ParserPlugin(NetworkParserPlugin, aliases=['networks'])
-network_parser = Parser(TYPE_MAPPING, label="networks")
