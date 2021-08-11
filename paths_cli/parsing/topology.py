@@ -1,9 +1,11 @@
 import os
 from .errors import InputError
+from paths_cli.parsing.root_parser import parser_for
 
 def get_topology_from_engine(dct):
     """If given the name of an engine, use that engine's topology"""
-    from paths_cli.parsing.engines import engine_parser
+    # from paths_cli.parsing.engines import engine_parser
+    engine_parser = parser_for('engine')
     if dct in engine_parser.named_objs:
         engine = engine_parser.named_objs[dct]
         try:

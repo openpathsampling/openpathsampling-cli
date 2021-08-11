@@ -2,8 +2,8 @@ import operator
 import functools
 
 from .core import Parser, InstanceBuilder, custom_eval, Parameter
-from .cvs import cv_parser
 from paths_cli.parsing.plugins import VolumeParserPlugin
+from paths_cli.parsing.root_parser import parser_for
 
 # TODO: extra function for volumes should not be necessary as of OPS 2.0
 def cv_volume_build_func(**dct):
@@ -21,7 +21,7 @@ def cv_volume_build_func(**dct):
 build_cv_volume = VolumeParserPlugin(
     builder=cv_volume_build_func,
     parameters=[
-        Parameter('cv', cv_parser,
+        Parameter('cv', parser_for('cv'),
                   description="CV that defines this volume"),
         Parameter('lambda_min', custom_eval,
                   description="Lower bound for this volume"),
@@ -30,10 +30,6 @@ build_cv_volume = VolumeParserPlugin(
     ],
     name='cv-volume',
 )
-
-def _use_parser(dct):
-    # this is a hack to get around circular definitions
-    return volume_parser(dct)
 
 # jsonschema type for combination volumes
 VOL_ARRAY_TYPE = {
@@ -45,7 +41,7 @@ build_intersection_volume = VolumeParserPlugin(
     builder=lambda subvolumes: functools.reduce(operator.__and__,
                                                 subvolumes),
     parameters=[
-        Parameter('subvolumes', _use_parser,
+        Parameter('subvolumes', parser_for('volume'),
                   json_type=VOL_ARRAY_TYPE,
                   description="List of the volumes to intersect")
     ],
@@ -56,7 +52,7 @@ build_union_volume = VolumeParserPlugin(
     builder=lambda subvolumes: functools.reduce(operator.__or__,
                                                 subvolumes),
     parameters=[
-        Parameter('subvolumes', _use_parser,
+        Parameter('subvolumes', parser_for('volume'),
                   json_type=VOL_ARRAY_TYPE,
                   description="List of the volumes to join into a union")
     ],
@@ -67,6 +63,3 @@ TYPE_MAPPING = {
     'cv-volume': build_cv_volume,
     'intersection': build_intersection_volume,
 }
-
-volume_parser = Parser(TYPE_MAPPING, label="volumes")
-

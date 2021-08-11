@@ -3,17 +3,17 @@ from paths_cli.parsing.core import (
 )
 from paths_cli.parsing.tools import custom_eval
 from paths_cli.parsing.shooting import shooting_selector_parser
-from paths_cli.parsing.engines import engine_parser
 from paths_cli.parsing.networks import network_parser
 from paths_cli.parsing.strategies import (
     strategy_parser, SP_SELECTOR_PARAMETER
 )
 from paths_cli.parsing.plugins import SchemeParserPlugin, ParserPlugin
+from paths_cli.parsing.root_parser import parser_for
 
 
 NETWORK_PARAMETER = Parameter('network', network_parser)
 
-ENGINE_PARAMETER = Parameter('engine', engine_parser)  # reuse elsewhere?
+ENGINE_PARAMETER = Parameter('engine', parser_for('engine'))  # reuse elsewhere?
 
 STRATEGIES_PARAMETER = Parameter('strategies', strategy_parser, default=None)
 

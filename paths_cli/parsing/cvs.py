@@ -58,4 +58,3 @@ TYPE_MAPPING = {
 }
 
 CV_PARSER = ParserPlugin(CVParserPlugin, aliases=['cvs'])
-cv_parser = Parser(TYPE_MAPPING, label="CVs")

@@ -1,7 +1,7 @@
 from paths_cli.parsing.core import (
     InstanceBuilder, Parser, Builder, Parameter
 )
-from paths_cli.parsing.cvs import cv_parser
+from paths_cli.parsing.root_parser import parser_for
 from paths_cli.parsing.tools import custom_eval
 import numpy as np
 
@@ -21,7 +21,7 @@ build_gaussian_selector = InstanceBuilder(
     builder=Builder('openpathsampling.GaussianBiasSelector',
                     remapper=remapping_gaussian_stddev),
     parameters=[
-        Parameter('cv', cv_parser),
+        Parameter('cv', parser_for('cv')),
         Parameter('mean', custom_eval),
         Parameter('stddev', custom_eval),
     ],

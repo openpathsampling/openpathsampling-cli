@@ -2,8 +2,8 @@ from paths_cli.parsing.core import (
     Parser, Builder, Parameter
 )
 from paths_cli.parsing.shooting import shooting_selector_parser
-from paths_cli.parsing.engines import engine_parser
 from paths_cli.parsing.plugins import StrategyParserPlugin, ParserPlugin
+from paths_cli.parsing.root_parser import parser_for
 
 def _strategy_name(class_name):
     return f"openpathsampling.strategies.{class_name}"
@@ -15,7 +15,7 @@ def _group_parameter(group_name):
 # TODO: maybe this moves into shooting once we have the metadata?
 SP_SELECTOR_PARAMETER = Parameter('selector', shooting_selector_parser)
 
-ENGINE_PARAMETER = Parameter('engine', engine_parser,
+ENGINE_PARAMETER = Parameter('engine', parser_for('engine'),
                              description="the engine for moves of this "
                              "type")
 

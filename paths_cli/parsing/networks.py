@@ -2,15 +2,14 @@ from paths_cli.parsing.core import (
     InstanceBuilder, Parser, Builder, Parameter
 )
 from paths_cli.parsing.tools import custom_eval
-from paths_cli.parsing.volumes import volume_parser
-from paths_cli.parsing.cvs import cv_parser
 from paths_cli.parsing.plugins import NetworkParserPlugin, ParserPlugin
+from paths_cli.parsing.root_parser import parser_for
 
 build_interface_set = InstanceBuilder(
     builder=Builder('openpathsampling.VolumeInterfaceSet'),
     parameters=[
-        Parameter('cv', cv_parser, description="the collective variable "
-                  "for this interface set"),
+        Parameter('cv', parser_for('cv'), description="the collective "
+                  "variable for this interface set"),
         Parameter('minvals', custom_eval), # TODO fill in JSON types
         Parameter('maxvals', custom_eval), # TODO fill in JSON types
     ],
@@ -20,6 +19,7 @@ build_interface_set = InstanceBuilder(
 def mistis_trans_info(dct):
     dct = dct.copy()
     transitions = dct.pop('transitions')
+    volume_parser = parser_for('volume')
     trans_info = [
         (
             volume_parser(trans['initial_state']),
@@ -45,9 +45,9 @@ def tis_trans_info(dct):
 build_tps_network = NetworkParserPlugin(
     builder=Builder('openpathsampling.TPSNetwork'),
     parameters=[
-        Parameter('initial_states', volume_parser,
+        Parameter('initial_states', parser_for('volume'),
                   description="initial states for this transition"),
-        Parameter('final_states', volume_parser,
+        Parameter('final_states', parser_for('volume'),
                   description="final states for this transition")
     ],
     name='tps'

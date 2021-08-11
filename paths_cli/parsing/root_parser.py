@@ -1,20 +1,6 @@
 from paths_cli.parsing.core import Parser, InstanceBuilder
-from paths_cli.parsing.engines import engine_parser
-from paths_cli.parsing.cvs import cv_parser
-from paths_cli.parsing.volumes import volume_parser
-from paths_cli.parsing.networks import network_parser
-from paths_cli.parsing.schemes import scheme_parser
 from paths_cli.parsing.plugins import ParserPlugin
 
-
-TYPE_MAPPING = {
-    'engines': engine_parser,
-    'cvs': cv_parser,
-    'volumes': volume_parser,
-    'states': volume_parser,
-    'networks': network_parser,
-    'moveschemes': scheme_parser,
-}
 
 _DEFAULT_PARSE_ORDER = [
     'engine',
@@ -30,6 +16,21 @@ PARSE_ORDER = _DEFAULT_PARSE_ORDER.copy()
 PARSERS = {}
 ALIASES = {}
 
+class ParserProxy:
+    def __init__(self, parser_name):
+        self.parser_name = parser_name
+
+    @property
+    def _proxy(self):
+        return PARSERS[self.parser_name]
+
+    @property
+    def named_objs(self):
+        return self._proxy.named_objs
+
+    def __call__(self, *args, **kwargs):
+        return self._proxy(*args, **kwargs)
+
 def parser_for(parser_name):
     """Delayed parser calling.
 
@@ -40,9 +41,7 @@ def parser_for(parser_name):
     parser_name : str
         the name of the parser to use
     """
-    def load_and_call_parser(*args, **kwargs):
-        return PARSERS[parser_name](*args, **kwargs)
-    return load_and_call_parser
+    return ParserProxy(parser_name)
 
 def _get_parser(parser_name):
     """

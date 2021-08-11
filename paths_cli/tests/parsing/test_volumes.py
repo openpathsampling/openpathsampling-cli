@@ -1,5 +1,6 @@
 import pytest
 from unittest import mock
+from paths_cli.tests.parsing.utils import mock_parser
 
 import yaml
 import openpathsampling as paths
@@ -40,8 +41,11 @@ class TestBuildCVVolume:
         yml = self.yml.format(func=self.func[inline])
         dct = yaml.load(yml, Loader=yaml.FullLoader)
         if inline =='external':
-            patchloc = 'paths_cli.parsing.volumes.cv_parser.named_objs'
-            with mock.patch.dict(patchloc, {'foo': self.mock_cv}):
+            patch_loc = 'paths_cli.parsing.root_parser.PARSERS'
+            parsers = {
+                'cv': mock_parser('cv', named_objs={'foo': self.mock_cv})
+            }
+            with mock.patch.dict(patch_loc, parsers):
                 vol = build_cv_volume(dct)
         elif inline == 'internal':
             vol = build_cv_volume(dct)
@@ -95,13 +99,16 @@ class TestBuildCombinationVolume:
 
         true_vol = combo_class(vol_A, vol_B)
         dct = yaml.load(yml, yaml.FullLoader)
-        this_mod = 'paths_cli.parsing.volumes.'
-        patchloc = 'paths_cli.parsing.volumes.volume_parser.named_objs'
-        with \
-                mock.patch.dict(this_mod + 'cv_parser.named_objs',
-                              {'foo': self.cv}) as cv_patch, \
-                mock.patch.dict(this_mod + 'volume_parser.named_objs',
-                                named_volumes_dict) as vol_patch:
+        parser = {
+            'cv': mock_parser('cv', named_objs={'foo': self.cv}),
+            'volume': mock_parser(
+                'volume',
+                type_dispatch={'cv-volume': build_cv_volume},
+                named_objs=named_volumes_dict
+            ),
+        }
+        with mock.patch.dict('paths_cli.parsing.root_parser.PARSERS',
+                             parser):
             vol = builder(dct)
 
         traj = make_1d_traj([0.5, 2.0, 0.2])

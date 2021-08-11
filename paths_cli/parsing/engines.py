@@ -58,4 +58,3 @@ TYPE_MAPPING = {
 }
 
 ENGINE_PARSER = ParserPlugin(EngineParserPlugin, aliases=['engines'])
-engine_parser = Parser(TYPE_MAPPING, label="engines")
