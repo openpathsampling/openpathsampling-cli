@@ -45,7 +45,8 @@ def parser_for(parser_name):
 
 def _get_parser(parser_name):
     """
-    _get_parser must only be used after the parsers have been registered
+    _get_parser must only be used after the parsers have been registered. It
+    will automatically create a parser for any unknown ``parser_name.``
     """
     parser = PARSERS.get(parser_name, None)
     if parser is None:
