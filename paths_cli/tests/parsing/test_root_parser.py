@@ -5,33 +5,39 @@ from paths_cli.parsing.root_parser import (
     _register_parser_plugin
 )
 from unittest.mock import Mock, patch
+from paths_cli.parsing.core import Parser
 
 PARSER_LOC = "paths_cli.parsing.root_parser.PARSERS"
 
 class TestParserProxy:
     def setup(self):
+        self.parser = Parser(None, "foo")
+        self.parser.named_objs['bar'] = 'baz'
+        self.proxy = ParserProxy('foo')
         pass
 
     def test_proxy(self):
-        # the _proxy should be the registered parser
-        pytest.skip()
+        # (NOT API) the _proxy should be the registered parser
+        with patch.dict(PARSER_LOC, {'foo': self.parser}):
+            assert self.proxy._proxy is self.parser
 
     def test_proxy_nonexisting(self):
         # _proxy should error if the no parser is registered
-        pytest.skip()
+        with pytest.raises(KeyError):
+            self.proxy._proxy
 
     def test_named_objs(self):
         # the `.named_objs` attribute should work in the proxy
-        pytest.skip()
+        with patch.dict(PARSER_LOC, {'foo': self.parser}):
+            assert self.proxy.named_objs == {'bar': 'baz'}
 
     def test_call(self):
-        # the `__call__` method should work in the proxy
         # the `__call__` method should work in the proxy
         pytest.skip()
 
 def test_parser_for_nonexisting():
-    # if the nothing is ever registered with the parser, then parser_for
-    # should error
+    # if nothing is ever registered with the parser, then parser_for should
+    # error
     parsers = {}
     with patch.dict(PARSER_LOC, parsers):
         assert 'foo' not in parsers
@@ -43,7 +49,10 @@ def test_parser_for_nonexisting():
 def test_parser_for_existing():
     # if a parser already exists when parser_for is called, then parser_for
     # should get that as its proxy
-    pytest.skip()
+    foo_parser = Parser(None, 'foo')
+    with patch.dict(PARSER_LOC, {'foo': foo_parser}):
+        proxy = parser_for('foo')
+        assert proxy._proxy is foo_parser
 
 def test_parser_for_registered():
     # if a parser is registered after parser_for is called, then parser_for
