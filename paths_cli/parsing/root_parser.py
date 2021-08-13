@@ -104,15 +104,10 @@ def _register_parser_plugin(plugin):
             raise DUPLICATE_ERROR
         ALIASES[alias] = plugin.name
 
-### old versions
-
-def register_builder(parser_name, name, builder):
-    parser = TYPE_MAPPING[parser_name]
-    parser.register_builder(builder, name)
-
 def parse(dct):
     objs = []
-    for category, func in TYPE_MAPPING.items():
+    for category in PARSE_ORDER:
+        func = PARSERS[category]
         yaml_objs = dct.get(category, [])
         new = [func(obj) for obj in yaml_objs]
         objs.extend(new)
