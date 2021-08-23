@@ -309,7 +309,7 @@ class OPSStorageLoadSingle(AbstractLoader):
             if name is None:
                 msg = "Couldn't guess which item to use from " + self.store
             else:
-                msg = "Couldn't find {name} is {store}".format(
+                msg = "Couldn't find {name} in {store}".format(
                     name=name,
                     store=self.store
                 )
