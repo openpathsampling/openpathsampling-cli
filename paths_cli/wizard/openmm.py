@@ -10,7 +10,7 @@ else:
 
 OPENMM_SERIALIZATION_URL=(
     "http://docs.openmm.org/latest/api-python/generated/"
-    "simtk.openmm.openmm.XmlSerializer.html"
+    "openmm.openmm.XmlSerializer.html"
 )
 
 def _openmm_serialization_helper(wizard, user_input):  # no-cov
