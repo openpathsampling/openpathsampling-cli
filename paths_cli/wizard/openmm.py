@@ -1,5 +1,7 @@
 from paths_cli.wizard.errors import FILE_LOADING_ERROR_MSG, not_installed
 from paths_cli.wizard.core import get_object
+
+# should be able to simplify this try block when we drop OpenMM < 7.6
 try:
     import openmm as mm
 except ImportError:

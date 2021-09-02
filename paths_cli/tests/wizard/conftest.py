@@ -3,6 +3,7 @@ import pytest
 import openpathsampling as paths
 import mdtraj as md
 
+# should be able to remove this try block when we drop OpenMM < 7.6
 try:
     import openmm as mm
     from openmm import unit as u
@@ -22,8 +23,9 @@ def ad_openmm(tmpdir):
     """
     Provide directory with files to start alanine depeptide sim in OpenMM
     """
+    # switch back to importorskip when we drop OpenMM < 7.6
     if not HAS_OPENMM:
-        pytest.skip()
+        pytest.skip("could not import openmm")
     # mm = pytest.importorskip('simtk.openmm')
     # u = pytest.importorskip('simtk.unit')
     openmmtools = pytest.importorskip('openmmtools')
