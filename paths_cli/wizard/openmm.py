@@ -1,10 +1,14 @@
 from paths_cli.wizard.errors import FILE_LOADING_ERROR_MSG, not_installed
 from paths_cli.wizard.core import get_object
 try:
-    from simtk import openmm as mm
-    import mdtraj as md
+    import openmm as mm
 except ImportError:
-    HAS_OPENMM = False
+    try:
+        from simtk import openmm as mm
+    except ImportError:
+        HAS_OPENMM = False
+    else:  # -no-cov-
+      HAS_OPENMM = True
 else:
     HAS_OPENMM = True
 
