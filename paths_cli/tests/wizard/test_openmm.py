@@ -8,12 +8,28 @@ from paths_cli.wizard.openmm import (
     _load_openmm_xml, _load_topology, openmm, OPENMM_SERIALIZATION_URL
 )
 
+# should be able to remove this try block when we drop OpenMM < 7.6
+try:
+    import openmm as mm
+except ImportError:
+    try:
+        from simtk import openmm as mm
+    except ImportError:
+        HAS_OPENMM = False
+    else:
+        HAS_OPENMM = True  # -no-cov-
+else:
+    HAS_OPENMM = True
+
 def test_helper_url():
     assert_url(OPENMM_SERIALIZATION_URL)
 
 @pytest.mark.parametrize('obj_type', ['system', 'integrator', 'foo'])
 def test_load_openmm_xml(ad_openmm, obj_type):
-    mm = pytest.importorskip('simtk.openmm')
+    # switch back to importorskip when we drop OpenMM < 7.6
+    if not HAS_OPENMM:
+        pytest.skip("could not import openmm")
+    # mm = pytest.importorskip("simtk.openmm")
     filename = f"{obj_type}.xml"
     inputs = [filename]
     expected_count = 1
