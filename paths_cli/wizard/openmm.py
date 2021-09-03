@@ -1,16 +1,22 @@
 from paths_cli.wizard.errors import FILE_LOADING_ERROR_MSG, not_installed
 from paths_cli.wizard.core import get_object
+
+# should be able to simplify this try block when we drop OpenMM < 7.6
 try:
-    from simtk import openmm as mm
-    import mdtraj as md
+    import openmm as mm
 except ImportError:
-    HAS_OPENMM = False
+    try:
+        from simtk import openmm as mm
+    except ImportError:
+        HAS_OPENMM = False
+    else:  # -no-cov-
+      HAS_OPENMM = True
 else:
     HAS_OPENMM = True
 
 OPENMM_SERIALIZATION_URL=(
     "http://docs.openmm.org/latest/api-python/generated/"
-    "simtk.openmm.openmm.XmlSerializer.html"
+    "openmm.openmm.XmlSerializer.html"
 )
 
 def _openmm_serialization_helper(wizard, user_input):  # no-cov
