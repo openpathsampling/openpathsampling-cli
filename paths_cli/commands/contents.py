@@ -22,13 +22,13 @@ NAME_TO_ATTR = {
 
 @click.command(
     'contents',
-    short_help="list named objects from an OPS output file",
+    short_help="list named objects from an OPS storage file",
 )
 @INPUT_FILE.clicked(required=True)
 @click.option('--table', type=str, required=False,
               help="table to show results from")
 def contents(input_file, table):
-    """List the names of named objects in an OPS output file.
+    """List the names of named objects in an OPS storage file.
 
     This is particularly useful when getting ready to use a simulation
     command (i.e., to identify exactly how a state or engine is named.)
