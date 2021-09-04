@@ -96,7 +96,7 @@ INPUT_FILE = StorageLoader(
 OUTPUT_FILE = StorageLoader(
     param=Option('-o', '--output-file',
                  type=click.Path(writable=True),
-                 help="output ncfile"),
+                 help="output file"),
     mode='w'
 )
 
