@@ -172,7 +172,7 @@ class InstanceBuilder(OPSPlugin):
         if not self.name.endswith(self.parser_name):
             schema_name = f"{self.name}-{self.object_type}"
         else:
-            schema_name = name
+            schema_name = self.parser_name
         return schema_name
 
     def to_json_schema(self, schema_context=None):
@@ -225,6 +225,7 @@ class InstanceBuilder(OPSPlugin):
             new_dct[attr] = func(input_dct[attr])
 
         optionals = set(self.optional_attributes) & set(dct)
+
         for attr in optionals:
             new_dct[attr] = self.optional_attributes[attr](dct[attr])
 
@@ -271,7 +272,8 @@ class Parser:
     def register_object(self, obj, name):
         if name is not None:
             if name in self.named_objs:
-                raise RuntimeError("Same name twice")  # TODO improve
+                raise InputError(f"An object of type {self.name} and name "
+                                 f"{name} already exists.")
             obj = obj.named(name)
             self.named_objs[name] = obj
         obj = obj.named(name)
