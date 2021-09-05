@@ -1,4 +1,6 @@
 class InputError(Exception):
+    """Raised when users provide bad input in files/interactive sessions.
+    """
     @classmethod
     def invalid_input(cls, value, attr, type_name=None, name=None):
         msg = f"'{value}' is not a valid input for {attr}"

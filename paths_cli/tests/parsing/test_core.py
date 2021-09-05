@@ -7,6 +7,20 @@ import numpy.testing as npt
 
 from paths_cli.parsing.core import *
 
+class MockNamedObject:
+    # used in the tests for Parser._parse_dict and Parser.register_object
+    def __init__(self, data):
+        self.data = data
+        self.name = None
+
+    def named(self, name):
+        self.name = name
+        return self
+
+def mock_named_object_factory(dct):
+    return MockNamedObject(**dct)
+
+
 class TestParameter:
     def setup(self):
         self.loader = Mock(
@@ -180,40 +194,101 @@ class TestInstanceBuilder:
 
 
 class TestParser:
+    def setup(self):
+        self.parser = Parser(
+            {'foo': mock_named_object_factory},
+            'foo_parser'
+        )
+
+    def _mock_register_obj(self):
+        obj = "bar"
+        self.parser.all_objs.append(obj)
+        self.parser.named_objs['foo'] = obj
+
     def test_parse_str(self):
         # parse_str should load a known object with the input name
-        pytest.skip()
+        self._mock_register_obj()
+        assert self.parser._parse_str('foo') == "bar"
 
     def test_parse_str_error(self):
         # if parse_str is given a name that is not known, an InputError
         # should be raised
-        pytest.skip()
+        self._mock_register_obj()
+        with pytest.raises(InputError, match="Unable to find"):
+            self.parser._parse_str('baz')
 
-    def test_parse_dict(self):
+    @pytest.mark.parametrize('named', [True, False])
+    def test_parse_dict(self, named):
         # parse_dct should create the object from the input dict
-        pytest.skip()
+        input_dict = {'type': 'foo', 'data': "qux"}
+        if named:
+            input_dict['name'] = 'bar'
+
+        obj = self.parser._parse_dict(input_dict)
+        assert obj.data == "qux"
+        name = {True: 'bar', False: None}[named]
+        assert obj.name == name
 
     def test_register_object_named(self):
         # when registered, a named object should register with the all_objs
         # list and with the named_objs dict
-        pytest.skip()
+        obj = MockNamedObject('foo')
+        assert obj.name is None
+        assert self.parser.all_objs == []
+        assert self.parser.named_objs == {}
+        obj = self.parser.register_object(obj, 'bar')
+        assert obj.name == 'bar'
+        assert self.parser.all_objs == [obj]
+        assert self.parser.named_objs == {'bar': obj}
 
     def test_register_object_unnamed(self):
         # when registered, an unnamed object should register with the
         # all_objs list and leave the named_objs dict unchanged
-        pytest.skip()
+        obj = MockNamedObject('foo')
+        assert obj.name is None
+        assert self.parser.all_objs == []
+        assert self.parser.named_objs == {}
+        obj = self.parser.register_object(obj, None)
+        assert obj.name is None
+        assert self.parser.all_objs == [obj]
+        assert self.parser.named_objs == {}
 
     def test_register_object_duplicate(self):
         # if an attempt is made to register an object with a name that is
         # already in use, an InputError should be raised, and the object
         # should not register with either all_objs or named_objs
-        pytest.skip()
+        obj = MockNamedObject('foo').named('bar')
+        self.parser.named_objs['bar'] = obj
+        self.parser.all_objs.append(obj)
+        obj2 = MockNamedObject('baz')
+        with pytest.raises(InputError, match="already exists"):
+            self.parser.register_object(obj2, 'bar')
+
+        assert self.parser.named_objs == {'bar': obj}
+        assert self.parser.all_objs == [obj]
+        assert obj2.name is None
 
     def test_register_builder(self):
-        pytest.skip()
+        # a new builder can be registered and used, if it has a new name
+        assert len(self.parser.type_dispatch) == 1
+        assert 'bar' not in self.parser.type_dispatch
+        self.parser.register_builder(lambda dct: 10, 'bar')
+        assert len(self.parser.type_dispatch) == 2
+        assert 'bar' in self.parser.type_dispatch
+        input_dict = {'type': 'bar'}
+        assert self.parser(input_dict) == 10
 
     def test_register_builder_duplicate(self):
-        pytest.skip()
+        # if an attempt is made to registered a builder with a name that is
+        # already in use, a RuntimeError is raised
+        orig = self.parser.type_dispatch['foo']
+        # TODO: this should be an error; need to figure out how to avoid
+        # duplication
+        # with pytest.raises(RuntimeError, match="already registered"):
+        with pytest.warns(UserWarning, match="already registered"):
+            self.parser.register_builder(lambda dct: 10, 'foo')
+
+        assert self.parser.type_dispatch['foo'] is orig
 
     @pytest.mark.parametrize('input_type', ['str', 'dict'])
     def test_parse(self, input_type):

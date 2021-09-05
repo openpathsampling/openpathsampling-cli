@@ -232,6 +232,8 @@ class InstanceBuilder(OPSPlugin):
         return new_dct
 
     def __call__(self, dct):
+        # TODO: convert this to taking **dct -- I think that makes more
+        # sense
         ops_dct = self.parse_attrs(dct)
         self.logger.debug("Building...")
         self.logger.debug(ops_dct)
@@ -258,7 +260,7 @@ class Parser:
         try:
             return self.named_objs[name]
         except KeyError as e:
-            raise e  # TODO: replace with better error
+            raise InputError.unknown_name(self.label, name)
 
     def _parse_dict(self, dct):
         dct = dct.copy()  # make a local copy
@@ -272,23 +274,23 @@ class Parser:
     def register_object(self, obj, name):
         if name is not None:
             if name in self.named_objs:
-                raise InputError(f"An object of type {self.name} and name "
+                raise InputError(f"An object of type {self.label} and name "
                                  f"{name} already exists.")
-            obj = obj.named(name)
             self.named_objs[name] = obj
-        obj = obj.named(name)
+            obj = obj.named(name)
         self.all_objs.append(obj)
         return obj
 
     def register_builder(self, builder, name):
         if name in self.type_dispatch:
-            msg = (f"'{builder.name}' is already registered "
+            msg = (f"'{name}' is already registered "
                    f"with {self.label}")
             if self.error_on_duplicate:
                 raise RuntimeError(msg)
             else:
                 warnings.warn(msg)
-        self.type_dispatch[name] = builder
+        else:
+            self.type_dispatch[name] = builder
 
     def parse(self, dct):
         if isinstance(dct, str):
