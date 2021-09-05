@@ -25,16 +25,16 @@ logger = logging.getLogger(__name__)
 
 @click.command(
     'contents',
-    short_help="list named objects from an OPS .nc file",
+    short_help="list named objects from an OPS storage file",
 )
 @INPUT_FILE.clicked(required=True)
 @click.option('--table', type=str, required=False,
               help="table to show results from")
 def contents(input_file, table):
-    """List the names of named objects in an OPS .nc file.
+    """List the names of named objects in an OPS storage file.
 
-    This is particularly useful when getting ready to use one of simulation
-    scripts (i.e., to identify exactly how a state or engine is named.)
+    This is particularly useful when getting ready to use a simulation
+    command (i.e., to identify exactly how a state or engine is named.)
     """
     storage = INPUT_FILE.get(input_file)
     print(storage)
