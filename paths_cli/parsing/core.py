@@ -69,7 +69,7 @@ class Parameter:
         return attr
 
     def __call__(self, *args, **kwargs):
-        # check correct call signature here
+        # check correct call signature here?
         return self.loader(*args, **kwargs)
 
     def to_json_schema(self, schema_context=None):
@@ -86,7 +86,7 @@ class Builder:
     When the parsed parameters dictionary matches the kwargs for your class,
     you can create a valid delayed builder function with
 
-    .. code:
+    .. code::
 
         builder = Builder('import_path.for_the.ClassToBuild')
 
@@ -129,6 +129,25 @@ class Builder:
 
 
 class InstanceBuilder(OPSPlugin):
+    """
+
+    Parameters
+    ----------
+    builder : Callable
+        Function that actually creates an instance of this object. Note that
+        the :class:`.Builder` class is often a useful tool here (but any
+        callable is allowed).
+    parameters : List[:class:`.Parameter]
+        Descriptions of the paramters for that the builder takes.
+    name : str
+        Name used in the text input for this object.
+    aliases : List[str]
+        Other names that can be used.
+    requires_ops : Tuple[int, int]
+        version of OpenPathSampling required for this functionality
+    requires_cli : Tuple[int, int]
+        version of the OPS CLI requires for this functionality
+    """
     SCHEMA = "http://openpathsampling.org/schemas/sim-setup/draft01.json"
     parser_name = None
     error_on_duplicate = False  # TODO: temporary
@@ -174,6 +193,10 @@ class InstanceBuilder(OPSPlugin):
     def parse_attrs(self, dct):
         """Parse the user input dictionary to mapping of name to object.
 
+        This changes the values in the key-value pairs we get from the file
+        into objects that are suitable as input to a function. Further
+        remapping of keys is performed by the builder.
+
         Parameters
         ----------
         dct: Dict
@@ -182,8 +205,8 @@ class InstanceBuilder(OPSPlugin):
         Returns
         -------
         Dict :
-            Mapping with the keys relevant to the input dictionary, but
-            values are now appropriate inputs for the builder.
+            Mapping with the keys from the input dictionary, but values are
+            now appropriate inputs for the builder.
         """
         # TODO: support aliases in dct[attr]
         input_dct = self.defaults.copy()
