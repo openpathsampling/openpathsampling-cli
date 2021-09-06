@@ -1,0 +1,126 @@
+engines: 
+  - type: openmm
+    name: engine
+    system: system.xml
+    integrator: integrator.xml
+    topology: ad.pdb
+    n_steps_per_frame: 10
+    n_frames_max: 10000
+
+cvs:
+  - name: phi
+    type: mdtraj
+    topology: ad.pdb
+    period_min: -np.pi
+    period_max: np.pi
+    func: compute_dihedrals
+    kwargs:
+      atom_indices: [[4, 6, 8, 14]]
+  - name: psi
+    type: mdtraj
+    topology: ad.pdb
+    period_min: -np.pi
+    period_max: np.pi
+    func: compute_dihedrals
+    kwargs:
+      atom_indices: [[6, 8, 14, 16]]
+
+states:
+  - name: alpha_R
+    type: intersection
+    subvolumes:
+      - type: cv-volume
+        cv: psi
+        lambda_min: -100 * np.pi / 180
+        lambda_max: 0.0
+      - type: cv-volume
+        cv: phi
+        lambda_min: -np.pi
+        lambda_max: 0
+  - name: C_7eq
+    type: intersection
+    subvolumes:
+      - type: cv-volume
+        cv: psi
+        lambda_min: 100 * np.pi / 180
+        lambda_max: 200 * np.pi / 180
+      - type: cv-volume
+        cv: phi
+        lambda_min: -np.pi
+        lambda_max: 0
+
+#simulations:
+  #- type: tps
+    #name: tps-sim
+    #initial_states:
+      #- C_7eq
+    #final_states:
+      #- alpha_R
+    ##movescheme:  # default scheme; doesn't need to be explicit
+      ##strategies:
+        ##- type: one-way-shooting
+          ##group: shooting
+          ##selector:
+            ##type: uniform
+  #- type: tis
+    #name: tis-sim
+    #initial_state:
+      #- alpha_R
+    #final_state:
+      #- C_7eq
+    #interface_set:
+      #cv: psi
+      #min_lambdas: -100.0 * np.pi / 180
+      #max_lambdas: np.array([0.0, 25.0, 50.0]) * np.pi / 180
+
+networks:
+  - type: tps
+    name: tps-network
+    initial_states:
+      - C_7eq
+    final_states:
+      - alpha_R
+
+  #- type: tis
+    #name: tis-network
+    #initial_state: C_7eq
+    #final_state: alpha_R
+    #interface_set:
+      #cv: psi
+      #min_lambdas: -100.0 * np.pi / 180
+      #max_lambdas: np.array([0.0, 25.0, 50.0]) * np.pi / 180
+
+  #- type: mistis
+    #name: mistis-network
+    #transitions:
+      #- initial_state: C_7eq
+        #final_state: alpha_R
+        #interface_set:
+          #cv: psi
+          #min_lambdas: -100.0 * np.pi / 180
+          #max_lambdas: np.array([0.0, 25.0, 50.0]) * np.pi / 180
+
+  #- type: mstis
+    #name: mstis-network
+    #transitions:
+      #- initial_state: C_7eq
+        #interface_set:
+          #cv: psi
+          #min_lambdas: -100.0 * np.pi / 180
+          #max_lambdas: np.array([0.0, 25.0, 50.0]) * np.pi / 180
+      #- initial_state: alpha_R
+        #interface_set:
+          #cv: psi
+          ## TODO need a negative psi here or allow decreasing transitions
+
+
+#moveschemes:
+  #- type: scheme
+    #name: tps-sim
+    #network: tps-network
+    #strategies:
+      #- type: one-way
+        #selector:
+          #type: uniform
+        #engine: engine
+

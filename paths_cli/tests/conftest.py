@@ -3,6 +3,14 @@ from openpathsampling.engines import toy as toys
 import openpathsampling as paths
 import pytest
 
+import pathlib
+
+@pytest.fixture
+def test_data_dir():
+    tests = pathlib.Path(__file__).parent / "testdata"
+    return tests
+
+
 @pytest.fixture
 def flat_engine():
     pes = toys.LinearSlope([0, 0, 0], 0)

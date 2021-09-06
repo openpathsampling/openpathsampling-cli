@@ -3,6 +3,7 @@ import click
 from paths_cli.parsing.root_parser import parse
 from paths_cli.parameters import OUTPUT_FILE
 from paths_cli.errors import MissingIntegrationError
+from paths_cli import OPSCommandPlugin
 import importlib
 
 def import_module(module_name, format_type=None, install=None):
@@ -65,6 +66,9 @@ def compile_(input_file, output_file):
     storage = OUTPUT_FILE.get(output_file)
     storage.save(objs)
 
-
-CLI = compile_
-SECTION = "Debug"
+PLUGIN = OPSCommandPlugin(
+    command=compile_,
+    section="Debug",
+    requires_ops=(1, 0),
+    requires_cli=(0, 3)
+)

@@ -18,6 +18,8 @@ except ImportError:
 else:
     HAS_OPENMM = True
 
+# TODO: this isn't wizard-specific, and should be moved somwhere more
+# generally useful (like, oh, maybe openpathsampling.tests.fixtures?)
 @pytest.fixture
 def ad_openmm(tmpdir):
     """
