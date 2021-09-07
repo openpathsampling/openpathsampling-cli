@@ -2,9 +2,9 @@ import pytest
 import paths_cli
 from paths_cli.compiling.root_compiler import *
 from paths_cli.compiling.root_compiler import (
-    _get_compiler, _get_registration_names, _register_builder_plugin,
-    _register_compiler_plugin, _sort_user_categories, _CompilerProxy,
-    _COMPILERS, _ALIASES
+    _canonical_name, _get_compiler, _get_registration_names,
+    _register_builder_plugin, _register_compiler_plugin,
+    _sort_user_categories, _CompilerProxy, _COMPILERS, _ALIASES
 )
 from unittest.mock import Mock, PropertyMock, patch
 from paths_cli.compiling.core import Compiler, InstanceBuilder
@@ -23,7 +23,8 @@ def foo_compiler_plugin():
 
 @pytest.fixture
 def foo_baz_builder_plugin():
-    builder = InstanceBuilder(None, [], name='baz')
+    builder = InstanceBuilder(lambda: "FOO" , [], name='baz',
+                              aliases=['qux'])
     builder.compiler_name = 'foo'
     return builder
 
@@ -34,11 +35,18 @@ BASE = "paths_cli.compiling.root_compiler."
 
 ### TESTS ##################################################################
 
-def clean_input_key():
-    pytest.skip()
+@pytest.mark.parametrize('input_string', ["foo-bar", "FOO_bar", "foo  bar",
+                                          "foo_bar", "foo BAR"])
+def test_clean_input_key(input_string):
+    assert clean_input_key(input_string) == "foo_bar"
 
-def test_canonical_name():
-    pytest.skip()
+@pytest.mark.parametrize('input_name', ['canonical', 'alias'])
+def test_canonical_name(input_name):
+    compilers = {'canonical': "FOO"}
+    aliases = {'alias': 'canonical'}
+    with patch.dict(COMPILER_LOC, compilers) as compilers_, \
+            patch.dict(BASE + "_ALIASES", aliases) as aliases_:
+        assert _canonical_name(input_name) == "canonical"
 
 class TestCompilerProxy:
     def setup(self):
@@ -83,15 +91,22 @@ def test_compiler_for_existing(foo_compiler):
         proxy = compiler_for('foo')
         assert proxy._proxy is foo_compiler
 
-def test_compiler_for_registered():
+def test_compiler_for_unregistered(foo_compiler):
     # if a compiler is registered after compiler_for is called, then
     # compiler_for should use that as its proxy
-    pytest.skip()
+    proxy = compiler_for('foo')
+    with patch.dict(COMPILER_LOC, {'foo': foo_compiler}):
+        assert proxy._proxy is foo_compiler
 
-def test_compiler_for_registered_alias():
+def test_compiler_for_registered_alias(foo_compiler):
     # if compiler_for is registered as an alias, compiler_for should still
     # get the correct compiler
-    pytest.skip()
+    compilers = {'foo': foo_compiler}
+    aliases = {'bar': 'foo'}
+    with patch.dict(COMPILER_LOC, compilers) as compilers_, \
+            patch.dict(BASE + "_ALIASES", aliases) as aliases_:
+        proxy  = compiler_for('bar')
+        assert proxy._proxy is foo_compiler
 
 def test_get_compiler_existing(foo_compiler):
     # if a compiler has been registered, then _get_compiler should return the
@@ -132,15 +147,47 @@ def test_register_compiler_plugin(foo_compiler_plugin):
 
     assert 'foo' not in _COMPILERS
 
-def test_register_compiler_plugin_duplicate():
+@pytest.mark.parametrize('duplicate_of', ['canonical', 'alias'])
+@pytest.mark.parametrize('duplicate_from', ['canonical', 'alias'])
+def test_register_compiler_plugin_duplicate(duplicate_of, duplicate_from):
     # if a compiler of the same name exists either in canonical or aliases,
     # _register_compiler_plugin should raise an error
-    pytest.skip()
 
-def test_register_builder_plugin():
+    # duplicate_of: existing
+    # duplicate_from: which part of the plugin has the duplicated name
+    pytest.skip()  # FIXME: same duplication problem as before, I think
+    if duplicate_from == 'canonical':
+        plugin = CompilerPlugin(Mock(compiler_name=duplicate_of),
+                                aliases=['foo'])
+    else:
+        plugin = CompilerPlugin(Mock(compiler_name='foo'),
+                                aliases=[duplicate_of])
+
+    compilers = {'canonical': "FOO"}
+    aliases = {'alias': 'canonical'}
+    with patch.dict(COMPILER_LOC, compilers) as compilers_,\
+            patch.dict(BASE + "_ALIASES", aliases) as aliases_:
+        with pytest.raises(CompilerRegistrationError):
+            _register_compiler_plugin(plugin)
+
+@pytest.mark.parametrize('compiler_exists', [True, False])
+def test_register_builder_plugin(compiler_exists, foo_baz_builder_plugin,
+                                 foo_compiler):
     # _register_builder_plugin should register plugins that don't exist,
     # including registering the compiler if needed
-    pytest.skip()
+    if compiler_exists:
+        compilers = {'foo': foo_compiler}
+    else:
+        compilers = {}
+
+    with patch.dict(COMPILER_LOC, compilers):
+        if not compiler_exists:
+            assert 'foo' not in _COMPILERS
+        _register_builder_plugin(foo_baz_builder_plugin)
+        assert 'foo' in _COMPILERS
+        type_dispatch = _COMPILERS['foo'].type_dispatch
+        assert type_dispatch['baz'] is foo_baz_builder_plugin
+        assert type_dispatch['qux'] is foo_baz_builder_plugin
 
 def test_register_plugins_unit(foo_compiler_plugin, foo_baz_builder_plugin):
     # register_plugins should correctly sort builder and compiler plugins,
@@ -177,4 +224,34 @@ def test_sort_user_categories():
 
 def test_do_compile():
     # compiler should correctly compile a basic input dict
-    pytest.skip()
+    compilers = {
+        'foo': Compiler({
+            'baz': lambda dct: "BAZ" * dct['x']
+        }, 'foo'),
+        'bar': Compiler({
+            'qux': lambda dct: "QUX" * dct['x']
+        }, 'bar'),
+    }
+    aliases = {'baar': 'bar'}
+    input_dict = {
+        'foo': [{
+            'type': 'baz',
+            'x': 2
+        }],
+        'baar': [{
+            'type': 'qux',
+            'x': 3
+        }]
+    }
+    order = ['bar', 'foo']
+    try:
+        paths_cli.compiling.root_compiler.COMPILE_ORDER = order
+        with patch.dict(COMPILER_LOC, compilers) as _compiler,\
+                patch.dict(BASE + "_ALIASES", aliases) as _alias:
+            objs = do_compile(input_dict)
+    finally:
+        paths_cli.compiling.root_compiler.COMPILE_ORDER = COMPILE_ORDER
+        # check that we unset properly (test the test)
+        assert paths_cli.compiling.root_compiler.COMPILE_ORDER[0] == 'engine'
+
+    assert objs == ["QUXQUXQUX", "BAZBAZ"]

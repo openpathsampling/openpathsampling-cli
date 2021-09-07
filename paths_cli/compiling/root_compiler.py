@@ -29,7 +29,7 @@ def clean_input_key(key):
     """
     key = key.lower()
     key = "_".join(key.split())  # whitespace to underscore
-    key.replace("-", "_")
+    key = key.replace("-", "_")
     return key
 
 ### Managing known compilers and aliases to the known compilers ############
@@ -63,8 +63,9 @@ def _get_compiler(compiler_name):
     return _COMPILERS[canonical_name]
 
 def _register_compiler_plugin(plugin):
-    DUPLICATE_ERROR = RuntimeError(f"The name {plugin.name} has been "
-                                   "reserved by another compiler")
+    DUPLICATE_ERROR = CompilerRegistrationError(
+        f"The name {plugin.name} has been reserved by another compiler"
+    )
     if plugin.name in _COMPILERS:
         raise DUPLICATE_ERROR
 
@@ -175,10 +176,11 @@ def do_compile(dct):
     """
     objs = []
     for category in _sort_user_categories(dct):
-        # func = COMPILERS[category]
+        # breakpoint()
         func = _get_compiler(category)
         yaml_objs = dct.get(category, [])
-        print(f"{yaml_objs}")
-        new = [func(obj) for obj in yaml_objs]
+        logger.debug(f"{yaml_objs}")
+        new = func(yaml_objs)
+        # new = [func(obj) for obj in yaml_objs]
         objs.extend(new)
     return objs

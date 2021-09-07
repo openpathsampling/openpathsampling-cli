@@ -295,8 +295,14 @@ class TestCompiler:
 
     @pytest.mark.parametrize('input_type', ['str', 'dict'])
     def test_compile(self, input_type):
+        # the compile method should work whether the input is a dict
+        # representing an object to be compiled or string name for an
+        # already-compiled object
         pytest.skip()
 
+    @pytest.mark.parametrize('input_type', ['str', 'dict'])
     @pytest.mark.parametrize('as_list', [True, False])
-    def test_call(self, as_list):
+    def test_call(self, input_type, as_list):
+        # the call method should work whether the input is a single object
+        # or a list of objects (as well as whether string or dict)
         pytest.skip()
