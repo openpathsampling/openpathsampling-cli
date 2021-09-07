@@ -42,7 +42,7 @@ def tis_trans_info(dct):
                            'interfaces': interface_set}]
     return mistis_trans_info(dct)
 
-build_tps_network = NetworkParserPlugin(
+TPS_NETWORK_PLUGIN = NetworkParserPlugin(
     builder=Builder('openpathsampling.TPSNetwork'),
     parameters=[
         Parameter('initial_states', parser_for('volume'),
@@ -53,16 +53,21 @@ build_tps_network = NetworkParserPlugin(
     name='tps'
 )
 
-build_mistis_network = NetworkParserPlugin(
+build_tps_network = TPS_NETWORK_PLUGIN
+
+MISTIS_NETWORK_PLUGIN = NetworkParserPlugin(
     parameters=[Parameter('trans_info', mistis_trans_info)],
     builder=Builder('openpathsampling.MISTISNetwork'),
     name='mistis'
 )
+build_mistis_network = MISTIS_NETWORK_PLUGIN
 
-build_tis_network = NetworkParserPlugin(
+TIS_NETWORK_PLUGIN = NetworkParserPlugin(
     builder=Builder('openpathsampling.MISTISNetwork'),
     parameters=[Parameter('trans_info', tis_trans_info)],
     name='tis'
 )
+build_tis_network = TIS_NETWORK_PLUGIN
+
 
 NETWORK_PARSER = ParserPlugin(NetworkParserPlugin, aliases=['networks'])

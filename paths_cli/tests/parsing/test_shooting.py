@@ -18,7 +18,7 @@ def test_build_gaussian_selector(cv_and_states):
     cv, _, _ = cv_and_states
     dct = {'cv': 'x', 'mean': 1.0, 'stddev': 2.0}
     parser = {'cv': mock_parser('cv', named_objs={'x': cv})}
-    with patch.dict('paths_cli.parsing.root_parser.PARSERS', parser):
+    with patch.dict('paths_cli.parsing.root_parser._PARSERS', parser):
         sel = build_gaussian_selector(dct)
 
     assert isinstance(sel, paths.GaussianBiasSelector)

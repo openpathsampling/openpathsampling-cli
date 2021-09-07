@@ -41,7 +41,7 @@ class TestBuildCVVolume:
         yml = self.yml.format(func=self.func[inline])
         dct = yaml.load(yml, Loader=yaml.FullLoader)
         if inline =='external':
-            patch_loc = 'paths_cli.parsing.root_parser.PARSERS'
+            patch_loc = 'paths_cli.parsing.root_parser._PARSERS'
             parsers = {
                 'cv': mock_parser('cv', named_objs={'foo': self.mock_cv})
             }
@@ -107,7 +107,7 @@ class TestBuildCombinationVolume:
                 named_objs=named_volumes_dict
             ),
         }
-        with mock.patch.dict('paths_cli.parsing.root_parser.PARSERS',
+        with mock.patch.dict('paths_cli.parsing.root_parser._PARSERS',
                              parser):
             vol = builder(dct)
 

@@ -53,6 +53,9 @@ def test_select_loader_error():
         select_loader('foo.bar')
 
 def test_compile(ad_openmm, test_data_dir):
+    # this is a smoke test to check that, given a correct YAML file, we can
+    # compile the yaml into a db file, and then reload (some of) the saves
+    # objects from the db.
     runner = CliRunner()
     setup = test_data_dir / "setup.yml"
     shutil.copy2(str(setup), ad_openmm)
@@ -63,18 +66,29 @@ def test_compile(ad_openmm, test_data_dir):
                  ad_openmm / "integrator.xml"]
         for filename in files:
             shutil.copy2(str(filename), cwd)
-        pytest.skip()  # TODO: right now we're not building the parsers
+        pytest.skip()  # TODO: parser aliases don't work yet
         result = runner.invoke(
             compile_,
             ['setup.yml', '-o', str(ad_openmm / 'setup.db')]
         )
+        if result.exc_info:  # -no-cov-
+            # this only runs in the event of an error (to provide a clearer
+            # failure)  (TODO: change this up a little maybe? re-raise the
+            # error?)
+            import traceback
+            traceback.print_tb(result.exc_info[2])
+            print(result.exception)
+            print(result.exc_info)
         assert result.exit_code == 0
+        print(result.output)
+        assert os.path.exists(str(ad_openmm / 'setup.db'))
         from openpathsampling.experimental.storage import (
             Storage, monkey_patch_all)
-        st = Storage('setup.db', mode='r')
+        # TODO: need to do the temporary monkey patch here
+        st = Storage(str(ad_openmm / 'setup.db'), mode='r')
 
         # smoke tests that we can reload things
+        print("Engines:", len(st.engines), [e.name for e in st.engines])
         engine = st.engines['engine']
         phi = st.cvs['phi']
         C_7eq = st.volumes['C_7eq']
-        pytest.skip()

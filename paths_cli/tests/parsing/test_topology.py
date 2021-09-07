@@ -16,7 +16,7 @@ class TestBuildTopology:
         assert topology.n_atoms == 1651
 
     def test_build_topology_engine(self, flat_engine):
-        patch_loc = 'paths_cli.parsing.root_parser.PARSERS'
+        patch_loc = 'paths_cli.parsing.root_parser._PARSERS'
         parser = mock_parser('engine', named_objs={'flat': flat_engine})
         parsers = {'engine': parser}
         with patch.dict(patch_loc, parsers):
@@ -25,7 +25,7 @@ class TestBuildTopology:
             assert topology.n_atoms == 1
 
     def test_build_topology_fail(self):
-        patch_loc = 'paths_cli.parsing.root_parser.PARSERS'
+        patch_loc = 'paths_cli.parsing.root_parser._PARSERS'
         parsers = {'engine': mock_parser('engine')}
         with patch.dict(patch_loc, parsers):
             with pytest.raises(InputError):

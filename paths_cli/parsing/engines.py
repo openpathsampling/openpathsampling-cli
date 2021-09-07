@@ -53,8 +53,4 @@ OPENMM_PLUGIN = EngineParserPlugin(
     name='openmm',
 )
 
-TYPE_MAPPING = {
-    'openmm': OPENMM_PLUGIN,
-}
-
 ENGINE_PARSER = ParserPlugin(EngineParserPlugin, aliases=['engines'])

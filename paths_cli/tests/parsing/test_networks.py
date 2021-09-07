@@ -46,7 +46,7 @@ def test_mistis_trans_info(cv_and_states):
             "A": state_A, "B": state_B
         }),
     }
-    with mock.patch.dict('paths_cli.parsing.root_parser.PARSERS', parser):
+    with mock.patch.dict('paths_cli.parsing.root_parser._PARSERS', parser):
         results = mistis_trans_info(dct)
 
     check_unidirectional_tis(results, state_A, state_B, cv)
@@ -71,7 +71,7 @@ def test_tis_trans_info(cv_and_states):
             "A": state_A, "B": state_B
         }),
     }
-    with mock.patch.dict('paths_cli.parsing.root_parser.PARSERS', parser):
+    with mock.patch.dict('paths_cli.parsing.root_parser._PARSERS', parser):
         results = tis_trans_info(dct)
 
     check_unidirectional_tis(results, state_A, state_B, cv)
@@ -86,7 +86,7 @@ def test_build_tps_network(cv_and_states):
         'volume': mock_parser('volume', named_objs={"A": state_A,
                                                     "B": state_B}),
     }
-    with mock.patch.dict('paths_cli.parsing.root_parser.PARSERS', parser):
+    with mock.patch.dict('paths_cli.parsing.root_parser._PARSERS', parser):
         network = build_tps_network(dct)
     assert isinstance(network, paths.TPSNetwork)
     assert len(network.initial_states) == len(network.final_states) == 1

@@ -18,7 +18,7 @@ def cv_volume_build_func(**dct):
     # TODO: wrap this with some logging
     return builder(**dct)
 
-build_cv_volume = VolumeParserPlugin(
+CV_VOLUME_PLUGIN = VolumeParserPlugin(
     builder=cv_volume_build_func,
     parameters=[
         Parameter('cv', parser_for('cv'),
@@ -31,13 +31,15 @@ build_cv_volume = VolumeParserPlugin(
     name='cv-volume',
 )
 
+build_cv_volume = CV_VOLUME_PLUGIN
+
 # jsonschema type for combination volumes
 VOL_ARRAY_TYPE = {
     'type': 'array',
     'items': {"$ref": "#/definitions/volume_type"}
 }
 
-build_intersection_volume = VolumeParserPlugin(
+INTERSECTION_VOLUME_PLUGIN = VolumeParserPlugin(
     builder=lambda subvolumes: functools.reduce(operator.__and__,
                                                 subvolumes),
     parameters=[
@@ -48,7 +50,9 @@ build_intersection_volume = VolumeParserPlugin(
     name='intersection',
 )
 
-build_union_volume = VolumeParserPlugin(
+build_intersection_volume = INTERSECTION_VOLUME_PLUGIN
+
+UNION_VOLUME_PLUGIN = VolumeParserPlugin(
     builder=lambda subvolumes: functools.reduce(operator.__or__,
                                                 subvolumes),
     parameters=[
@@ -59,7 +63,4 @@ build_union_volume = VolumeParserPlugin(
     name='union',
 )
 
-TYPE_MAPPING = {
-    'cv-volume': build_cv_volume,
-    'intersection': build_intersection_volume,
-}
+build_union_volume = UNION_VOLUME_PLUGIN

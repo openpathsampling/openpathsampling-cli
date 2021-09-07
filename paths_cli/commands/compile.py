@@ -1,10 +1,15 @@
 import click
 
-from paths_cli.parsing.root_parser import parse
+from paths_cli.parsing.root_parser import parse, register_plugins
 from paths_cli.parameters import OUTPUT_FILE
 from paths_cli.errors import MissingIntegrationError
 from paths_cli import OPSCommandPlugin
+from paths_cli.parsing.plugins import ParserPlugin, InstanceBuilder
+from paths_cli.plugin_management import (
+    NamespacePluginLoader, FilePluginLoader
+)
 import importlib
+from paths_cli.utils import app_dir_plugins
 
 def import_module(module_name, format_type=None, install=None):
     try:
@@ -28,13 +33,11 @@ def load_json(f):
     json = import_module('json')  # this should never fail... std lib!
     return json.loads(f.read())
 
-# TODO: It looks like TOML was working with my test dict -- I'll have to see
-# if that's an issue with the TOML format or just something weird. I thought
-# TOML was equally as flexible (in theory) as JSON.
-# def load_toml(f):
-#     toml = import_module('toml', format_type="TOML", install="toml")
-#     return toml.loads(f.read())
-
+# This is why we can't use TOML:
+# https://github.com/toml-lang/toml/issues/553#issuecomment-444814690
+# Conflicts with rules preventing mixed types in arrays. This seems to have
+# relaxed in TOML 1.0, but the toml package doesn't support the 1.0
+# standard. We'll add toml in once the pacakge supports the standard.
 
 EXTENSIONS = {
     'yaml': load_yaml,
@@ -51,6 +54,17 @@ def select_loader(filename):
     except KeyError:
         raise RuntimeError(f"Unknown file extension: {ext}")
 
+def load_plugins():
+    plugin_types = (InstanceBuilder, ParserPlugin)
+    plugin_loaders = [
+        NamespacePluginLoader('paths_cli.parsing', plugin_types),
+        FilePluginLoader(app_dir_plugins(posix=False), plugin_types),
+        FilePluginLoader(app_dir_plugins(posix=True), plugin_types),
+        NamespacePluginLoader('paths_cli_plugins', plugin_types)
+    ]
+    plugins = sum([loader() for loader in plugin_loaders], [])
+    return plugins
+
 @click.command(
     'compile',
 )
@@ -61,8 +75,11 @@ def compile_(input_file, output_file):
     with open(input_file, mode='r') as f:
         dct = loader(f)
 
+    plugins = load_plugins()
+    register_plugins(plugins)
+
     objs = parse(dct)
-    # print(objs)
+    print(objs)
     storage = OUTPUT_FILE.get(output_file)
     storage.save(objs)
 
