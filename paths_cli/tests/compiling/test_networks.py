@@ -1,12 +1,14 @@
 import pytest
 from unittest import mock
-from paths_cli.tests.parsing.utils import mock_parser
+from paths_cli.tests.compiling.utils import mock_compiler
 import numpy as np
 
 import yaml
 import openpathsampling as paths
 
-from paths_cli.parsing.networks import *
+from paths_cli.compiling.networks import *
+
+_COMPILERS_LOC = 'paths_cli.compiling.root_compiler._COMPILERS'
 
 
 def check_unidirectional_tis(results, state_A, state_B, cv):
@@ -39,14 +41,14 @@ def test_mistis_trans_info(cv_and_states):
             }
         }]
     }
-    patch_base = 'paths_cli.parsing.networks'
-    parser = {
-        'cv': mock_parser('cv', named_objs={'cv': cv}),
-        'volume': mock_parser('volume', named_objs={
+    patch_base = 'paths_cli.compiling.networks'
+    compiler = {
+        'cv': mock_compiler('cv', named_objs={'cv': cv}),
+        'volume': mock_compiler('volume', named_objs={
             "A": state_A, "B": state_B
         }),
     }
-    with mock.patch.dict('paths_cli.parsing.root_parser._PARSERS', parser):
+    with mock.patch.dict(_COMPILERS_LOC, compiler):
         results = mistis_trans_info(dct)
 
     check_unidirectional_tis(results, state_A, state_B, cv)
@@ -65,13 +67,13 @@ def test_tis_trans_info(cv_and_states):
         }
     }
 
-    parser = {
-        'cv': mock_parser('cv', named_objs={'cv': cv}),
-        'volume': mock_parser('volume', named_objs={
+    compiler = {
+        'cv': mock_compiler('cv', named_objs={'cv': cv}),
+        'volume': mock_compiler('volume', named_objs={
             "A": state_A, "B": state_B
         }),
     }
-    with mock.patch.dict('paths_cli.parsing.root_parser._PARSERS', parser):
+    with mock.patch.dict(_COMPILERS_LOC, compiler):
         results = tis_trans_info(dct)
 
     check_unidirectional_tis(results, state_A, state_B, cv)
@@ -82,11 +84,11 @@ def test_build_tps_network(cv_and_states):
     _, state_A, state_B = cv_and_states
     yml = "\n".join(["initial_states:", "  - A", "final_states:", "  - B"])
     dct = yaml.load(yml, yaml.FullLoader)
-    parser = {
-        'volume': mock_parser('volume', named_objs={"A": state_A,
+    compiler = {
+        'volume': mock_compiler('volume', named_objs={"A": state_A,
                                                     "B": state_B}),
     }
-    with mock.patch.dict('paths_cli.parsing.root_parser._PARSERS', parser):
+    with mock.patch.dict(_COMPILERS_LOC, compiler):
         network = build_tps_network(dct)
     assert isinstance(network, paths.TPSNetwork)
     assert len(network.initial_states) == len(network.final_states) == 1

@@ -3,7 +3,7 @@ from functools import partial
 from paths_cli.wizard.core import get_missing_object
 from paths_cli.wizard.engines import engines
 from paths_cli.wizard.cvs import cvs
-from paths_cli.parsing.tools import custom_eval
+from paths_cli.compiling.tools import custom_eval
 
 import numpy as np
 

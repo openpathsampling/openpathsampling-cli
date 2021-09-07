@@ -1,8 +1,8 @@
-from paths_cli.parsing.core import (
-    InstanceBuilder, Parser, Builder, Parameter
+from paths_cli.compiling.core import (
+    InstanceBuilder, Compiler, Builder, Parameter
 )
-from paths_cli.parsing.root_parser import parser_for
-from paths_cli.parsing.tools import custom_eval
+from paths_cli.compiling.root_compiler import compiler_for
+from paths_cli.compiling.tools import custom_eval
 import numpy as np
 
 build_uniform_selector = InstanceBuilder(
@@ -21,14 +21,14 @@ build_gaussian_selector = InstanceBuilder(
     builder=Builder('openpathsampling.GaussianBiasSelector',
                     remapper=remapping_gaussian_stddev),
     parameters=[
-        Parameter('cv', parser_for('cv')),
+        Parameter('cv', compiler_for('cv')),
         Parameter('mean', custom_eval),
         Parameter('stddev', custom_eval),
     ],
     name='gaussian',
 )
 
-shooting_selector_parser = Parser(
+shooting_selector_compiler = Compiler(
     type_dispatch={
         'uniform': build_uniform_selector,
         'gaussian': build_gaussian_selector,

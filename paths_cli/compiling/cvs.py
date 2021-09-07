@@ -1,11 +1,11 @@
 import os
 import importlib
 
-from .core import Parser, InstanceBuilder, custom_eval, Parameter, Builder
+from .core import Compiler, InstanceBuilder, custom_eval, Parameter, Builder
 from .topology import build_topology
 from .errors import InputError
 from paths_cli.utils import import_thing
-from paths_cli.parsing.plugins import CVParserPlugin, ParserPlugin
+from paths_cli.compiling.plugins import CVCompilerPlugin, CompilerPlugin
 
 
 class AllowedPackageHandler:
@@ -27,7 +27,7 @@ def cv_kwargs_remapper(dct):
 
 
 # MDTraj-specific
-MDTRAJ_CV_PLUGIN = CVParserPlugin(
+MDTRAJ_CV_PLUGIN = CVCompilerPlugin(
     builder=Builder('openpathsampling.experimental.storage.'
                     'collective_variables.MDTrajFunctionCV',
                     remapper=cv_kwargs_remapper),
@@ -51,10 +51,10 @@ MDTRAJ_CV_PLUGIN = CVParserPlugin(
     name="mdtraj"
 )
 
-# Main CV parser
+# Main CV compiler
 
 TYPE_MAPPING = {
     'mdtraj': MDTRAJ_CV_PLUGIN,
 }
 
-CV_PARSER = ParserPlugin(CVParserPlugin, aliases=['cvs'])
+CV_COMPILER = CompilerPlugin(CVCompilerPlugin, aliases=['cvs'])

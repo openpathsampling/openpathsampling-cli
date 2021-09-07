@@ -2,8 +2,8 @@ import pytest
 import yaml
 import os
 
-from paths_cli.parsing.engines import *
-from paths_cli.parsing.errors import InputError
+from paths_cli.compiling.engines import *
+from paths_cli.compiling.errors import InputError
 import openpathsampling as paths
 
 from openpathsampling.engines import openmm as ops_openmm

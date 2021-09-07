@@ -1,10 +1,10 @@
 import click
 
-from paths_cli.parsing.root_parser import parse, register_plugins
+from paths_cli.compiling.root_compiler import do_compile, register_plugins
 from paths_cli.parameters import OUTPUT_FILE
 from paths_cli.errors import MissingIntegrationError
 from paths_cli import OPSCommandPlugin
-from paths_cli.parsing.plugins import ParserPlugin, InstanceBuilder
+from paths_cli.compiling.plugins import CompilerPlugin, InstanceBuilder
 from paths_cli.plugin_management import (
     NamespacePluginLoader, FilePluginLoader
 )
@@ -18,7 +18,7 @@ def import_module(module_name, format_type=None, install=None):
         if format_type is None:
             format_type = module_name
 
-        msg = "Unable to find a parser for f{format_type} on your system."
+        msg = "Unable to find a compiler for f{format_type} on your system."
         if install is not None:
             msg += " Please install f{install} to use this format."
 
@@ -55,9 +55,9 @@ def select_loader(filename):
         raise RuntimeError(f"Unknown file extension: {ext}")
 
 def load_plugins():
-    plugin_types = (InstanceBuilder, ParserPlugin)
+    plugin_types = (InstanceBuilder, CompilerPlugin)
     plugin_loaders = [
-        NamespacePluginLoader('paths_cli.parsing', plugin_types),
+        NamespacePluginLoader('paths_cli.compiling', plugin_types),
         FilePluginLoader(app_dir_plugins(posix=False), plugin_types),
         FilePluginLoader(app_dir_plugins(posix=True), plugin_types),
         NamespacePluginLoader('paths_cli_plugins', plugin_types)
@@ -78,7 +78,7 @@ def compile_(input_file, output_file):
     plugins = load_plugins()
     register_plugins(plugins)
 
-    objs = parse(dct)
+    objs = do_compile(dct)
     print(objs)
     storage = OUTPUT_FILE.get(output_file)
     storage.save(objs)

@@ -83,8 +83,8 @@ class Parameter:
 class Builder:
     """Builder is a wrapper class to simplify writing builder functions.
 
-    When the parsed parameters dictionary matches the kwargs for your class,
-    you can create a valid delayed builder function with
+    When the compiled parameters dictionary matches the kwargs for your
+    class, you can create a valid delayed builder function with
 
     .. code::
 
@@ -149,7 +149,7 @@ class InstanceBuilder(OPSPlugin):
         version of the OPS CLI requires for this functionality
     """
     SCHEMA = "http://openpathsampling.org/schemas/sim-setup/draft01.json"
-    parser_name = None
+    compiler_name = None
     error_on_duplicate = False  # TODO: temporary
     def __init__(self, builder, parameters, name=None, aliases=None,
                  requires_ops=(1, 0), requires_cli=(0, 3)):
@@ -165,14 +165,14 @@ class InstanceBuilder(OPSPlugin):
         self.builder = builder
         self.builder_name = str(self.builder)
         self.parameters = parameters
-        self.logger = logging.getLogger(f"parser.InstanceBuilder.{builder}")
+        self.logger = logging.getLogger(f"compiler.InstanceBuilder.{builder}")
 
     @property
     def schema_name(self):
-        if not self.name.endswith(self.parser_name):
+        if not self.name.endswith(self.compiler_name):
             schema_name = f"{self.name}-{self.object_type}"
         else:
-            schema_name = self.parser_name
+            schema_name = self.compiler_name
         return schema_name
 
     def to_json_schema(self, schema_context=None):
@@ -190,8 +190,8 @@ class InstanceBuilder(OPSPlugin):
         }
         return self.schema_name, dct
 
-    def parse_attrs(self, dct):
-        """Parse the user input dictionary to mapping of name to object.
+    def compile_attrs(self, dct):
+        """Compile the user input dictionary to mapping of name to object.
 
         This changes the values in the key-value pairs we get from the file
         into objects that are suitable as input to a function. Further
@@ -234,7 +234,7 @@ class InstanceBuilder(OPSPlugin):
     def __call__(self, dct):
         # TODO: convert this to taking **dct -- I think that makes more
         # sense
-        ops_dct = self.parse_attrs(dct)
+        ops_dct = self.compile_attrs(dct)
         self.logger.debug("Building...")
         self.logger.debug(ops_dct)
         obj =  self.builder(**ops_dct)
@@ -242,8 +242,8 @@ class InstanceBuilder(OPSPlugin):
         return obj
 
 
-class Parser:
-    """Generic parse class; instances for each category"""
+class Compiler:
+    """Generic compile class; instances for each category"""
     error_on_duplicate = False  # TODO: temporary
     def __init__(self, type_dispatch, label):
         if type_dispatch is None:
@@ -252,17 +252,17 @@ class Parser:
         self.label = label
         self.named_objs = {}
         self.all_objs = []
-        logger_name = f"parser.Parser[{label}]"
+        logger_name = f"compiler.Compiler[{label}]"
         self.logger = logging.getLogger(logger_name)
 
-    def _parse_str(self, name):
+    def _compile_str(self, name):
         self.logger.debug(f"Looking for '{name}'")
         try:
             return self.named_objs[name]
         except KeyError as e:
             raise InputError.unknown_name(self.label, name)
 
-    def _parse_dict(self, dct):
+    def _compile_dict(self, dct):
         dct = dct.copy()  # make a local copy
         name = dct.pop('name', None)
         type_name = dct.pop('type')
@@ -292,14 +292,14 @@ class Parser:
         else:
             self.type_dispatch[name] = builder
 
-    def parse(self, dct):
+    def compile(self, dct):
         if isinstance(dct, str):
-            return self._parse_str(dct)
+            return self._compile_str(dct)
         else:
-            return self._parse_dict(dct)
+            return self._compile_dict(dct)
 
     def __call__(self, dct):
         dcts, listified = listify(dct)
-        objs = [self.parse(d) for d in dcts]
+        objs = [self.compile(d) for d in dcts]
         results = unlistify(objs, listified)
         return results

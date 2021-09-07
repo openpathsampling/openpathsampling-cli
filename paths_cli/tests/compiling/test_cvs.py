@@ -4,8 +4,8 @@ import yaml
 from openpathsampling.tests.test_helpers import data_filename
 import numpy.testing as npt
 
-from paths_cli.parsing.cvs import *
-from paths_cli.parsing.errors import InputError
+from paths_cli.compiling.cvs import *
+from paths_cli.compiling.errors import InputError
 import openpathsampling as paths
 from openpathsampling.experimental.storage.collective_variables \
         import MDTrajFunctionCV

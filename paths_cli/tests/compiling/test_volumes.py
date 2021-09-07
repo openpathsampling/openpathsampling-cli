@@ -1,12 +1,12 @@
 import pytest
 from unittest import mock
-from paths_cli.tests.parsing.utils import mock_parser
+from paths_cli.tests.compiling.utils import mock_compiler
 
 import yaml
 import openpathsampling as paths
 from openpathsampling.tests.test_helpers import make_1d_traj
 
-from paths_cli.parsing.volumes import *
+from paths_cli.compiling.volumes import *
 
 class TestBuildCVVolume:
     def setup(self):
@@ -41,11 +41,11 @@ class TestBuildCVVolume:
         yml = self.yml.format(func=self.func[inline])
         dct = yaml.load(yml, Loader=yaml.FullLoader)
         if inline =='external':
-            patch_loc = 'paths_cli.parsing.root_parser._PARSERS'
-            parsers = {
-                'cv': mock_parser('cv', named_objs={'foo': self.mock_cv})
+            patch_loc = 'paths_cli.compiling.root_compiler._COMPILERS'
+            compilers = {
+                'cv': mock_compiler('cv', named_objs={'foo': self.mock_cv})
             }
-            with mock.patch.dict(patch_loc, parsers):
+            with mock.patch.dict(patch_loc, compilers):
                 vol = build_cv_volume(dct)
         elif inline == 'internal':
             vol = build_cv_volume(dct)
@@ -67,7 +67,8 @@ class TestBuildCombinationVolume:
         yml = ['- type: cv-volume', '  cv: foo',
                f"  lambda_min: {lambda_min}",
                f"  lambda_max: {lambda_max}"]
-        vol = paths.CVDefinedVolume(self.cv, lambda_min, lambda_max).named(name)
+        vol = paths.CVDefinedVolume(self.cv, lambda_min,
+                                    lambda_max).named(name)
         description = {'name': name,
                        'type': 'cv-volume',
                        'cv': 'foo',
@@ -99,16 +100,16 @@ class TestBuildCombinationVolume:
 
         true_vol = combo_class(vol_A, vol_B)
         dct = yaml.load(yml, yaml.FullLoader)
-        parser = {
-            'cv': mock_parser('cv', named_objs={'foo': self.cv}),
-            'volume': mock_parser(
+        compiler = {
+            'cv': mock_compiler('cv', named_objs={'foo': self.cv}),
+            'volume': mock_compiler(
                 'volume',
                 type_dispatch={'cv-volume': build_cv_volume},
                 named_objs=named_volumes_dict
             ),
         }
-        with mock.patch.dict('paths_cli.parsing.root_parser._PARSERS',
-                             parser):
+        with mock.patch.dict('paths_cli.compiling.root_compiler._COMPILERS',
+                             compiler):
             vol = builder(dct)
 
         traj = make_1d_traj([0.5, 2.0, 0.2])

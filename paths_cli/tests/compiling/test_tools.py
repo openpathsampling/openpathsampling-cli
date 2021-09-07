@@ -3,7 +3,7 @@ import numpy.testing as npt
 import numpy as np
 import math
 
-from paths_cli.parsing.tools import *
+from paths_cli.compiling.tools import *
 
 @pytest.mark.parametrize('expr,expected', [
     ('1+1', 2),

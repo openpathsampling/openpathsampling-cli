@@ -1,14 +1,14 @@
-from paths_cli.parsing.core import (
-    InstanceBuilder, Parser, Builder, Parameter
+from paths_cli.compiling.core import (
+    InstanceBuilder, Compiler, Builder, Parameter
 )
-from paths_cli.parsing.tools import custom_eval
-from paths_cli.parsing.plugins import NetworkParserPlugin, ParserPlugin
-from paths_cli.parsing.root_parser import parser_for
+from paths_cli.compiling.tools import custom_eval
+from paths_cli.compiling.plugins import NetworkCompilerPlugin, CompilerPlugin
+from paths_cli.compiling.root_compiler import compiler_for
 
 build_interface_set = InstanceBuilder(
     builder=Builder('openpathsampling.VolumeInterfaceSet'),
     parameters=[
-        Parameter('cv', parser_for('cv'), description="the collective "
+        Parameter('cv', compiler_for('cv'), description="the collective "
                   "variable for this interface set"),
         Parameter('minvals', custom_eval), # TODO fill in JSON types
         Parameter('maxvals', custom_eval), # TODO fill in JSON types
@@ -19,12 +19,12 @@ build_interface_set = InstanceBuilder(
 def mistis_trans_info(dct):
     dct = dct.copy()
     transitions = dct.pop('transitions')
-    volume_parser = parser_for('volume')
+    volume_compiler = compiler_for('volume')
     trans_info = [
         (
-            volume_parser(trans['initial_state']),
+            volume_compiler(trans['initial_state']),
             build_interface_set(trans['interfaces']),
-            volume_parser(trans['final_state'])
+            volume_compiler(trans['final_state'])
         )
         for trans in transitions
     ]
@@ -42,12 +42,12 @@ def tis_trans_info(dct):
                            'interfaces': interface_set}]
     return mistis_trans_info(dct)
 
-TPS_NETWORK_PLUGIN = NetworkParserPlugin(
+TPS_NETWORK_PLUGIN = NetworkCompilerPlugin(
     builder=Builder('openpathsampling.TPSNetwork'),
     parameters=[
-        Parameter('initial_states', parser_for('volume'),
+        Parameter('initial_states', compiler_for('volume'),
                   description="initial states for this transition"),
-        Parameter('final_states', parser_for('volume'),
+        Parameter('final_states', compiler_for('volume'),
                   description="final states for this transition")
     ],
     name='tps'
@@ -55,14 +55,14 @@ TPS_NETWORK_PLUGIN = NetworkParserPlugin(
 
 build_tps_network = TPS_NETWORK_PLUGIN
 
-MISTIS_NETWORK_PLUGIN = NetworkParserPlugin(
+MISTIS_NETWORK_PLUGIN = NetworkCompilerPlugin(
     parameters=[Parameter('trans_info', mistis_trans_info)],
     builder=Builder('openpathsampling.MISTISNetwork'),
     name='mistis'
 )
 build_mistis_network = MISTIS_NETWORK_PLUGIN
 
-TIS_NETWORK_PLUGIN = NetworkParserPlugin(
+TIS_NETWORK_PLUGIN = NetworkCompilerPlugin(
     builder=Builder('openpathsampling.MISTISNetwork'),
     parameters=[Parameter('trans_info', tis_trans_info)],
     name='tis'
@@ -70,4 +70,4 @@ TIS_NETWORK_PLUGIN = NetworkParserPlugin(
 build_tis_network = TIS_NETWORK_PLUGIN
 
 
-NETWORK_PARSER = ParserPlugin(NetworkParserPlugin, aliases=['networks'])
+NETWORK_COMPILER = CompilerPlugin(NetworkCompilerPlugin, aliases=['networks'])

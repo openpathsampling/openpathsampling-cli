@@ -1,8 +1,8 @@
 from .topology import build_topology
-from .core import Parser, custom_eval, Builder
-from paths_cli.parsing.core import Parameter
+from .core import Compiler, custom_eval, Builder
+from paths_cli.compiling.core import Parameter
 from .tools import custom_eval_int
-from paths_cli.parsing.plugins import EngineParserPlugin, ParserPlugin
+from paths_cli.compiling.plugins import EngineCompilerPlugin, CompilerPlugin
 
 from paths_cli.errors import MissingIntegrationError
 
@@ -46,11 +46,11 @@ OPENMM_PARAMETERS = [
                            "trajectory")),
 ]
 
-OPENMM_PLUGIN = EngineParserPlugin(
+OPENMM_PLUGIN = EngineCompilerPlugin(
     builder=Builder('openpathsampling.engines.openmm.Engine',
                     remapper=openmm_options),
     parameters=OPENMM_PARAMETERS,
     name='openmm',
 )
 
-ENGINE_PARSER = ParserPlugin(EngineParserPlugin, aliases=['engines'])
+ENGINE_COMPILER = CompilerPlugin(EngineCompilerPlugin, aliases=['engines'])

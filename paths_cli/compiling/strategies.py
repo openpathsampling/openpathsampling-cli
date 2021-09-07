@@ -1,9 +1,11 @@
-from paths_cli.parsing.core import (
-    Parser, Builder, Parameter
+from paths_cli.compiling.core import (
+    Compiler, Builder, Parameter
 )
-from paths_cli.parsing.shooting import shooting_selector_parser
-from paths_cli.parsing.plugins import StrategyParserPlugin, ParserPlugin
-from paths_cli.parsing.root_parser import parser_for
+from paths_cli.compiling.shooting import shooting_selector_compiler
+from paths_cli.compiling.plugins import (
+    StrategyCompilerPlugin, CompilerPlugin
+)
+from paths_cli.compiling.root_compiler import compiler_for
 
 def _strategy_name(class_name):
     return f"openpathsampling.strategies.{class_name}"
@@ -13,9 +15,9 @@ def _group_parameter(group_name):
                      description="the group name for these movers")
 
 # TODO: maybe this moves into shooting once we have the metadata?
-SP_SELECTOR_PARAMETER = Parameter('selector', shooting_selector_parser)
+SP_SELECTOR_PARAMETER = Parameter('selector', shooting_selector_compiler)
 
-ENGINE_PARAMETER = Parameter('engine', parser_for('engine'),
+ENGINE_PARAMETER = Parameter('engine', compiler_for('engine'),
                              description="the engine for moves of this "
                              "type")
 
@@ -28,7 +30,7 @@ REPLACE_FALSE_PARAMETER = Parameter('replace', bool, default=False)
 
 
 
-build_one_way_shooting_strategy = StrategyParserPlugin(
+build_one_way_shooting_strategy = StrategyCompilerPlugin(
     builder=Builder(_strategy_name("OneWayShootingStrategy")),
     parameters=[
         SP_SELECTOR_PARAMETER,
@@ -39,7 +41,7 @@ build_one_way_shooting_strategy = StrategyParserPlugin(
     name='one-way-shooting',
 )
 
-build_two_way_shooting_strategy = StrategyParserPlugin(
+build_two_way_shooting_strategy = StrategyCompilerPlugin(
     builder=Builder(_strategy_name("TwoWayShootingStrategy")),
     parameters = [
         Parameter('modifier', ...),
@@ -51,7 +53,7 @@ build_two_way_shooting_strategy = StrategyParserPlugin(
     name='two-way-shooting',
 )
 
-build_nearest_neighbor_repex_strategy = StrategyParserPlugin(
+build_nearest_neighbor_repex_strategy = StrategyCompilerPlugin(
     builder=Builder(_strategy_name("NearestNeighborRepExStrategy")),
     parameters=[
         REPEX_GROUP_PARAMETER,
@@ -60,7 +62,7 @@ build_nearest_neighbor_repex_strategy = StrategyParserPlugin(
     name='nearest-neighbor=repex',
 )
 
-build_all_set_repex_strategy = StrategyParserPlugin(
+build_all_set_repex_strategy = StrategyCompilerPlugin(
     builder=Builder(_strategy_name("AllSetRepExStrategy")),
     parameters=[
         REPEX_GROUP_PARAMETER,
@@ -69,7 +71,7 @@ build_all_set_repex_strategy = StrategyParserPlugin(
     name='all-set-repex',
 )
 
-build_path_reversal_strategy = StrategyParserPlugin(
+build_path_reversal_strategy = StrategyCompilerPlugin(
     builder=Builder(_strategy_name("PathReversalStrategy")),
     parameters=[
         _group_parameter('pathreversal'),
@@ -78,7 +80,7 @@ build_path_reversal_strategy = StrategyParserPlugin(
     name='path-reversal',
 )
 
-build_minus_move_strategy = StrategyParserPlugin(
+build_minus_move_strategy = StrategyCompilerPlugin(
     builder=Builder(_strategy_name("MinusMoveStrategy")),
     parameters=[
         ENGINE_PARAMETER,
@@ -88,7 +90,7 @@ build_minus_move_strategy = StrategyParserPlugin(
     name='minus',
 )
 
-build_single_replica_minus_move_strategy = StrategyParserPlugin(
+build_single_replica_minus_move_strategy = StrategyCompilerPlugin(
     builder=Builder(_strategy_name("SingleReplicaMinusMoveStrategy")),
     parameters=[
         ENGINE_PARAMETER,
@@ -98,4 +100,5 @@ build_single_replica_minus_move_strategy = StrategyParserPlugin(
     name='single-replica-minus',
 )
 
-STRATEGY_PARSER = ParserPlugin(StrategyParserPlugin, aliases=['strategies'])
+STRATEGY_COMPILER = CompilerPlugin(StrategyCompilerPlugin,
+                                   aliases=['strategies'])

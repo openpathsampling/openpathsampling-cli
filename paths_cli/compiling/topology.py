@@ -1,13 +1,13 @@
 import os
 from .errors import InputError
-from paths_cli.parsing.root_parser import parser_for
+from paths_cli.compiling.root_compiler import compiler_for
 
 def get_topology_from_engine(dct):
     """If given the name of an engine, use that engine's topology"""
-    # from paths_cli.parsing.engines import engine_parser
-    engine_parser = parser_for('engine')
-    if dct in engine_parser.named_objs:
-        engine = engine_parser.named_objs[dct]
+    # from paths_cli.compiling.engines import engine_compiler
+    engine_compiler = compiler_for('engine')
+    if dct in engine_compiler.named_objs:
+        engine = engine_compiler.named_objs[dct]
         try:
             return engine.topology
         except AttributeError:  # no-cov

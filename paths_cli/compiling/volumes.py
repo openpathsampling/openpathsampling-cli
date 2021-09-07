@@ -1,9 +1,9 @@
 import operator
 import functools
 
-from .core import Parser, InstanceBuilder, custom_eval, Parameter
-from paths_cli.parsing.plugins import VolumeParserPlugin
-from paths_cli.parsing.root_parser import parser_for
+from .core import Compiler, InstanceBuilder, custom_eval, Parameter
+from paths_cli.compiling.plugins import VolumeCompilerPlugin
+from paths_cli.compiling.root_compiler import compiler_for
 
 # TODO: extra function for volumes should not be necessary as of OPS 2.0
 def cv_volume_build_func(**dct):
@@ -18,10 +18,10 @@ def cv_volume_build_func(**dct):
     # TODO: wrap this with some logging
     return builder(**dct)
 
-CV_VOLUME_PLUGIN = VolumeParserPlugin(
+CV_VOLUME_PLUGIN = VolumeCompilerPlugin(
     builder=cv_volume_build_func,
     parameters=[
-        Parameter('cv', parser_for('cv'),
+        Parameter('cv', compiler_for('cv'),
                   description="CV that defines this volume"),
         Parameter('lambda_min', custom_eval,
                   description="Lower bound for this volume"),
@@ -39,11 +39,11 @@ VOL_ARRAY_TYPE = {
     'items': {"$ref": "#/definitions/volume_type"}
 }
 
-INTERSECTION_VOLUME_PLUGIN = VolumeParserPlugin(
+INTERSECTION_VOLUME_PLUGIN = VolumeCompilerPlugin(
     builder=lambda subvolumes: functools.reduce(operator.__and__,
                                                 subvolumes),
     parameters=[
-        Parameter('subvolumes', parser_for('volume'),
+        Parameter('subvolumes', compiler_for('volume'),
                   json_type=VOL_ARRAY_TYPE,
                   description="List of the volumes to intersect")
     ],
@@ -52,11 +52,11 @@ INTERSECTION_VOLUME_PLUGIN = VolumeParserPlugin(
 
 build_intersection_volume = INTERSECTION_VOLUME_PLUGIN
 
-UNION_VOLUME_PLUGIN = VolumeParserPlugin(
+UNION_VOLUME_PLUGIN = VolumeCompilerPlugin(
     builder=lambda subvolumes: functools.reduce(operator.__or__,
                                                 subvolumes),
     parameters=[
-        Parameter('subvolumes', parser_for('volume'),
+        Parameter('subvolumes', compiler_for('volume'),
                   json_type=VOL_ARRAY_TYPE,
                   description="List of the volumes to join into a union")
     ],

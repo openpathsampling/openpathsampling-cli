@@ -1,22 +1,22 @@
-from paths_cli.parsing.core import (
-    InstanceBuilder, Parser, Builder, Parameter
+from paths_cli.compiling.core import (
+    InstanceBuilder, Compiler, Builder, Parameter
 )
-from paths_cli.parsing.tools import custom_eval
-from paths_cli.parsing.shooting import shooting_selector_parser
-from paths_cli.parsing.strategies import SP_SELECTOR_PARAMETER
-from paths_cli.parsing.plugins import SchemeParserPlugin, ParserPlugin
-from paths_cli.parsing.root_parser import parser_for
+from paths_cli.compiling.tools import custom_eval
+from paths_cli.compiling.shooting import shooting_selector_compiler
+from paths_cli.compiling.strategies import SP_SELECTOR_PARAMETER
+from paths_cli.compiling.plugins import SchemeCompilerPlugin, CompilerPlugin
+from paths_cli.compiling.root_compiler import compiler_for
 
 
-NETWORK_PARAMETER = Parameter('network', parser_for('network'))
+NETWORK_PARAMETER = Parameter('network', compiler_for('network'))
 
-ENGINE_PARAMETER = Parameter('engine', parser_for('engine'))  # reuse elsewhere?
+ENGINE_PARAMETER = Parameter('engine', compiler_for('engine'))  # reuse?
 
-STRATEGIES_PARAMETER = Parameter('strategies', parser_for('strategy'),
+STRATEGIES_PARAMETER = Parameter('strategies', compiler_for('strategy'),
                                  default=None)
 
 
-build_spring_shooting_scheme = SchemeParserPlugin(
+build_spring_shooting_scheme = SchemeCompilerPlugin(
     builder=Builder('openpathsampling.SpringShootingMoveScheme'),
     parameters=[
         NETWORK_PARAMETER,
@@ -48,7 +48,7 @@ class BuildSchemeStrategy:
         return scheme
 
 
-build_one_way_shooting_scheme = SchemeParserPlugin(
+build_one_way_shooting_scheme = SchemeCompilerPlugin(
     builder=BuildSchemeStrategy('openpathsampling.OneWayShootingMoveScheme',
                                 default_global_strategy=False),
     parameters=[
@@ -60,7 +60,7 @@ build_one_way_shooting_scheme = SchemeParserPlugin(
     name='one-way-shooting',
 )
 
-build_scheme = SchemeParserPlugin(
+build_scheme = SchemeCompilerPlugin(
     builder=BuildSchemeStrategy('openpathsampling.MoveScheme',
                                 default_global_strategy=True),
     parameters=[
@@ -70,4 +70,4 @@ build_scheme = SchemeParserPlugin(
     name='scheme'
 )
 
-SCHEME_PARSER = ParserPlugin(SchemeParserPlugin, aliases=['schemes'])
+SCHEME_COMPILER = CompilerPlugin(SchemeCompilerPlugin, aliases=['schemes'])

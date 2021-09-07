@@ -66,7 +66,7 @@ def test_compile(ad_openmm, test_data_dir):
                  ad_openmm / "integrator.xml"]
         for filename in files:
             shutil.copy2(str(filename), cwd)
-        pytest.skip()  # TODO: parser aliases don't work yet
+        pytest.skip()  # TODO: compiler aliases don't work yet
         result = runner.invoke(
             compile_,
             ['setup.yml', '-o', str(ad_openmm / 'setup.db')]
