@@ -11,6 +11,7 @@ from paths_cli.plugin_management import (
 import importlib
 from paths_cli.utils import app_dir_plugins
 
+# this is just to handle a nicer error
 def import_module(module_name, format_type=None, install=None):
     try:
         mod = importlib.import_module(module_name)

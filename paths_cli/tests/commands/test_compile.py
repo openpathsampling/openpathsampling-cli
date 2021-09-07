@@ -66,7 +66,7 @@ def test_compile(ad_openmm, test_data_dir):
                  ad_openmm / "integrator.xml"]
         for filename in files:
             shutil.copy2(str(filename), cwd)
-        pytest.skip()  # TODO: compiler aliases don't work yet
+        # pytest.skip()  # TODO: compiler aliases don't work yet
         result = runner.invoke(
             compile_,
             ['setup.yml', '-o', str(ad_openmm / 'setup.db')]
@@ -79,9 +79,10 @@ def test_compile(ad_openmm, test_data_dir):
             traceback.print_tb(result.exc_info[2])
             print(result.exception)
             print(result.exc_info)
-        assert result.exit_code == 0
         print(result.output)
+        assert result.exit_code == 0
         assert os.path.exists(str(ad_openmm / 'setup.db'))
+        import openpathsampling as paths
         from openpathsampling.experimental.storage import (
             Storage, monkey_patch_all)
         # TODO: need to do the temporary monkey patch here
@@ -92,3 +93,11 @@ def test_compile(ad_openmm, test_data_dir):
         engine = st.engines['engine']
         phi = st.cvs['phi']
         C_7eq = st.volumes['C_7eq']
+        from openpathsampling.experimental.storage.monkey_patches import unpatch
+        paths = unpatch(paths)
+        paths.InterfaceSet.simstore = False
+        import importlib
+        importlib.reload(paths.netcdfplus)
+        importlib.reload(paths.collectivevariable)
+        importlib.reload(paths.collectivevariables)
+        importlib.reload(paths)

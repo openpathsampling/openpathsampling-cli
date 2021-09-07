@@ -53,20 +53,22 @@ TPS_NETWORK_PLUGIN = NetworkCompilerPlugin(
     name='tps'
 )
 
-build_tps_network = TPS_NETWORK_PLUGIN
 
 MISTIS_NETWORK_PLUGIN = NetworkCompilerPlugin(
     parameters=[Parameter('trans_info', mistis_trans_info)],
     builder=Builder('openpathsampling.MISTISNetwork'),
     name='mistis'
 )
-build_mistis_network = MISTIS_NETWORK_PLUGIN
 
 TIS_NETWORK_PLUGIN = NetworkCompilerPlugin(
     builder=Builder('openpathsampling.MISTISNetwork'),
     parameters=[Parameter('trans_info', tis_trans_info)],
     name='tis'
 )
+
+# old names not yet replaced in testing
+build_tps_network = TPS_NETWORK_PLUGIN
+build_mistis_network = MISTIS_NETWORK_PLUGIN
 build_tis_network = TIS_NETWORK_PLUGIN
 
 

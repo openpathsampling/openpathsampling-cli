@@ -55,6 +55,11 @@ def _get_compiler(compiler_name):
     registered. It will automatically create a compiler for any unknown
     ``compiler_name.``
     """
+    if compiler_name is None:
+        if None not in _COMPILERS:
+            _COMPILERS[None] = Compiler(None, None)
+        return _COMPILERS[None]
+
     canonical_name = _canonical_name(compiler_name)
     # create a new compiler if none exists
     if canonical_name is None:
@@ -165,6 +170,7 @@ def _sort_user_categories(user_categories):
     """
     user_to_canonical = {user_key: _canonical_name(user_key)
                          for user_key in user_categories}
+    logger.debug(user_to_canonical)
     sorted_keys = sorted(
         user_categories,
         key=lambda x: COMPILE_ORDER.index(user_to_canonical[x])
@@ -175,12 +181,10 @@ def do_compile(dct):
     """Main function for compiling user input to objects.
     """
     objs = []
-    for category in _sort_user_categories(dct):
-        # breakpoint()
+    for category in _sort_user_categories(dct.keys()):
         func = _get_compiler(category)
         yaml_objs = dct.get(category, [])
-        logger.debug(f"{yaml_objs}")
+        logger.debug(yaml_objs)
         new = func(yaml_objs)
-        # new = [func(obj) for obj in yaml_objs]
         objs.extend(new)
     return objs

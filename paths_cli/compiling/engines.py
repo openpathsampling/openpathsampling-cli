@@ -14,7 +14,7 @@ else:
     HAS_OPENMM = True
 
 def load_openmm_xml(filename):
-    if not HAS_OPENMM:  # pragma: no cover
+    if not HAS_OPENMM:  # -no-cov-
         raise RuntimeError("OpenMM does not seem to be installed")
 
     with open(filename, mode='r') as f:

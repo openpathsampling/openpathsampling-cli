@@ -27,7 +27,7 @@ def import_thing(module, obj=None):
     return result
 
 
-def app_dir_plugins(posix):
+def app_dir_plugins(posix):  # covered as smoke tests (too OS dependent)
     return str(pathlib.Path(
         click.get_app_dir("OpenPathSampling", force_posix=posix)
     ).resolve() / 'cli-plugins')

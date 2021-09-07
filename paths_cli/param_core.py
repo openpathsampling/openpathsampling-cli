@@ -115,6 +115,14 @@ class StorageLoader(AbstractLoader):
             storage = Storage(name, self.mode)
         return storage
 
+    @classmethod
+    def cleanup(cls):
+        if cls.has_simstore_patch:
+            import openpathsampling as paths
+            from openpathsampling.experimental.storage.monkey_patches \
+                    import unpatch
+            paths = unpatch(paths)
+
 
 class OPSStorageLoadNames(AbstractLoader):
     """Simple loader that expects its input to be a name or index.
