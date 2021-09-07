@@ -7,7 +7,6 @@ from paths_cli.compiling.root_compiler import compiler_for
 
 # TODO: extra function for volumes should not be necessary as of OPS 2.0
 def cv_volume_build_func(**dct):
-    # TODO: this should take dict, not kwargs
     import openpathsampling as paths
     cv = dct['cv']
     builder = paths.CVDefinedVolume

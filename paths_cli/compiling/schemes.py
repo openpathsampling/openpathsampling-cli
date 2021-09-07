@@ -16,7 +16,7 @@ STRATEGIES_PARAMETER = Parameter('strategies', compiler_for('strategy'),
                                  default=None)
 
 
-build_spring_shooting_scheme = SchemeCompilerPlugin(
+SPRING_SHOOTING_PLUGIN = SchemeCompilerPlugin(
     builder=Builder('openpathsampling.SpringShootingMoveScheme'),
     parameters=[
         NETWORK_PARAMETER,
@@ -32,7 +32,7 @@ class BuildSchemeStrategy:
         self.scheme_class = scheme_class
         self.default_global_strategy = default_global_strategy
 
-    def __call__(self, dct):
+    def __call__(self, **dct):
         from openpathsampling import strategies
         if self.default_global_strategy:
             global_strategy = [strategies.OrganizeByMoveGroupStrategy()]
@@ -40,15 +40,15 @@ class BuildSchemeStrategy:
             global_strategy = []
 
         builder = Builder(self.scheme_class)
-        strategies = dct.pop('strategies', []) + global_strategy
-        scheme = builder(dct)
+        strategies = global_strategy + dct.pop('strategies', [])
+        scheme = builder(**dct)
         for strat in strategies:
             scheme.append(strat)
         # self.logger.debug(f"strategies: {scheme.strategies}")
         return scheme
 
 
-build_one_way_shooting_scheme = SchemeCompilerPlugin(
+ONE_WAY_SHOOTING_SCHEME_PLUGIN = SchemeCompilerPlugin(
     builder=BuildSchemeStrategy('openpathsampling.OneWayShootingMoveScheme',
                                 default_global_strategy=False),
     parameters=[
@@ -60,7 +60,7 @@ build_one_way_shooting_scheme = SchemeCompilerPlugin(
     name='one-way-shooting',
 )
 
-build_scheme = SchemeCompilerPlugin(
+MOVESCHEME_PLUGIN = SchemeCompilerPlugin(
     builder=BuildSchemeStrategy('openpathsampling.MoveScheme',
                                 default_global_strategy=True),
     parameters=[

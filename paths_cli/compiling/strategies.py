@@ -15,7 +15,8 @@ def _group_parameter(group_name):
                      description="the group name for these movers")
 
 # TODO: maybe this moves into shooting once we have the metadata?
-SP_SELECTOR_PARAMETER = Parameter('selector', shooting_selector_compiler)
+SP_SELECTOR_PARAMETER = Parameter('selector', shooting_selector_compiler,
+                                  default=None)
 
 ENGINE_PARAMETER = Parameter('engine', compiler_for('engine'),
                              description="the engine for moves of this "
