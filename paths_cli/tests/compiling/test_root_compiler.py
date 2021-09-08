@@ -21,13 +21,13 @@ def foo_compiler():
 
 @pytest.fixture
 def foo_compiler_plugin():
-    return CategoryPlugin(Mock(compiler_name='foo'), ['bar'])
+    return CategoryPlugin(Mock(category='foo'), ['bar'])
 
 @pytest.fixture
 def foo_baz_builder_plugin():
     builder = InstanceCompilerPlugin(lambda: "FOO" , [], name='baz',
                                      aliases=['qux'])
-    builder.compiler_name = 'foo'
+    builder.category = 'foo'
     return builder
 
 ### CONSTANTS ##############################################################
@@ -63,7 +63,7 @@ class TestCategoryCompilerProxy:
 
     def test_proxy_nonexisting(self):
         # _proxy should error if the no compiler is registered
-        with pytest.raises(RuntimeError, match="No compiler registered"):
+        with pytest.raises(RuntimeError, match="No CategoryCompiler"):
             self.proxy._proxy
 
     def test_named_objs(self):
@@ -83,7 +83,7 @@ def test_compiler_for_nonexisting():
         assert 'foo' not in compilers
         proxy = compiler_for('foo')
         assert 'foo' not in compilers
-        with pytest.raises(RuntimeError, match="No compiler registered"):
+        with pytest.raises(RuntimeError, match="No CategoryCompiler"):
             proxy._proxy
 
 def test_compiler_for_existing(foo_compiler):
@@ -158,10 +158,10 @@ def test_register_compiler_plugin_duplicate(duplicate_of, duplicate_from):
     # duplicate_of: existing
     # duplicate_from: which part of the plugin has the duplicated name
     if duplicate_from == 'canonical':
-        plugin = CategoryPlugin(Mock(compiler_name=duplicate_of),
+        plugin = CategoryPlugin(Mock(category=duplicate_of),
                                 aliases=['foo'])
     else:
-        plugin = CategoryPlugin(Mock(compiler_name='foo'),
+        plugin = CategoryPlugin(Mock(category='foo'),
                                 aliases=[duplicate_of])
 
     compilers = {'canonical': "FOO"}

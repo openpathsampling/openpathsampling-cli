@@ -4,7 +4,7 @@ from unittest.mock import Mock
 
 class TestCompilerPlugin:
     def setup(self):
-        self.plugin_class = Mock(compiler_name='foo')
+        self.plugin_class = Mock(category='foo')
         self.plugin = CategoryPlugin(self.plugin_class)
         self.aliased_plugin = CategoryPlugin(self.plugin_class,
                                              aliases=['bar'])

@@ -16,7 +16,7 @@ class CategoryPlugin(OPSPlugin):
 
     @property
     def name(self):
-        return self.plugin_class.compiler_name
+        return self.plugin_class.category
 
     def __repr__(self):
         return (f"CompilerPlugin({self.plugin_class.__name__}, "
@@ -24,19 +24,19 @@ class CategoryPlugin(OPSPlugin):
 
 
 class EngineCompilerPlugin(InstanceCompilerPlugin):
-    compiler_name = 'engine'
+    category = 'engine'
 
 class CVCompilerPlugin(InstanceCompilerPlugin):
-    compiler_name = 'cv'
+    category = 'cv'
 
 class VolumeCompilerPlugin(InstanceCompilerPlugin):
-    compiler_name = 'volume'
+    category = 'volume'
 
 class NetworkCompilerPlugin(InstanceCompilerPlugin):
-    compiler_name = 'network'
+    category = 'network'
 
 class SchemeCompilerPlugin(InstanceCompilerPlugin):
-    compiler_name = 'scheme'
+    category = 'scheme'
 
 class StrategyCompilerPlugin(InstanceCompilerPlugin):
-    compiler_name = 'strategy'
+    category = 'strategy'

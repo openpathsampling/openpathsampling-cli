@@ -51,27 +51,27 @@ def _canonical_name(alias):
     alias_to_canonical.update({pname: pname for pname in _COMPILERS})
     return alias_to_canonical.get(alias, None)
 
-def _get_compiler(compiler_name):
+def _get_compiler(category):
     """
-    _get_compiler must only be used after the compilers have been
+    _get_compiler must only be used after the CategoryCompilers have been
     registered. It will automatically create a compiler for any unknown
-    ``compiler_name.``
+    ``category.``
     """
-    if compiler_name is None:
+    if category is None:
         if None not in _COMPILERS:
             _COMPILERS[None] = CategoryCompiler(None, None)
         return _COMPILERS[None]
 
-    canonical_name = _canonical_name(compiler_name)
+    canonical_name = _canonical_name(category)
     # create a new compiler if none exists
     if canonical_name is None:
-        canonical_name = compiler_name
-        _COMPILERS[compiler_name] = CategoryCompiler(None, compiler_name)
+        canonical_name = category
+        _COMPILERS[category] = CategoryCompiler(None, category)
     return _COMPILERS[canonical_name]
 
 def _register_compiler_plugin(plugin):
     DUPLICATE_ERROR = CategoryCompilerRegistrationError(
-        f"The name {plugin.name} has been reserved by another compiler"
+        f"The category '{plugin.name}' has been reserved by another plugin"
     )
     if plugin.name in _COMPILERS or plugin.name in _ALIASES:
         raise DUPLICATE_ERROR
@@ -93,15 +93,15 @@ def _register_compiler_plugin(plugin):
 # the loading of the compiler by using a proxy object.
 
 class _CategoryCompilerProxy:
-    def __init__(self, compiler_name):
-        self.compiler_name = compiler_name
+    def __init__(self, category):
+        self.category = category
 
     @property
     def _proxy(self):
-        canonical_name = _canonical_name(self.compiler_name)
+        canonical_name = _canonical_name(self.category)
         if canonical_name is None:
-            raise RuntimeError("No compiler registered for "
-                               f"'{self.compiler_name}'")
+            raise RuntimeError("No CategoryCompiler registered for "
+                               f"'{self.category}'")
         return _get_compiler(canonical_name)
 
     @property
@@ -111,17 +111,17 @@ class _CategoryCompilerProxy:
     def __call__(self, *args, **kwargs):
         return self._proxy(*args, **kwargs)
 
-def compiler_for(compiler_name):
+def compiler_for(category):
     """Delayed compiler calling.
 
     Use this when you need to use a compiler as the loader for a  parameter.
 
     Parameters
     ----------
-    compiler_name : str
-        the name of the compiler to use
+    category : str
+        the category to use (:class:`.CategoryCompiler` name or alias)
     """
-    return _CategoryCompilerProxy(compiler_name)
+    return _CategoryCompilerProxy(category)
 
 
 ### Registering builder plugins and user-facing register_plugins ###########
@@ -143,7 +143,7 @@ def _get_registration_names(plugin):
     return ordered_names
 
 def _register_builder_plugin(plugin):
-    compiler = _get_compiler(plugin.compiler_name)
+    compiler = _get_compiler(plugin.category)
     for name in _get_registration_names(plugin):
         compiler.register_builder(plugin, name)
 

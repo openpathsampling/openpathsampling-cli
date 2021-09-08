@@ -145,7 +145,7 @@ class InstanceCompilerPlugin(OPSPlugin):
         version of the OPS CLI requires for this functionality
     """
     SCHEMA = "http://openpathsampling.org/schemas/sim-setup/draft01.json"
-    compiler_name = None
+    category = None
     error_on_duplicate = False  # TODO: temporary
     def __init__(self, builder, parameters, name=None, aliases=None,
                  requires_ops=(1, 0), requires_cli=(0, 3)):
@@ -166,8 +166,8 @@ class InstanceCompilerPlugin(OPSPlugin):
 
     @property
     def schema_name(self):
-        if not self.name.endswith(self.compiler_name):
-            schema_name = f"{self.name}-{self.compiler_name}"
+        if not self.name.endswith(self.category):
+            schema_name = f"{self.name}-{self.category}"
         else:
             schema_name = self.name
         return schema_name
