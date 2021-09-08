@@ -66,7 +66,8 @@ TIS_NETWORK_PLUGIN = NetworkCompilerPlugin(
     name='tis'
 )
 
-# old names not yet replaced in testing
+# old names not yet replaced in testing  THESE ARE WHY WE'RE DOUBLING! GET
+# RID OF THEM! (also, use an is-check)
 build_tps_network = TPS_NETWORK_PLUGIN
 build_mistis_network = MISTIS_NETWORK_PLUGIN
 build_tis_network = TIS_NETWORK_PLUGIN

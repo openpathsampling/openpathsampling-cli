@@ -285,10 +285,7 @@ class TestCompiler:
         # if an attempt is made to registered a builder with a name that is
         # already in use, a RuntimeError is raised
         orig = self.compiler.type_dispatch['foo']
-        # TODO: this should be an error; need to figure out how to avoid
-        # duplication
-        # with pytest.raises(RuntimeError, match="already registered"):
-        with pytest.warns(UserWarning, match="already registered"):
+        with pytest.raises(RuntimeError, match="already registered"):
             self.compiler.register_builder(lambda dct: 10, 'foo')
 
         assert self.compiler.type_dispatch['foo'] is orig
