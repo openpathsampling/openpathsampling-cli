@@ -155,7 +155,6 @@ def test_register_compiler_plugin_duplicate(duplicate_of, duplicate_from):
 
     # duplicate_of: existing
     # duplicate_from: which part of the plugin has the duplicated name
-    pytest.skip()  # FIXME: same duplication problem as before, I think
     if duplicate_from == 'canonical':
         plugin = CompilerPlugin(Mock(compiler_name=duplicate_of),
                                 aliases=['foo'])

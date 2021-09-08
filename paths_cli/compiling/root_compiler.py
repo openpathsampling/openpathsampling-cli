@@ -71,7 +71,7 @@ def _register_compiler_plugin(plugin):
     DUPLICATE_ERROR = CompilerRegistrationError(
         f"The name {plugin.name} has been reserved by another compiler"
     )
-    if plugin.name in _COMPILERS:
+    if plugin.name in _COMPILERS or plugin.name in _ALIASES:
         raise DUPLICATE_ERROR
 
     compiler = _get_compiler(plugin.name)
