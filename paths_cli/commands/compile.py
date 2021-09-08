@@ -7,11 +7,9 @@ from paths_cli import OPSCommandPlugin
 from paths_cli.compiling.plugins import (
     CategoryPlugin, InstanceCompilerPlugin
 )
-from paths_cli.plugin_management import (
-    NamespacePluginLoader, FilePluginLoader
-)
+from paths_cli.plugin_management import NamespacePluginLoader
 import importlib
-from paths_cli.utils import app_dir_plugins
+from paths_cli.utils import get_installed_plugins
 
 # this is just to handle a nicer error
 def import_module(module_name, format_type=None, install=None):
@@ -40,7 +38,7 @@ def load_json(f):
 # https://github.com/toml-lang/toml/issues/553#issuecomment-444814690
 # Conflicts with rules preventing mixed types in arrays. This seems to have
 # relaxed in TOML 1.0, but the toml package doesn't support the 1.0
-# standard. We'll add toml in once the pacakge supports the standard.
+# standard. We'll add toml in once the package supports the standard.
 
 EXTENSIONS = {
     'yaml': load_yaml,
@@ -57,17 +55,6 @@ def select_loader(filename):
     except KeyError:
         raise RuntimeError(f"Unknown file extension: {ext}")
 
-def load_plugins():
-    plugin_types = (InstanceCompilerPlugin, CategoryPlugin)
-    plugin_loaders = [
-        NamespacePluginLoader('paths_cli.compiling', plugin_types),
-        FilePluginLoader(app_dir_plugins(posix=False), plugin_types),
-        FilePluginLoader(app_dir_plugins(posix=True), plugin_types),
-        NamespacePluginLoader('paths_cli_plugins', plugin_types)
-    ]
-    plugins = sum([loader() for loader in plugin_loaders], [])
-    return plugins
-
 @click.command(
     'compile',
 )
@@ -78,7 +65,12 @@ def compile_(input_file, output_file):
     with open(input_file, mode='r') as f:
         dct = loader(f)
 
-    plugins = load_plugins()
+    plugin_types = (InstanceCompilerPlugin, CategoryPlugin)
+    plugins = get_installed_plugins(
+        default_loader=NamespacePluginLoader('paths_cli.compiling',
+                                             plugin_types),
+        plugin_types=plugin_types
+    )
     register_plugins(plugins)
 
     objs = do_compile(dct)

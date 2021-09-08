@@ -15,7 +15,7 @@ import click
 
 from .plugin_management import (FilePluginLoader, NamespacePluginLoader,
                                 OPSCommandPlugin)
-from .utils import app_dir_plugins
+from .utils import get_installed_plugins
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
@@ -27,15 +27,10 @@ class OpenPathSamplingCLI(click.MultiCommand):
     def __init__(self, *args, **kwargs):
         # the logic here is all about loading the plugins
         commands = str(pathlib.Path(__file__).parent.resolve() / 'commands')
-        self.plugin_loaders = [
-            FilePluginLoader(commands, OPSCommandPlugin),
-            FilePluginLoader(app_dir_plugins(posix=False), OPSCommandPlugin),
-            FilePluginLoader(app_dir_plugins(posix=True), OPSCommandPlugin),
-            NamespacePluginLoader('paths_cli_plugins', OPSCommandPlugin)
-        ]
-
-        plugins = sum([loader() for loader in self.plugin_loaders], [])
-
+        plugins = get_installed_plugins(
+            default_loader=FilePluginLoader(commands, OPSCommandPlugin),
+            plugin_types=OPSCommandPlugin
+        )
         self._get_command = {}
         self._sections = collections.defaultdict(list)
         self.plugins = []
