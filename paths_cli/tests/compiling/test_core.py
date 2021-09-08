@@ -146,6 +146,14 @@ class TestInstanceBuilder:
         self.instance_builder.compiler_name = 'demo'
         self.input_dict = {'req_param': "qux", 'opt_override': 25}
 
+    def test_schema_name(self):
+        assert self.instance_builder.schema_name == 'demo'
+        self.instance_builder.compiler_name = 'foo'
+        assert self.instance_builder.schema_name == 'demo-foo'
+        self.instance_builder.name = 'demo-foo'
+        assert self.instance_builder.schema_name == 'demo-foo'
+
+
     def test_to_json_schema(self):
         # to_json_schema should create a valid JSON schema entry for this
         # instance builder

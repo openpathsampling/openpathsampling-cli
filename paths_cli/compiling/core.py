@@ -170,9 +170,9 @@ class InstanceBuilder(OPSPlugin):
     @property
     def schema_name(self):
         if not self.name.endswith(self.compiler_name):
-            schema_name = f"{self.name}-{self.object_type}"
+            schema_name = f"{self.name}-{self.compiler_name}"
         else:
-            schema_name = self.compiler_name
+            schema_name = self.name
         return schema_name
 
     def to_json_schema(self, schema_context=None):

@@ -14,6 +14,10 @@ def test_import_module_error():
     with pytest.raises(MissingIntegrationError, match="Unable to find"):
         import_module('foobarbazqux')
 
+def test_import_module_install_suggestion():
+    with pytest.raises(MissingIntegrationError, match"Please install"):
+        import_module('foobarbazqux', install='foobarbazqux')
+
 _BASIC_DICT = {'foo': ['bar', {'baz': 10}], 'qux': 'quux', 'froob': 0.5}
 
 def _std_dump(module):
