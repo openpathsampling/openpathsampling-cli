@@ -1,10 +1,8 @@
 from .topology import build_topology
-from .core import Compiler, custom_eval, Builder
+from .core import Builder
 from paths_cli.compiling.core import Parameter
 from .tools import custom_eval_int
-from paths_cli.compiling.plugins import EngineCompilerPlugin, CompilerPlugin
-
-from paths_cli.errors import MissingIntegrationError
+from paths_cli.compiling.plugins import EngineCompilerPlugin, CategoryPlugin
 
 try:
     from simtk import openmm as mm
@@ -53,4 +51,4 @@ OPENMM_PLUGIN = EngineCompilerPlugin(
     name='openmm',
 )
 
-ENGINE_COMPILER = CompilerPlugin(EngineCompilerPlugin, aliases=['engines'])
+ENGINE_COMPILER = CategoryPlugin(EngineCompilerPlugin, aliases=['engines'])

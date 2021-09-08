@@ -1,11 +1,11 @@
 from paths_cli.compiling.core import (
-    InstanceBuilder, Compiler, Builder, Parameter
+    InstanceCompilerPlugin, Builder, Parameter
 )
 from paths_cli.compiling.tools import custom_eval
-from paths_cli.compiling.plugins import NetworkCompilerPlugin, CompilerPlugin
+from paths_cli.compiling.plugins import NetworkCompilerPlugin, CategoryPlugin
 from paths_cli.compiling.root_compiler import compiler_for
 
-build_interface_set = InstanceBuilder(
+build_interface_set = InstanceCompilerPlugin(
     builder=Builder('openpathsampling.VolumeInterfaceSet'),
     parameters=[
         Parameter('cv', compiler_for('cv'), description="the collective "
@@ -73,4 +73,4 @@ build_mistis_network = MISTIS_NETWORK_PLUGIN
 build_tis_network = TIS_NETWORK_PLUGIN
 
 
-NETWORK_COMPILER = CompilerPlugin(NetworkCompilerPlugin, aliases=['networks'])
+NETWORK_COMPILER = CategoryPlugin(NetworkCompilerPlugin, aliases=['networks'])

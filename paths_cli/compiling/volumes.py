@@ -1,8 +1,9 @@
 import operator
 import functools
 
-from .core import Compiler, InstanceBuilder, custom_eval, Parameter
-from paths_cli.compiling.plugins import VolumeCompilerPlugin, CompilerPlugin
+from .core import Parameter
+from .tools import custom_eval
+from paths_cli.compiling.plugins import VolumeCompilerPlugin, CategoryPlugin
 from paths_cli.compiling.root_compiler import compiler_for
 
 # TODO: extra function for volumes should not be necessary as of OPS 2.0
@@ -64,5 +65,5 @@ UNION_VOLUME_PLUGIN = VolumeCompilerPlugin(
 
 build_union_volume = UNION_VOLUME_PLUGIN
 
-VOLUME_COMPILER = CompilerPlugin(VolumeCompilerPlugin, aliases=['state',
+VOLUME_COMPILER = CategoryPlugin(VolumeCompilerPlugin, aliases=['state',
                                                                 'states'])

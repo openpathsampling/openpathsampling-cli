@@ -4,7 +4,9 @@ from paths_cli.compiling.root_compiler import do_compile, register_plugins
 from paths_cli.parameters import OUTPUT_FILE
 from paths_cli.errors import MissingIntegrationError
 from paths_cli import OPSCommandPlugin
-from paths_cli.compiling.plugins import CompilerPlugin, InstanceBuilder
+from paths_cli.compiling.plugins import (
+    CategoryPlugin, InstanceCompilerPlugin
+)
 from paths_cli.plugin_management import (
     NamespacePluginLoader, FilePluginLoader
 )
@@ -56,7 +58,7 @@ def select_loader(filename):
         raise RuntimeError(f"Unknown file extension: {ext}")
 
 def load_plugins():
-    plugin_types = (InstanceBuilder, CompilerPlugin)
+    plugin_types = (InstanceCompilerPlugin, CategoryPlugin)
     plugin_loaders = [
         NamespacePluginLoader('paths_cli.compiling', plugin_types),
         FilePluginLoader(app_dir_plugins(posix=False), plugin_types),

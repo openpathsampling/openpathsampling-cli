@@ -4,27 +4,29 @@ from paths_cli.compiling.root_compiler import *
 from paths_cli.compiling.root_compiler import (
     _canonical_name, _get_compiler, _get_registration_names,
     _register_builder_plugin, _register_compiler_plugin,
-    _sort_user_categories, _CompilerProxy, _COMPILERS, _ALIASES
+    _sort_user_categories, _CategoryCompilerProxy, _COMPILERS, _ALIASES
 )
 from unittest.mock import Mock, PropertyMock, patch
-from paths_cli.compiling.core import Compiler, InstanceBuilder
-from paths_cli.compiling.plugins import CompilerPlugin
+from paths_cli.compiling.core import (
+    CategoryCompiler, InstanceCompilerPlugin
+)
+from paths_cli.compiling.plugins import CategoryPlugin
 
 
 ### FIXTURES ###############################################################
 
 @pytest.fixture
 def foo_compiler():
-    return Compiler(None, 'foo')
+    return CategoryCompiler(None, 'foo')
 
 @pytest.fixture
 def foo_compiler_plugin():
-    return CompilerPlugin(Mock(compiler_name='foo'), ['bar'])
+    return CategoryPlugin(Mock(compiler_name='foo'), ['bar'])
 
 @pytest.fixture
 def foo_baz_builder_plugin():
-    builder = InstanceBuilder(lambda: "FOO" , [], name='baz',
-                              aliases=['qux'])
+    builder = InstanceCompilerPlugin(lambda: "FOO" , [], name='baz',
+                                     aliases=['qux'])
     builder.compiler_name = 'foo'
     return builder
 
@@ -48,11 +50,11 @@ def test_canonical_name(input_name):
             patch.dict(BASE + "_ALIASES", aliases) as aliases_:
         assert _canonical_name(input_name) == "canonical"
 
-class TestCompilerProxy:
+class TestCategoryCompilerProxy:
     def setup(self):
-        self.compiler = Compiler(None, "foo")
+        self.compiler = CategoryCompiler(None, "foo")
         self.compiler.named_objs['bar'] = 'baz'
-        self.proxy = _CompilerProxy('foo')
+        self.proxy = _CategoryCompilerProxy('foo')
 
     def test_proxy(self):
         # (NOT API) the _proxy should be the registered compiler
@@ -156,17 +158,17 @@ def test_register_compiler_plugin_duplicate(duplicate_of, duplicate_from):
     # duplicate_of: existing
     # duplicate_from: which part of the plugin has the duplicated name
     if duplicate_from == 'canonical':
-        plugin = CompilerPlugin(Mock(compiler_name=duplicate_of),
+        plugin = CategoryPlugin(Mock(compiler_name=duplicate_of),
                                 aliases=['foo'])
     else:
-        plugin = CompilerPlugin(Mock(compiler_name='foo'),
+        plugin = CategoryPlugin(Mock(compiler_name='foo'),
                                 aliases=[duplicate_of])
 
     compilers = {'canonical': "FOO"}
     aliases = {'alias': 'canonical'}
     with patch.dict(COMPILER_LOC, compilers) as compilers_,\
             patch.dict(BASE + "_ALIASES", aliases) as aliases_:
-        with pytest.raises(CompilerRegistrationError):
+        with pytest.raises(CategoryCompilerRegistrationError):
             _register_compiler_plugin(plugin)
 
 @pytest.mark.parametrize('compiler_exists', [True, False])
@@ -224,10 +226,10 @@ def test_sort_user_categories():
 def test_do_compile():
     # compiler should correctly compile a basic input dict
     compilers = {
-        'foo': Compiler({
+        'foo': CategoryCompiler({
             'baz': lambda dct: "BAZ" * dct['x']
         }, 'foo'),
-        'bar': Compiler({
+        'bar': CategoryCompiler({
             'qux': lambda dct: "QUX" * dct['x']
         }, 'bar'),
     }

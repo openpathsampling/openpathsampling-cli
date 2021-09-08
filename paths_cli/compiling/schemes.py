@@ -1,10 +1,9 @@
 from paths_cli.compiling.core import (
-    InstanceBuilder, Compiler, Builder, Parameter
+    Builder, Parameter
 )
 from paths_cli.compiling.tools import custom_eval
-from paths_cli.compiling.shooting import shooting_selector_compiler
 from paths_cli.compiling.strategies import SP_SELECTOR_PARAMETER
-from paths_cli.compiling.plugins import SchemeCompilerPlugin, CompilerPlugin
+from paths_cli.compiling.plugins import SchemeCompilerPlugin, CategoryPlugin
 from paths_cli.compiling.root_compiler import compiler_for
 
 
@@ -70,4 +69,4 @@ MOVESCHEME_PLUGIN = SchemeCompilerPlugin(
     name='scheme'
 )
 
-SCHEME_COMPILER = CompilerPlugin(SchemeCompilerPlugin, aliases=['schemes'])
+SCHEME_COMPILER = CategoryPlugin(SchemeCompilerPlugin, aliases=['schemes'])

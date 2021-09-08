@@ -8,8 +8,8 @@ import numpy.testing as npt
 from paths_cli.compiling.core import *
 
 class MockNamedObject:
-    # used in the tests for Compiler._compile_dict and
-    # Compiler.register_object
+    # used in the tests for CategoryCompiler._compile_dict and
+    # CategoryCompiler.register_object
     def __init__(self, data):
         self.data = data
         self.name = None
@@ -124,7 +124,7 @@ class TestBuilder:
         builder = Builder(self._callable, after_build=local_after)
         assert builder(string="foo") == "oofoo"
 
-class TestInstanceBuilder:
+class TestInstanceCompilerPlugin:
     @staticmethod
     def _builder(req_param, opt_default=10, opt_override=100):
         return f"{req_param}, {opt_default}, {opt_override}"
@@ -137,7 +137,7 @@ class TestInstanceBuilder:
             Parameter('opt_override', identity, json_type='int',
                       default=100)
         ]
-        self.instance_builder = InstanceBuilder(
+        self.instance_builder = InstanceCompilerPlugin(
             self._builder,
             self.parameters,
             name='demo',
@@ -204,9 +204,9 @@ class TestInstanceBuilder:
         assert self.instance_builder(self.input_dict) == expected
 
 
-class TestCompiler:
+class TestCategoryCompiler:
     def setup(self):
-        self.compiler = Compiler(
+        self.compiler = CategoryCompiler(
             {'foo': mock_named_object_factory},
             'foo_compiler'
         )

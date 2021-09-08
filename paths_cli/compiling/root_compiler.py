@@ -1,10 +1,12 @@
-from paths_cli.compiling.core import Compiler, InstanceBuilder
-from paths_cli.compiling.plugins import CompilerPlugin
+from paths_cli.compiling.core import (
+    CategoryCompiler, InstanceCompilerPlugin
+)
+from paths_cli.compiling.plugins import CategoryPlugin
 
 import logging
 logger = logging.getLogger(__name__)
 
-class CompilerRegistrationError(Exception):
+class CategoryCompilerRegistrationError(Exception):
     pass
 
 
@@ -34,7 +36,7 @@ def clean_input_key(key):
 
 ### Managing known compilers and aliases to the known compilers ############
 
-_COMPILERS = {}  # mapping: {canonical_name: Compiler}
+_COMPILERS = {}  # mapping: {canonical_name: CategoryCompiler}
 _ALIASES = {}  # mapping: {alias: canonical_name}
 # NOTE: _ALIASES does *not* include self-mapping of the canonical names
 
@@ -57,24 +59,22 @@ def _get_compiler(compiler_name):
     """
     if compiler_name is None:
         if None not in _COMPILERS:
-            _COMPILERS[None] = Compiler(None, None)
+            _COMPILERS[None] = CategoryCompiler(None, None)
         return _COMPILERS[None]
 
     canonical_name = _canonical_name(compiler_name)
     # create a new compiler if none exists
     if canonical_name is None:
         canonical_name = compiler_name
-        _COMPILERS[compiler_name] = Compiler(None, compiler_name)
+        _COMPILERS[compiler_name] = CategoryCompiler(None, compiler_name)
     return _COMPILERS[canonical_name]
 
 def _register_compiler_plugin(plugin):
-    DUPLICATE_ERROR = CompilerRegistrationError(
+    DUPLICATE_ERROR = CategoryCompilerRegistrationError(
         f"The name {plugin.name} has been reserved by another compiler"
     )
     if plugin.name in _COMPILERS or plugin.name in _ALIASES:
         raise DUPLICATE_ERROR
-
-    compiler = _get_compiler(plugin.name)
 
     # register aliases
     new_aliases = set(plugin.aliases) - set([plugin.name])
@@ -83,6 +83,8 @@ def _register_compiler_plugin(plugin):
             raise DUPLICATE_ERROR
         _ALIASES[alias] = plugin.name
 
+    _ = _get_compiler(plugin.name)
+
 
 ### Handling delayed loading of compilers ##################################
 #
@@ -90,7 +92,7 @@ def _register_compiler_plugin(plugin):
 # order for them to be able to access dynamically-loaded plugins, we delay
 # the loading of the compiler by using a proxy object.
 
-class _CompilerProxy:
+class _CategoryCompilerProxy:
     def __init__(self, compiler_name):
         self.compiler_name = compiler_name
 
@@ -119,7 +121,7 @@ def compiler_for(compiler_name):
     compiler_name : str
         the name of the compiler to use
     """
-    return _CompilerProxy(compiler_name)
+    return _CategoryCompilerProxy(compiler_name)
 
 
 ### Registering builder plugins and user-facing register_plugins ###########
@@ -149,9 +151,9 @@ def register_plugins(plugins):
     builders = []
     compilers = []
     for plugin in plugins:
-        if isinstance(plugin, InstanceBuilder):
+        if isinstance(plugin, InstanceCompilerPlugin):
             builders.append(plugin)
-        elif isinstance(plugin, CompilerPlugin):
+        elif isinstance(plugin, CategoryPlugin):
             compilers.append(plugin)
 
     for plugin in compilers:
@@ -166,7 +168,7 @@ def _sort_user_categories(user_categories):
     """Organize user input categories into compile order.
 
     "Cateogories" are the first-level keys in the user input file (e.g.,
-    'engines', 'cvs', etc.) There must be one Compiler per category.
+    'engines', 'cvs', etc.) There must be one CategoryCompiler per category.
     """
     user_to_canonical = {user_key: _canonical_name(user_key)
                          for user_key in user_categories}

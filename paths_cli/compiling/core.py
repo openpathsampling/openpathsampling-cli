@@ -1,15 +1,11 @@
-import os
 import json
-import importlib
 import yaml
 
-from collections import namedtuple, abc
-import warnings
+from collections import namedtuple
 
 import logging
 
 from .errors import InputError
-from .tools import custom_eval
 from paths_cli.utils import import_thing
 from paths_cli.plugin_management import OPSPlugin
 
@@ -115,7 +111,7 @@ class Builder:
         self.builder = builder
 
     def __call__(self, **dct):
-        # TODO: change this InstanceBuilder.build to make this better
+        # TODO: change this InstanceCompilerPlugin.build to make this better
         if isinstance(self.builder, str):
             module, _, func = self.builder.rpartition('.')
             builder = import_thing(module, func)
@@ -128,7 +124,7 @@ class Builder:
         return after
 
 
-class InstanceBuilder(OPSPlugin):
+class InstanceCompilerPlugin(OPSPlugin):
     """
 
     Parameters
@@ -165,7 +161,8 @@ class InstanceBuilder(OPSPlugin):
         self.builder = builder
         self.builder_name = str(self.builder)
         self.parameters = parameters
-        self.logger = logging.getLogger(f"compiler.InstanceBuilder.{builder}")
+        logger_name = f"compiler.InstanceCompilerPlugin.{builder}"
+        self.logger = logging.getLogger(logger_name)
 
     @property
     def schema_name(self):
@@ -242,7 +239,7 @@ class InstanceBuilder(OPSPlugin):
         return obj
 
 
-class Compiler:
+class CategoryCompiler:
     """Generic compile class; instances for each category"""
     # error_on_duplicate = False  # TODO: temporary
     error_on_duplicate = True

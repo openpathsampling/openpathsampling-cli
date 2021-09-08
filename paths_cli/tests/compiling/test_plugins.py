@@ -5,8 +5,8 @@ from unittest.mock import Mock
 class TestCompilerPlugin:
     def setup(self):
         self.plugin_class = Mock(compiler_name='foo')
-        self.plugin = CompilerPlugin(self.plugin_class)
-        self.aliased_plugin = CompilerPlugin(self.plugin_class,
+        self.plugin = CategoryPlugin(self.plugin_class)
+        self.aliased_plugin = CategoryPlugin(self.plugin_class,
                                              aliases=['bar'])
 
     @pytest.mark.parametrize('plugin_type', ['basic', 'aliased'])

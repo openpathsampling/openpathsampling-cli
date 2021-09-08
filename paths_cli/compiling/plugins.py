@@ -1,9 +1,9 @@
-from paths_cli.compiling.core import InstanceBuilder
+from paths_cli.compiling.core import InstanceCompilerPlugin
 from paths_cli.plugin_management import OPSPlugin
 
-class CompilerPlugin(OPSPlugin):
+class CategoryPlugin(OPSPlugin):
     """
-    Compiler plugins only need to be made for top-level
+    Category plugins only need to be made for top-level
     """
     error_on_duplicate = False  # TODO: temporary
     def __init__(self, plugin_class, aliases=None, requires_ops=(1, 0),
@@ -23,20 +23,20 @@ class CompilerPlugin(OPSPlugin):
                 f"{self.aliases})")
 
 
-class EngineCompilerPlugin(InstanceBuilder):
+class EngineCompilerPlugin(InstanceCompilerPlugin):
     compiler_name = 'engine'
 
-class CVCompilerPlugin(InstanceBuilder):
+class CVCompilerPlugin(InstanceCompilerPlugin):
     compiler_name = 'cv'
 
-class VolumeCompilerPlugin(InstanceBuilder):
+class VolumeCompilerPlugin(InstanceCompilerPlugin):
     compiler_name = 'volume'
 
-class NetworkCompilerPlugin(InstanceBuilder):
+class NetworkCompilerPlugin(InstanceCompilerPlugin):
     compiler_name = 'network'
 
-class SchemeCompilerPlugin(InstanceBuilder):
+class SchemeCompilerPlugin(InstanceCompilerPlugin):
     compiler_name = 'scheme'
 
-class StrategyCompilerPlugin(InstanceBuilder):
+class StrategyCompilerPlugin(InstanceCompilerPlugin):
     compiler_name = 'strategy'

@@ -1,9 +1,7 @@
-from paths_cli.compiling.core import (
-    Compiler, Builder, Parameter
-)
+from paths_cli.compiling.core import Builder, Parameter
 from paths_cli.compiling.shooting import shooting_selector_compiler
 from paths_cli.compiling.plugins import (
-    StrategyCompilerPlugin, CompilerPlugin
+    StrategyCompilerPlugin, CategoryPlugin
 )
 from paths_cli.compiling.root_compiler import compiler_for
 
@@ -100,5 +98,5 @@ build_single_replica_minus_move_strategy = StrategyCompilerPlugin(
     name='single-replica-minus',
 )
 
-STRATEGY_COMPILER = CompilerPlugin(StrategyCompilerPlugin,
+STRATEGY_COMPILER = CategoryPlugin(StrategyCompilerPlugin,
                                    aliases=['strategies'])

@@ -1,11 +1,12 @@
 import os
 import importlib
 
-from .core import Compiler, InstanceBuilder, custom_eval, Parameter, Builder
+from .core import Parameter, Builder
+from .tools import custom_eval
 from .topology import build_topology
 from .errors import InputError
 from paths_cli.utils import import_thing
-from paths_cli.compiling.plugins import CVCompilerPlugin, CompilerPlugin
+from paths_cli.compiling.plugins import CVCompilerPlugin, CategoryPlugin
 
 
 class AllowedPackageHandler:
@@ -57,4 +58,4 @@ TYPE_MAPPING = {
     'mdtraj': MDTRAJ_CV_PLUGIN,
 }
 
-CV_COMPILER = CompilerPlugin(CVCompilerPlugin, aliases=['cvs'])
+CV_COMPILER = CategoryPlugin(CVCompilerPlugin, aliases=['cvs'])
