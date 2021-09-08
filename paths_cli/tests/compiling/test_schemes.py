@@ -6,6 +6,7 @@ import openpathsampling as paths
 from unittest.mock import patch
 from openpathsampling.tests.test_helpers import make_1d_traj
 from paths_cli.tests.compiling.utils import mock_compiler
+from paths_cli.compiling.strategies import ONE_WAY_SHOOTING_STRATEGY_PLUGIN
 
 _COMPILERS_LOC = 'paths_cli.compiling.root_compiler._COMPILERS'
 
@@ -42,6 +43,7 @@ def test_build_spring_shooting_scheme(tps_compilers_and_traj):
     assert isinstance(scheme, paths.SpringShootingMoveScheme)
     # smoke test that it can build its tree and load init conds
     scheme.move_decision_tree()
+    assert len(scheme.strategies) == 2  # includes the global
     _ = scheme.initial_conditions_from_trajectories(traj)
 
 
@@ -61,18 +63,22 @@ def test_build_one_way_shooting_scheme(network, tps_compilers_and_traj,
     _ = scheme.initial_conditions_from_trajectories(traj)
 
 
-def test_movescheme_plugin(tis_compilers_and_traj, flat_engine):
+def test_movescheme_plugin(tis_compilers_and_traj):
     paths.InterfaceSet._reset()
     compilers, traj = tis_compilers_and_traj
+    compilers['strategy'] = mock_compiler(
+        'strategy',
+        type_dispatch={
+            'one-way-shooting': ONE_WAY_SHOOTING_STRATEGY_PLUGIN
+        },
+        named_objs={}
+    )
 
     dct = {'network': 'tis_network',
            'strategies': [
-               {'type': ''},
-               {'type': ''},
-               {'type': ''},
-               {'type': ''},
+               {'type': 'one-way-shooting',
+                'engine': 'flat_engine'},
            ]}
-    pytest.skip()
     with patch.dict(_COMPILERS_LOC, compilers):
         scheme = MOVESCHEME_PLUGIN(dct)
 

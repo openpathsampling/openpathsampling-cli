@@ -30,8 +30,7 @@ REPLACE_TRUE_PARAMETER = Parameter('replace', bool, default=True)
 REPLACE_FALSE_PARAMETER = Parameter('replace', bool, default=False)
 
 
-
-build_one_way_shooting_strategy = StrategyCompilerPlugin(
+ONE_WAY_SHOOTING_STRATEGY_PLUGIN = StrategyCompilerPlugin(
     builder=Builder(_strategy_name("OneWayShootingStrategy")),
     parameters=[
         SP_SELECTOR_PARAMETER,
@@ -41,18 +40,18 @@ build_one_way_shooting_strategy = StrategyCompilerPlugin(
     ],
     name='one-way-shooting',
 )
-
-build_two_way_shooting_strategy = StrategyCompilerPlugin(
-    builder=Builder(_strategy_name("TwoWayShootingStrategy")),
-    parameters = [
-        Parameter('modifier', ...),
-        SP_SELECTOR_PARAMETER,
-        ENGINE_PARAMETER,
-        SHOOTING_GROUP_PARAMETER,
-        REPLACE_TRUE_PARAMETER,
-    ],
-    name='two-way-shooting',
-)
+build_one_way_shooting_strategy = ONE_WAY_SHOOTING_STRATEGY_PLUGIN
+# build_two_way_shooting_strategy = StrategyCompilerPlugin(
+#     builder=Builder(_strategy_name("TwoWayShootingStrategy")),
+#     parameters = [
+#         Parameter('modifier', ...),
+#         SP_SELECTOR_PARAMETER,
+#         ENGINE_PARAMETER,
+#         SHOOTING_GROUP_PARAMETER,
+#         REPLACE_TRUE_PARAMETER,
+#     ],
+#     name='two-way-shooting',
+# )
 
 build_nearest_neighbor_repex_strategy = StrategyCompilerPlugin(
     builder=Builder(_strategy_name("NearestNeighborRepExStrategy")),

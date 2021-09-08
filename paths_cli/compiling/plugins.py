@@ -18,6 +18,10 @@ class CompilerPlugin(OPSPlugin):
     def name(self):
         return self.plugin_class.compiler_name
 
+    def __repr__(self):
+        return (f"CompilerPlugin({self.plugin_class.__name__}, "
+                f"{self.aliases})")
+
 
 class EngineCompilerPlugin(InstanceBuilder):
     compiler_name = 'engine'
@@ -32,7 +36,7 @@ class NetworkCompilerPlugin(InstanceBuilder):
     compiler_name = 'network'
 
 class SchemeCompilerPlugin(InstanceBuilder):
-    compiler_name =  'scheme'
+    compiler_name = 'scheme'
 
 class StrategyCompilerPlugin(InstanceBuilder):
     compiler_name = 'strategy'
