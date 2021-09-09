@@ -146,7 +146,6 @@ class InstanceCompilerPlugin(OPSPlugin):
     """
     SCHEMA = "http://openpathsampling.org/schemas/sim-setup/draft01.json"
     category = None
-    error_on_duplicate = False  # TODO: temporary
     def __init__(self, builder, parameters, name=None, aliases=None,
                  requires_ops=(1, 0), requires_cli=(0, 3)):
         super().__init__(requires_ops, requires_cli)
@@ -241,8 +240,6 @@ class InstanceCompilerPlugin(OPSPlugin):
 
 class CategoryCompiler:
     """Generic compile class; instances for each category"""
-    # error_on_duplicate = False  # TODO: temporary
-    error_on_duplicate = True
     def __init__(self, type_dispatch, label):
         if type_dispatch is None:
             type_dispatch = {}
@@ -282,11 +279,11 @@ class CategoryCompiler:
     def register_builder(self, builder, name):
         if name in self.type_dispatch:
             if self.type_dispatch[name] is builder:
-                return  # nothing to do here!
+                # if it's the identical object, just skip it
+                return
             msg = (f"'{name}' is already registered "
                    f"with {self.label}")
-            if self.error_on_duplicate:
-                raise RuntimeError(msg)
+            raise RuntimeError(msg)
         else:
             self.type_dispatch[name] = builder
 

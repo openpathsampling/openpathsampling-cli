@@ -20,7 +20,6 @@ class Plugin(object):
         tuple representing hte minimum allowed version of the command line
         interface application
     """
-    error_on_duplicate = True
     def __init__(self, requires_lib, requires_cli):
         self.requires_lib = requires_lib
         self.requires_cli = requires_cli
@@ -39,10 +38,7 @@ class Plugin(object):
                 f"The plugin {repr(self)} has been previously "
                 "registered with different metadata."
             )
-            if self.error_on_duplicate:
-                raise PluginRegistrationError(msg)
-            else:
-                warnings.warn(msg)
+            raise PluginRegistrationError(msg)
 
         self.location = location
         self.plugin_type = plugin_type

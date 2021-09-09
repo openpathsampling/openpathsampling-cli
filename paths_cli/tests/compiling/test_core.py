@@ -290,13 +290,19 @@ class TestCategoryCompiler:
         assert self.compiler(input_dict) == 10
 
     def test_register_builder_duplicate(self):
-        # if an attempt is made to registered a builder with a name that is
+        # if an attempt is made to registere a builder with a name that is
         # already in use, a RuntimeError is raised
         orig = self.compiler.type_dispatch['foo']
         with pytest.raises(RuntimeError, match="already registered"):
             self.compiler.register_builder(lambda dct: 10, 'foo')
 
         assert self.compiler.type_dispatch['foo'] is orig
+
+    def test_register_builder_identical(self):
+        # if an attempt is made to register a builder that has already been
+        # registered, nothin happens (since it is already registered)
+        orig = self.compiler.type_dispatch['foo']
+        self.compiler.register_builder(orig, 'foo')
 
     @pytest.mark.parametrize('input_type', ['str', 'dict'])
     def test_compile(self, input_type):

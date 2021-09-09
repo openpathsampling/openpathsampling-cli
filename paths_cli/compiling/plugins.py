@@ -5,7 +5,6 @@ class CategoryPlugin(OPSPlugin):
     """
     Category plugins only need to be made for top-level
     """
-    error_on_duplicate = False  # TODO: temporary
     def __init__(self, plugin_class, aliases=None, requires_ops=(1, 0),
                  requires_cli=(0,4)):
         super().__init__(requires_ops, requires_cli)
