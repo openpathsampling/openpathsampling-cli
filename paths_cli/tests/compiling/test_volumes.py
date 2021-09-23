@@ -90,7 +90,7 @@ class TestBuildCombinationVolume:
             descriptions = {"A": desc_A, "B": desc_B}
             subvol_yaml = ['  - A', '  - B']
 
-        yml = "\n".join(["type: {combo}", "name: bar", "subvolumes:"]
+        yml = "\n".join([f"type: {combo}", "name: bar", "subvolumes:"]
                         + subvol_yaml)
 
         combo_class = {'union': paths.UnionVolume,
