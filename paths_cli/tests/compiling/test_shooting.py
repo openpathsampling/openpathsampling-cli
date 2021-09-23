@@ -1,6 +1,7 @@
 import pytest
 
 from paths_cli.compiling.shooting import *
+from paths_cli.compiling.shooting import _remapping_gaussian_stddev
 import openpathsampling as paths
 from paths_cli.tests.compiling.utils import mock_compiler
 
@@ -13,7 +14,7 @@ def test_remapping_gaussian_stddev(cv_and_states):
     cv, _, _ = cv_and_states
     dct = {'cv': cv, 'mean': 1.0, 'stddev': 2.0}
     expected = {'collectivevariable': cv, 'l_0': 1.0, 'alpha': 0.125}
-    results = remapping_gaussian_stddev(dct)
+    results = _remapping_gaussian_stddev(dct)
     assert results == expected
 
 def test_build_gaussian_selector(cv_and_states):

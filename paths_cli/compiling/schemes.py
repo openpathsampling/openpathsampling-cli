@@ -43,7 +43,6 @@ class BuildSchemeStrategy:
         scheme = builder(**dct)
         for strat in strategies:
             scheme.append(strat)
-        self.logger.debug(f"strategies: {scheme.strategies}")
         return scheme
 
 

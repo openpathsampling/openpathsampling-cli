@@ -10,6 +10,7 @@ from paths_cli.compiling.plugins import (
 from paths_cli.plugin_management import NamespacePluginLoader
 import importlib
 from paths_cli.utils import get_installed_plugins
+from paths_cli.commands.contents import report_all_tables
 
 # this is just to handle a nicer error
 def import_module(module_name, format_type=None, install=None):
@@ -74,9 +75,11 @@ def compile_(input_file, output_file):
     register_plugins(plugins)
 
     objs = do_compile(dct)
-    print(objs)
+    print(f"Saving {len(objs)} user-specified objects to {output_file}....")
     storage = OUTPUT_FILE.get(output_file)
     storage.save(objs)
+    report_all_tables(storage)
+
 
 PLUGIN = OPSCommandPlugin(
     command=compile_,

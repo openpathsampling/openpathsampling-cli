@@ -85,7 +85,9 @@ class Builder:
 
     Additionally, this class provides hooks for functions that run before or
     after the main builder function. This allows many objects to be built by
-    implementing simple functions and hooking themn together with Builder.
+    implementing simple functions and hooking themn together with Builder,
+    which can act as a general adaptor between user input and the underlying
+    functions.
 
     Parameters
     ----------
@@ -93,7 +95,12 @@ class Builder:
         primary callable to build an object, or string representing the
         fully-qualified path to a callable
     remapper : Callable[[Dict], Dict], optional
-        callable to remap the the mapping of ???
+        Callable to remap the input dict (as parsed from user input) to a
+        dict of keyword arguments for the builder function. This can be
+        used, e.g., to rename user-facing keys to the internally-used names,
+        or to add structure if, for example, inputs to the builder function
+        require structures (such as a dict) that are flattened in user
+        input, or vice-versa.
     after_build : Callable[[Any, Dict], Any], optional
         callable to update the created object with any additional
         information from the original dictionary.

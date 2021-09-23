@@ -10,7 +10,7 @@ build_uniform_selector = InstanceCompilerPlugin(
     name='uniform',
 )
 
-def remapping_gaussian_stddev(dct):
+def _remapping_gaussian_stddev(dct):
     dct['alpha'] = 0.5 / dct.pop('stddev')**2
     dct['collectivevariable'] = dct.pop('cv')
     dct['l_0'] = dct.pop('mean')
@@ -18,7 +18,7 @@ def remapping_gaussian_stddev(dct):
 
 build_gaussian_selector = InstanceCompilerPlugin(
     builder=Builder('openpathsampling.GaussianBiasSelector',
-                    remapper=remapping_gaussian_stddev),
+                    remapper=_remapping_gaussian_stddev),
     parameters=[
         Parameter('cv', compiler_for('cv')),
         Parameter('mean', custom_eval),

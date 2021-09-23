@@ -3,6 +3,7 @@ import yaml
 import os
 
 from paths_cli.compiling.engines import *
+from paths_cli.compiling.engines import _openmm_options
 from paths_cli.compiling.errors import InputError
 import openpathsampling as paths
 
@@ -53,7 +54,7 @@ class TestOpenMMEngineBuilder(object):
 
     def test_openmm_options(self):
         dct = yaml.load(self.yml, yaml.FullLoader)
-        dct = openmm_options(dct)
+        dct = _openmm_options(dct)
         assert dct == {'type': 'openmm', 'name': 'engine',
                        'system': 'system.xml',
                        'integrator': 'integrator.xml',

@@ -20,7 +20,7 @@ def load_openmm_xml(filename):
 
     return obj
 
-def openmm_options(dct):
+def _openmm_options(dct):
     n_steps_per_frame = dct.pop('n_steps_per_frame')
     n_frames_max = dct.pop('n_frames_max')
     options = {'n_steps_per_frame': n_steps_per_frame,
@@ -46,7 +46,7 @@ OPENMM_PARAMETERS = [
 
 OPENMM_PLUGIN = EngineCompilerPlugin(
     builder=Builder('openpathsampling.engines.openmm.Engine',
-                    remapper=openmm_options),
+                    remapper=_openmm_options),
     parameters=OPENMM_PARAMETERS,
     name='openmm',
 )

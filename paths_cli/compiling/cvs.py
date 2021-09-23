@@ -21,7 +21,7 @@ class AllowedPackageHandler:
         # on ImportError, we leave the error unchanged
         return func
 
-def cv_kwargs_remapper(dct):
+def _cv_kwargs_remapper(dct):
     kwargs = dct.pop('kwargs', {})
     dct.update(kwargs)
     return dct
@@ -31,7 +31,7 @@ def cv_kwargs_remapper(dct):
 MDTRAJ_CV_PLUGIN = CVCompilerPlugin(
     builder=Builder('openpathsampling.experimental.storage.'
                     'collective_variables.MDTrajFunctionCV',
-                    remapper=cv_kwargs_remapper),
+                    remapper=_cv_kwargs_remapper),
     parameters=[
         Parameter('topology', build_topology),
         Parameter('func', AllowedPackageHandler('mdtraj'),
