@@ -168,7 +168,7 @@ def _sort_user_categories(user_categories):
     """Organize user input categories into compile order.
 
     "Cateogories" are the first-level keys in the user input file (e.g.,
-    'engines', 'cvs', etc.) There must be one CategoryCompiler per category.
+    'engines', 'cvs', etc.). There must be one CategoryCompiler per category.
     """
     user_to_canonical = {user_key: _canonical_name(user_key)
                          for user_key in user_categories}

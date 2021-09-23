@@ -34,7 +34,7 @@ ONE_WAY_SHOOTING_STRATEGY_PLUGIN = StrategyCompilerPlugin(
         SP_SELECTOR_PARAMETER,
         ENGINE_PARAMETER,
         SHOOTING_GROUP_PARAMETER,
-        Parameter('replace', bool, default=True)
+        REPLACE_TRUE_PARAMETER
     ],
     name='one-way-shooting',
 )

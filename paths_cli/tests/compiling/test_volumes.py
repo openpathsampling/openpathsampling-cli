@@ -21,7 +21,7 @@ class TestBuildCVVolume:
         }
 
         self.func = {
-            'inline': "\n  ".join(["name: foo", "type: mdtraj"]),  # TODO
+            'inline': "\n  ".join(["name: foo", "type: mdtraj"]),
             'external': 'foo'
         }
 

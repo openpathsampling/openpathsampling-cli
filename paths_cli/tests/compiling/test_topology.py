@@ -28,5 +28,5 @@ class TestBuildTopology:
         patch_loc = 'paths_cli.compiling.root_compiler._COMPILERS'
         compilers = {'engine': mock_compiler('engine')}
         with patch.dict(patch_loc, compilers):
-            with pytest.raises(InputError):
+            with pytest.raises(InputError, match="foo"):
                 topology = build_topology('foo')

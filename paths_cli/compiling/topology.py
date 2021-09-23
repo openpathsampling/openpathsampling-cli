@@ -4,16 +4,10 @@ from paths_cli.compiling.root_compiler import compiler_for
 
 def get_topology_from_engine(dct):
     """If given the name of an engine, use that engine's topology"""
-    # from paths_cli.compiling.engines import engine_compiler
     engine_compiler = compiler_for('engine')
     if dct in engine_compiler.named_objs:
         engine = engine_compiler.named_objs[dct]
-        try:
-            return engine.topology
-        except AttributeError:  # no-cov
-            # how could this happen? passing is correct, to raise the
-            # InputError from MultiStrategyBuilder, but how to test?
-            pass
+        return getattr(engine, 'topology', None)
 
 def get_topology_from_file(dct):
     """If given the name of a file, use that to create the topology"""

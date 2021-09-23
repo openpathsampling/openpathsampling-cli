@@ -29,7 +29,7 @@ def test_loaders(mod_name, tmpdir):
     dump_getter = {
         'json': _std_dump,
         'yaml': _std_dump,
-        'toml': _std_dump,
+        # 'toml': _std_dump,
     }[mod_name]
     loader = {
         'json': load_json,
@@ -83,7 +83,7 @@ def test_compile(ad_openmm, test_data_dir):
             traceback.print_tb(result.exc_info[2])
             print(result.exception)
             print(result.exc_info)
-        print(result.output)
+            print(result.output)
         assert result.exit_code == 0
         assert os.path.exists(str(ad_openmm / 'setup.db'))
         import openpathsampling as paths
@@ -100,8 +100,3 @@ def test_compile(ad_openmm, test_data_dir):
         from openpathsampling.experimental.storage.monkey_patches import unpatch
         paths = unpatch(paths)
         paths.InterfaceSet.simstore = False
-        import importlib
-        importlib.reload(paths.netcdfplus)
-        importlib.reload(paths.collectivevariable)
-        importlib.reload(paths.collectivevariables)
-        importlib.reload(paths)

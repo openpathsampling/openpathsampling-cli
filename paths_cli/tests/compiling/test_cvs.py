@@ -39,5 +39,5 @@ class TestMDTrajFunctionCV:
     def test_bad_mdtraj_function_name(self):
         yml = self.yml.format(kwargs=self.kwargs, func="foo")
         dct = yaml.load(yml, Loader=yaml.FullLoader)
-        with pytest.raises(InputError):
+        with pytest.raises(InputError, match="foo"):
             cv = MDTRAJ_CV_PLUGIN(dct)

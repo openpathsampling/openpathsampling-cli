@@ -18,7 +18,6 @@ class TestOpenMMEngineBuilder(object):
             "integrator: integrator.xml", "topology: ad.pdb",
             "n_steps_per_frame: 10", "n_frames_max: 10000"
         ])
-        pass
 
     def teardown(self):
         os.chdir(self.cwd)

@@ -19,9 +19,9 @@ def import_module(module_name, format_type=None, install=None):
         if format_type is None:
             format_type = module_name
 
-        msg = "Unable to find a compiler for f{format_type} on your system."
+        msg = f"Unable to find a compiler for {format_type} on your system."
         if install is not None:
-            msg += " Please install f{install} to use this format."
+            msg += f" Please install {install} to use this format."
 
         raise MissingIntegrationError(msg)
     return mod

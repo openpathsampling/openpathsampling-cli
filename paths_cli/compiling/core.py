@@ -58,10 +58,7 @@ class Parameter:
     @staticmethod
     def _get_from_loader(loader, attr_name, attr):
         if attr is None:
-            try:
-                attr = getattr(loader, attr_name)
-            except AttributeError:
-                pass
+            attr = getattr(loader, attr_name, None)
         return attr
 
     def __call__(self, *args, **kwargs):
@@ -98,7 +95,7 @@ class Builder:
     remapper : Callable[[Dict], Dict], optional
         callable to remap the the mapping of ???
     after_build : Callable[[Any, Dict], Any], optional
-        ccallable to update the created object with any additional
+        callable to update the created object with any additional
         information from the original dictionary.
     """
     def __init__(self, builder, *, remapper=None, after_build=None):
@@ -217,8 +214,8 @@ class InstanceCompilerPlugin(OPSPlugin):
             except KeyError:
                 raise InputError(f"'{self.builder_name}' missing required "
                                  f"parameter '{attr}'")
-            self.logger.debug(f"{attr}: {input_dct[attr]}")
-            new_dct[attr] = func(input_dct[attr])
+            self.logger.debug(f"{attr}: {value}")
+            new_dct[attr] = func(value)
 
         optionals = set(self.optional_attributes) & set(dct)
 
