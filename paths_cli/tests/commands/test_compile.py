@@ -99,3 +99,10 @@ def test_compile(ad_openmm, test_data_dir):
         from openpathsampling.experimental.storage.monkey_patches import unpatch
         paths = unpatch(paths)
         paths.InterfaceSet.simstore = False
+        # TODO: this lines won't be necessary once OPS releases contain
+        # openpathsampling/openpathsampling#1065
+        import importlib
+        importlib.reload(paths.netcdfplus)
+        importlib.reload(paths.collectivevariable)
+        importlib.reload(paths.collectivevariables)
+        importlib.reload(paths)
