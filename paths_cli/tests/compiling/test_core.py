@@ -6,6 +6,8 @@ import os
 import numpy.testing as npt
 
 from paths_cli.compiling.core import *
+from paths_cli.compiling import compiler_for
+from paths_cli.tests.compiling.utils import mock_compiler
 
 class MockNamedObject:
     # used in the tests for CategoryCompiler._compile_dict and
@@ -187,10 +189,30 @@ class TestInstanceCompilerPlugin:
         assert compile_attrs(self.input_dict) == expected
 
     def test_compile_attrs_compiler_integration(self):
-        # compile_attrs gives the same object as already existing in a
-        # compiler if one of the parameters uses that compiler to load a
-        # named object
-        pytest.skip()
+        # compile_attrs gives the existing named object (is-identity) if one
+        # of the parameters uses that compiler to load a named object
+        user_input = {'foo': 'named_foo'}
+        # full_input = {'foo': {'name': 'named_foo',
+        #                       'type': 'baz',
+        #                       'bar': 'should see this'}}
+        bar_plugin = InstanceCompilerPlugin(
+            builder=lambda foo: 'in bar: should not see this',
+            parameters=[Parameter('foo', compiler_for('foo'))],
+        )
+        foo_plugin = InstanceCompilerPlugin(
+            builder=lambda: 'in foo: should not see this',
+            parameters=[],
+        )
+        named_objs = {'named_foo': 'should see this'}
+        type_dispatch = {'baz': foo_plugin}
+        PATCH_LOC = 'paths_cli.compiling.root_compiler._COMPILERS'
+        compiler = mock_compiler('foo', type_dispatch=type_dispatch,
+                                 named_objs=named_objs)
+        with patch.dict(PATCH_LOC, {'foo': compiler}):
+            compiled = bar_plugin.compile_attrs(user_input)
+
+        # maps attr name 'foo' to the previous existing object
+        assert compiled == {'foo': 'should see this'}
 
     def test_compile_attrs_missing_required(self):
         # an InputError should be raised if a required parameter is missing
@@ -304,16 +326,44 @@ class TestCategoryCompiler:
         orig = self.compiler.type_dispatch['foo']
         self.compiler.register_builder(orig, 'foo')
 
+    @staticmethod
+    def _validate_obj(obj, input_type):
+        if input_type == 'str':
+            assert obj == 'bar'
+        elif input_type == 'dict':
+            assert obj.data == 'qux'
+        else:
+            raise RuntimeError("Error in test setup")
+
     @pytest.mark.parametrize('input_type', ['str', 'dict'])
     def test_compile(self, input_type):
         # the compile method should work whether the input is a dict
         # representing an object to be compiled or string name for an
         # already-compiled object
-        pytest.skip()
+        self._mock_register_obj()
+        input_data = {
+            'str': 'foo',
+            'dict': {'type': 'foo', 'data': 'qux'}
+        }[input_type]
+        obj = self.compiler.compile(input_data)
+        self._validate_obj(obj, input_type)
 
     @pytest.mark.parametrize('input_type', ['str', 'dict'])
     @pytest.mark.parametrize('as_list', [True, False])
     def test_call(self, input_type, as_list):
         # the call method should work whether the input is a single object
         # or a list of objects (as well as whether string or dict)
-        pytest.skip()
+        self._mock_register_obj()
+        input_data = {
+            'str': 'foo',
+            'dict': {'type': 'foo', 'data': 'qux'}
+        }[input_type]
+        if as_list:
+            input_data = [input_data]
+
+        obj = self.compiler(input_data)
+        if as_list:
+            assert isinstance(obj, list)
+            assert len(obj) == 1
+            obj = obj[0]
+        self._validate_obj(obj, input_type)
