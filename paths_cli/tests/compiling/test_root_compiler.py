@@ -6,6 +6,7 @@ from paths_cli.compiling.root_compiler import (
     _register_builder_plugin, _register_compiler_plugin,
     _sort_user_categories, _CategoryCompilerProxy, _COMPILERS, _ALIASES
 )
+from paths_cli.tests.compiling.utils import mock_compiler
 from unittest.mock import Mock, PropertyMock, patch
 from paths_cli.compiling.core import (
     CategoryCompiler, InstanceCompilerPlugin
@@ -21,7 +22,7 @@ def foo_compiler():
 
 @pytest.fixture
 def foo_compiler_plugin():
-    return CategoryPlugin(Mock(category='foo'), ['bar'])
+    return CategoryPlugin(Mock(category='foo', __name__='foo'), ['bar'])
 
 @pytest.fixture
 def foo_baz_builder_plugin():
@@ -73,7 +74,17 @@ class TestCategoryCompilerProxy:
 
     def test_call(self):
         # the `__call__` method should work in the proxy
-        pytest.skip()
+        def _bar_dispatch(dct):
+            return dct['baz'] * dct['qux']
+
+        foo_compiler = mock_compiler(
+            category='foo',
+            type_dispatch={'bar': _bar_dispatch},
+        )
+        proxy = _CategoryCompilerProxy('foo')
+        user_input = {'type': 'bar', 'baz': 'baz', 'qux': 2}
+        with patch.dict(COMPILER_LOC, {'foo': foo_compiler}):
+            assert proxy(user_input) == "bazbaz"
 
 def test_compiler_for_nonexisting():
     # if nothing is ever registered with the compiler, then compiler_for
@@ -141,7 +152,9 @@ def test_get_registration_names(canonical, aliases, expected):
 def test_register_compiler_plugin(foo_compiler_plugin):
     # _register_compiler_plugin should register compilers that don't exist
     compilers = {}
-    with patch.dict(COMPILER_LOC, compilers):
+    aliases = {}
+    with patch.dict(COMPILER_LOC, compilers) as _compiler, \
+                patch.dict(BASE + "_ALIASES", aliases) as _alias:
         assert 'foo' not in compilers
         _register_compiler_plugin(foo_compiler_plugin)
         assert 'foo' in _COMPILERS
@@ -199,9 +212,18 @@ def test_register_plugins_unit(foo_compiler_plugin, foo_baz_builder_plugin):
         assert builder.called_once_with(foo_baz_builder_plugin)
         assert compiler.called_once_with(foo_compiler_plugin)
 
-def test_register_plugins_integration():
+def test_register_plugins_integration(foo_compiler_plugin,
+                                      foo_baz_builder_plugin):
     # register_plugins should correctly register plugins
-    pytest.skip()
+    compilers = {}
+    aliases = {}
+    with patch.dict(COMPILER_LOC, compilers) as _compiler, \
+                patch.dict(BASE + "_ALIASES", aliases) as _alias:
+        assert 'foo' not in _COMPILERS
+        register_plugins([foo_compiler_plugin, foo_baz_builder_plugin])
+        assert 'foo' in _COMPILERS
+        type_dispatch = _COMPILERS['foo'].type_dispatch
+        assert type_dispatch['baz'] is foo_baz_builder_plugin
 
 def test_sort_user_categories():
     # sorted user categories should match the expected compile order

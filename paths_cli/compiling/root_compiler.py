@@ -108,8 +108,8 @@ class _CategoryCompilerProxy:
     def named_objs(self):
         return self._proxy.named_objs
 
-    def __call__(self, *args, **kwargs):
-        return self._proxy(*args, **kwargs)
+    def __call__(self, dct):
+        return self._proxy(dct)
 
 def compiler_for(category):
     """Delayed compiler calling.
