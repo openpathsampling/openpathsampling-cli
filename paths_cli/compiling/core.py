@@ -169,7 +169,9 @@ class InstanceCompilerPlugin(OPSPlugin):
 
     @property
     def schema_name(self):
-        if not self.name.endswith(self.category):
+        # TODO: not exactly clear what the schema name should be if category
+        # is None -- don't think it actually exists in that case
+        if self.category and not self.name.endswith(self.category):
             schema_name = f"{self.name}-{self.category}"
         else:
             schema_name = self.name
