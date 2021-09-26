@@ -1,7 +1,7 @@
 from .topology import build_topology
 from .core import Builder
 from paths_cli.compiling.core import Parameter
-from .tools import custom_eval_int
+from .tools import custom_eval_int_strict_pos
 from paths_cli.compiling.plugins import EngineCompilerPlugin, CategoryPlugin
 
 def load_openmm_xml(filename):
@@ -32,9 +32,9 @@ OPENMM_PARAMETERS = [
               description="XML file with the OpenMM system"),
     Parameter('integrator', load_openmm_xml, json_type='string',
               description="XML file with the OpenMM integrator"),
-    Parameter('n_steps_per_frame', custom_eval_int,
+    Parameter('n_steps_per_frame', custom_eval_int_strict_pos,
               description="number of MD steps per saved frame"),
-    Parameter("n_frames_max", custom_eval_int,
+    Parameter("n_frames_max", custom_eval_int_strict_pos,
               description=("maximum number of frames before aborting "
                            "trajectory")),
 ]
