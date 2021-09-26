@@ -8,18 +8,7 @@ from paths_cli.wizard.openmm import (
     _load_openmm_xml, _load_topology, openmm, OPENMM_SERIALIZATION_URL
 )
 
-# should be able to remove this try block when we drop OpenMM < 7.6
-try:
-    import openmm as mm
-except ImportError:
-    try:
-        from simtk import openmm as mm
-    except ImportError:
-        HAS_OPENMM = False
-    else:
-        HAS_OPENMM = True  # -no-cov-
-else:
-    HAS_OPENMM = True
+from paths_cli.compat.openmm import mm, HAS_OPENMM
 
 def test_helper_url():
     assert_url(OPENMM_SERIALIZATION_URL)

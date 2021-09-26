@@ -5,11 +5,11 @@ import os
 from paths_cli.compiling.engines import *
 from paths_cli.compiling.engines import _openmm_options
 from paths_cli.compiling.errors import InputError
+from paths_cli.compat.openmm import HAS_OPENMM, mm, unit
 import openpathsampling as paths
 
 from openpathsampling.engines import openmm as ops_openmm
 import mdtraj as md
-
 
 class TestOpenMMEngineBuilder(object):
     def setup(self):
@@ -24,9 +24,9 @@ class TestOpenMMEngineBuilder(object):
         os.chdir(self.cwd)
 
     def _create_files(self, tmpdir):
-        mm = pytest.importorskip('simtk.openmm')
+        if not HAS_OPENMM:
+            pytest.skip('openmm not installed')
         openmmtools = pytest.importorskip('openmmtools')
-        unit = pytest.importorskip('simtk.unit')
         ad = openmmtools.testsystems.AlanineDipeptideVacuum()
         integrator = openmmtools.integrators.VVVRIntegrator(
             300*unit.kelvin, 1.0/unit.picosecond, 2.0*unit.femtosecond
@@ -41,7 +41,8 @@ class TestOpenMMEngineBuilder(object):
         trj.save(os.path.join(tmpdir, "ad.pdb"))
 
     def test_load_openmm_xml(self, tmpdir):
-        mm = pytest.importorskip('simtk.openmm')
+        if not HAS_OPENMM:
+            pytest.skip('openmm not installed')
         self._create_files(tmpdir)
         os.chdir(tmpdir)
         for fname in ['system.xml', 'integrator.xml', 'ad.pdb']:
