@@ -9,7 +9,7 @@ except ImportError:
     except ImportError:
         HAS_OPENMM = False
         mm = None
-        u = None
+        unit = None
     else: # -no-cov-
         HAS_OPENMM = True
 else:
