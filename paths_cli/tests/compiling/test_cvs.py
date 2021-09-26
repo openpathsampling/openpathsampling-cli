@@ -11,6 +11,8 @@ from openpathsampling.experimental.storage.collective_variables \
         import MDTrajFunctionCV
 import mdtraj as md
 
+from paths_cli.compat.openmm import HAS_OPENMM
+
 
 class TestMDTrajFunctionCV:
     def setup(self):
@@ -24,7 +26,8 @@ class TestMDTrajFunctionCV:
         self.kwargs = "indices: [[4, 6, 8, 14]]"
 
     def test_build_mdtraj_function_cv(self):
-        _ = pytest.importorskip('mdtraj')
+        if not HAS_OPENMM:
+            pytest.skip("Requires OpenMM for ops_load_trajectory")
         yml = self.yml.format(kwargs=self.kwargs, func="compute_dihedrals")
         dct = yaml.load(yml, Loader=yaml.FullLoader)
         cv = MDTRAJ_CV_PLUGIN(dct)
