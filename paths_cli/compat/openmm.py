@@ -5,7 +5,7 @@ try:
 except ImportError:
     try:
         from simtk import openmm as mm
-        from simtk import unit
+        from simtk import unit  # -no-cov-
     except ImportError:
         HAS_OPENMM = False
         mm = None

@@ -1,4 +1,5 @@
 import numpy as np
+from .errors import InputError
 
 def custom_eval(obj, named_objs=None):
     """Parse user input to allow simple math.
