@@ -17,9 +17,10 @@ def test_custom_eval(expr, expected):
 def test_custom_eval_int():
     assert custom_eval_int('5') == 5
 
-def test_custom_eval_int_strict_pos_error():
+@pytest.mark.parametrize('inp', [0, -1])
+def test_custom_eval_int_strict_pos_error(inp):
     with pytest.raises(InputError):
-        custom_eval_int_strict_pos(-1)
+        custom_eval_int_strict_pos(inp)
 
 def test_mdtraj_parse_atomlist_bad_input():
     with pytest.raises(TypeError, match="not integers"):

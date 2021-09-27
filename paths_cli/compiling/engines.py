@@ -5,8 +5,7 @@ from .tools import custom_eval_int_strict_pos
 from paths_cli.compiling.plugins import EngineCompilerPlugin, CategoryPlugin
 
 def load_openmm_xml(filename):
-    from openpathsampling.integration_tools import HAS_OPENMM
-    from openpathsampling.integration_tools import openmm as mm
+    from paths_cli.compat.openmm import HAS_OPENMM, mm
     if not HAS_OPENMM:  # -no-cov-
         raise RuntimeError("OpenMM does not seem to be installed")
 
