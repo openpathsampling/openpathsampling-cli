@@ -85,7 +85,7 @@ class Builder:
 
     Additionally, this class provides hooks for functions that run before or
     after the main builder function. This allows many objects to be built by
-    implementing simple functions and hooking themn together with Builder,
+    implementing simple functions and hooking them together with Builder,
     which can act as a general adaptor between user input and the underlying
     functions.
 
