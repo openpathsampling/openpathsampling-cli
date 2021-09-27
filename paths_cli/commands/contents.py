@@ -20,6 +20,9 @@ NAME_TO_ATTR = {
     'Snapshots': 'snapshots'
 }
 
+import logging
+logger = logging.getLogger(__name__)
+
 @click.command(
     'contents',
     short_help="list named objects from an OPS storage file",
@@ -49,6 +52,7 @@ def contents(input_file, table):
 
 def get_section_string(label, store):
     attr = NAME_TO_ATTR.get(label, label.lower())
+    logger.debug(f"Working on {attr}")
     if attr in UNNAMED_SECTIONS:
         string = get_unnamed_section_string(label, store)
     elif attr in ['tag', 'tags']:

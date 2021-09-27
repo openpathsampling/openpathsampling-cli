@@ -3,21 +3,10 @@ import pytest
 import openpathsampling as paths
 import mdtraj as md
 
-# should be able to remove this try block when we drop OpenMM < 7.6
-try:
-    import openmm as mm
-    from openmm import unit as u
-except ImportError:
-    try:
-        from simtk import openmm as mm
-        from simtk import unit as u
-    except ImportError:
-        HAS_OPENMM = False
-    else: # -no-cov-
-        HAS_OPENMM = True
-else:
-    HAS_OPENMM = True
+from paths_cli.compat.openmm import HAS_OPENMM, mm, unit
 
+# TODO: this isn't wizard-specific, and should be moved somwhere more
+# generally useful (like, oh, maybe openpathsampling.tests.fixtures?)
 @pytest.fixture
 def ad_openmm(tmpdir):
     """
@@ -32,12 +21,14 @@ def ad_openmm(tmpdir):
     md = pytest.importorskip('mdtraj')
     testsystem = openmmtools.testsystems.AlanineDipeptideVacuum()
     integrator = openmmtools.integrators.VVVRIntegrator(
-        300 * u.kelvin,
-        1.0 / u.picosecond,
-        2.0 * u.femtosecond
+        300 * unit.kelvin,
+        1.0 / unit.picosecond,
+        2.0 * unit.femtosecond
     )
-    traj = md.Trajectory([testsystem.positions.value_in_unit(u.nanometer)],
-                         topology=testsystem.mdtraj_topology)
+    traj = md.Trajectory(
+        [testsystem.positions.value_in_unit(unit.nanometer)],
+        topology=testsystem.mdtraj_topology
+    )
     files = {'integrator.xml': integrator,
              'system.xml': testsystem.system}
     with tmpdir.as_cwd():

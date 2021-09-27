@@ -1,6 +1,7 @@
 import collections
 import pkgutil
 import importlib
+import warnings
 import os
 
 class PluginRegistrationError(RuntimeError):
@@ -33,10 +34,12 @@ class Plugin(object):
                  or self.plugin_type != plugin_type)
         )
         if error_condition:  # -no-cov-
-            raise PluginRegistrationError(
+            msg = (
                 f"The plugin {repr(self)} has been previously "
                 "registered with different metadata."
             )
+            raise PluginRegistrationError(msg)
+
         self.location = location
         self.plugin_type = plugin_type
 

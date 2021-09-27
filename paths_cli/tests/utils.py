@@ -1,4 +1,5 @@
 import urllib.request
+import pytest
 
 try:
     urllib.request.urlopen('https://www.google.com')
@@ -15,4 +16,3 @@ def assert_url(url):
     # nice to give some better output to the user here.
     resp = urllib.request.urlopen(url)
     assert resp.status == 200
-

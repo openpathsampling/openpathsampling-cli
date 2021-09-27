@@ -1,5 +1,5 @@
 from paths_cli.wizard.engines import engines
-from paths_cli.parsing.tools import custom_eval, mdtraj_parse_atomlist
+from paths_cli.compiling.tools import custom_eval, mdtraj_parse_atomlist
 from paths_cli.wizard.load_from_ops import load_from_ops
 from paths_cli.wizard.load_from_ops import LABEL as _load_label
 from paths_cli.wizard.core import get_object

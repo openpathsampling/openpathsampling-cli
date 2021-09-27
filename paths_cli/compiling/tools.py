@@ -1,4 +1,5 @@
 import numpy as np
+from .errors import InputError
 
 def custom_eval(obj, named_objs=None):
     """Parse user input to allow simple math.
@@ -17,6 +18,16 @@ def custom_eval(obj, named_objs=None):
         'math': __import__('math'),
     }
     return eval(string, namespace)
+
+def custom_eval_int(obj, named_objs=None):
+    val = custom_eval(obj, named_objs)
+    return int(val)
+
+def custom_eval_int_strict_pos(obj, named_objs=None):
+    val = custom_eval_int(obj, named_objs)
+    if val <= 0:
+        raise InputError(f"Positive integer required; found {val}")
+    return val
 
 
 class UnknownAtomsError(RuntimeError):
