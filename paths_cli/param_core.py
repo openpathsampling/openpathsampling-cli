@@ -269,7 +269,7 @@ class OPSStorageLoadSingle(AbstractLoader):
         parameter. Each should be a callable taking a storage and the string
         input from the CLI, and should return the desired object or None if
         it cannot be found.
-    none_strategies : List[Callable[:class:`openpathsampling.Storage, Any]]
+    none_strategies : List[Callable[:class:`openpathsampling.Storage`, Any]]
         The strategies to be used when the CLI does not provide a value for
         this parameter. Each should be a callable taking a storage, and
         returning the desired object or None if it cannot be found.
@@ -309,7 +309,7 @@ class OPSStorageLoadSingle(AbstractLoader):
             if name is None:
                 msg = "Couldn't guess which item to use from " + self.store
             else:
-                msg = "Couldn't find {name} is {store}".format(
+                msg = "Couldn't find {name} in {store}".format(
                     name=name,
                     store=self.store
                 )

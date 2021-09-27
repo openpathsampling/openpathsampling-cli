@@ -7,6 +7,7 @@ from click.testing import CliRunner
 import openpathsampling as paths
 
 from paths_cli.commands.contents import *
+from .utils import assert_click_success
 
 def test_contents(tps_fixture):
     # we just do a full integration test of this one
@@ -36,7 +37,7 @@ def test_contents(tps_fixture):
             "Trajectories: 1 unnamed item",
             f"Snapshots: {2*len(init_conds[0])} unnamed items", ""
         ]
-        assert results.exit_code == 0
+        assert_click_success(results)
         assert results.output.split('\n') == expected
         for truth, beauty in zip(expected, results.output.split('\n')):
             assert truth == beauty
@@ -72,7 +73,7 @@ def test_contents_table(tps_fixture, table):
             ],
         }[table]
         assert results.output.split("\n") == expected
-        assert results.exit_code == 0
+        assert_click_success(results)
 
 def test_contents_table_error():
     runner = CliRunner()

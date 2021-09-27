@@ -3,23 +3,32 @@ import pytest
 import openpathsampling as paths
 import mdtraj as md
 
+from paths_cli.compat.openmm import HAS_OPENMM, mm, unit
+
+# TODO: this isn't wizard-specific, and should be moved somwhere more
+# generally useful (like, oh, maybe openpathsampling.tests.fixtures?)
 @pytest.fixture
 def ad_openmm(tmpdir):
     """
     Provide directory with files to start alanine depeptide sim in OpenMM
     """
-    mm = pytest.importorskip('simtk.openmm')
-    u = pytest.importorskip('simtk.unit')
+    # switch back to importorskip when we drop OpenMM < 7.6
+    if not HAS_OPENMM:
+        pytest.skip("could not import openmm")
+    # mm = pytest.importorskip('simtk.openmm')
+    # u = pytest.importorskip('simtk.unit')
     openmmtools = pytest.importorskip('openmmtools')
     md = pytest.importorskip('mdtraj')
     testsystem = openmmtools.testsystems.AlanineDipeptideVacuum()
     integrator = openmmtools.integrators.VVVRIntegrator(
-        300 * u.kelvin,
-        1.0 / u.picosecond,
-        2.0 * u.femtosecond
+        300 * unit.kelvin,
+        1.0 / unit.picosecond,
+        2.0 * unit.femtosecond
     )
-    traj = md.Trajectory([testsystem.positions.value_in_unit(u.nanometer)],
-                         topology=testsystem.mdtraj_topology)
+    traj = md.Trajectory(
+        [testsystem.positions.value_in_unit(unit.nanometer)],
+        topology=testsystem.mdtraj_topology
+    )
     files = {'integrator.xml': integrator,
              'system.xml': testsystem.system}
     with tmpdir.as_cwd():

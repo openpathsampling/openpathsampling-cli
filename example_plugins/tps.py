@@ -1,4 +1,5 @@
 import click
+from paths_cli import OPSCommandPlugin
 from paths_cli.parameters import (
     INPUT_FILE, OUTPUT_FILE, ENGINE, STATES, INIT_CONDS, N_STEPS_MC
 )
@@ -40,8 +41,17 @@ def tps_main(engine, states, init_traj, output_storage, n_steps):
     return simulation.sample_set, simulation
 
 
+# these lines enable this plugin to support OPS CLI < 0.3
 CLI = tps
 SECTION = "Simulation"
 
+# these lines enable this plugin to support OPS CLI >= 0.3
+PLUGIN = OPSCommandPlugin(
+    command=tps,
+    section="Simulation"
+)
+
+
+# this allows you to use this as a script, independently of the OPS CLI
 if __name__ == "__main__":
     tps()

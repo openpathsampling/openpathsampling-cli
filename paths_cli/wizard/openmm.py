@@ -1,14 +1,13 @@
 from paths_cli.wizard.errors import FILE_LOADING_ERROR_MSG, not_installed
 from paths_cli.wizard.core import get_object
 
-try:
-    from simtk import openmm as mm
-    import mdtraj as md
-except ImportError:
-    HAS_OPENMM = False
-else:
-    HAS_OPENMM = True
+# should be able to simplify this try block when we drop OpenMM < 7.6
+from paths_cli.compat.openmm import mm, HAS_OPENMM
 
+OPENMM_SERIALIZATION_URL=(
+    "http://docs.openmm.org/latest/api-python/generated/"
+    "openmm.openmm.XmlSerializer.html"
+)
 
 from paths_cli.wizard.parameters import (
     SimpleParameter, InstanceBuilder, load_custom_eval, CUSTOM_EVAL_ERROR
@@ -107,9 +106,7 @@ openmm_builder = InstanceBuilder(
 def _openmm_serialization_helper(wizard, user_input):  # no-cov
     wizard.say("You can write OpenMM objects like systems and integrators "
                "to XML files using the XMLSerializer class. Learn more "
-               "here: \n"
-               "http://docs.openmm.org/latest/api-python/generated/"
-               "simtk.openmm.openmm.XmlSerializer.html")
+               f"here: \n{OPENMM_SERIALIZATION_URL}")
 
 
 @get_object

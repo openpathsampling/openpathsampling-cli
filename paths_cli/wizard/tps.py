@@ -6,7 +6,7 @@ from paths_cli.wizard.volumes import volumes
 from functools import partial
 
 def tps_network(wizard):
-    raise NotImplementedError("Still need to add other network choic")
+    raise NotImplementedError("Still need to add other network choices")
 
 
 def tps_scheme(wizard, network=None):

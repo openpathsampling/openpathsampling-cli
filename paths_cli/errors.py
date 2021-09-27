@@ -1,0 +1,3 @@
+class MissingIntegrationError(ImportError):
+    pass
+

@@ -1,4 +1,5 @@
 import click
+from paths_cli import OPSCommandPlugin
 from paths_cli.parameters import (
     INPUT_FILE, APPEND_FILE, MULTI_CV, MULTI_ENGINE, MULTI_VOLUME,
     MULTI_NETWORK, MULTI_SCHEME, MULTI_TAG
@@ -55,6 +56,9 @@ def append(input_file, append_file, engine, cv, volume, network, scheme,
     storage.close()
 
 
-CLI = append
-SECTION = "Miscellaneous"
-REQUIRES_OPS = (1, 0)
+PLUGIN = OPSCommandPlugin(
+    command=append,
+    section="Miscellaneous",
+    requires_ops=(1, 0),
+    requires_cli=(0, 3)
+)

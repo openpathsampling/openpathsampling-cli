@@ -1,5 +1,6 @@
 import click
 from paths_cli.parameters import INPUT_FILE
+from paths_cli import OPSCommandPlugin
 
 UNNAMED_SECTIONS = ['steps', 'movechanges', 'samplesets', 'trajectories',
                     'snapshots']
@@ -19,18 +20,21 @@ NAME_TO_ATTR = {
     'Snapshots': 'snapshots'
 }
 
+import logging
+logger = logging.getLogger(__name__)
+
 @click.command(
     'contents',
-    short_help="list named objects from an OPS .nc file",
+    short_help="list named objects from an OPS storage file",
 )
 @INPUT_FILE.clicked(required=True)
 @click.option('--table', type=str, required=False,
               help="table to show results from")
 def contents(input_file, table):
-    """List the names of named objects in an OPS .nc file.
+    """List the names of named objects in an OPS storage file.
 
-    This is particularly useful when getting ready to use one of simulation
-    scripts (i.e., to identify exactly how a state or engine is named.)
+    This is particularly useful when getting ready to use a simulation
+    command (i.e., to identify exactly how a state or engine is named.)
     """
     storage = INPUT_FILE.get(input_file)
     print(storage)
@@ -48,6 +52,7 @@ def contents(input_file, table):
 
 def get_section_string(label, store):
     attr = NAME_TO_ATTR.get(label, label.lower())
+    logger.debug(f"Working on {attr}")
     if attr in UNNAMED_SECTIONS:
         string = get_unnamed_section_string(label, store)
     elif attr in ['tag', 'tags']:
@@ -112,6 +117,10 @@ def get_section_string_nameable(section, store, get_named):
                     + _item_or_items(n_unnamed))
     return out_str
 
-CLI = contents
-SECTION = "Miscellaneous"
-REQUIRES_OPS = (1, 0)
+
+PLUGIN = OPSCommandPlugin(
+    command=contents,
+    section="Miscellaneous",
+    requires_ops=(1, 0),
+    requires_cli=(0, 3)
+)
