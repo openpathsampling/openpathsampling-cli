@@ -45,3 +45,5 @@ def load_from_ops(wizard, store_name, obj_name):
     storage = _get_ops_storage(wizard)
     obj = _get_ops_object(wizard, storage, store_name, obj_name)
     return obj
+
+

@@ -1,4 +1,4 @@
-from paths_cli.parsing.tools import custom_eval
+from paths_cli.compiling.tools import custom_eval
 import importlib
 
 from paths_cli.wizard.helper import Helper

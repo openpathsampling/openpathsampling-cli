@@ -72,8 +72,8 @@ class Wizard:
     def ask(self, question, options=None, default=None, helper=None):
         result = self.console.input("🧙 " + question + " ")
         self.console.print()
-        if helper and result.startswith("?"):
-            helper(self, result)
+        if helper and result[0] in ["?", "!"]:
+            self.say(helper(result))
             return
         return result
 
@@ -89,6 +89,32 @@ class Wizard:
     def bad_input(self, content, preface="👺 "):
         # just changes the default preface; maybe print 1st line red?
         self.say(content, preface)
+
+    @get_object
+    def ask_enumerate_dict(self, question, options, helper=None):
+        self.say(question)
+        opt_string = "\n".join([f" {(i+1):>3}. {opt}"
+                                for i, opt in enumerate(options)])
+        self.say(opt_string, preface=" "*3)
+        choice = self.ask("Please select an option:", helper=helper)
+
+        # indicates input was handled by helper -- so ask again
+        if choice is None:
+           return None
+
+        # select by string
+        if choice in options:
+            return options[choice]
+
+        # select by number
+        try:
+            num = int(choice) - 1
+            result = list(options.values())[num]
+        except Exception:
+            self.bad_input(f"Sorry, '{choice}' is not a valid option.")
+            result = None
+
+        return result
 
     def ask_enumerate(self, question, options):
         """Ask the user to select from a list of options"""
@@ -111,6 +137,17 @@ class Wizard:
                 self.bad_input(f"Sorry, '{choice}' is not a valid option.")
                 result = None
 
+        return result
+
+    @get_object
+    def ask_load(self, question, loader, helper=None):
+        as_str = self.ask(question, helper=helper)
+        try:
+            result = loader(as_str)
+        except Exception as e:
+            self.exception(f"Sorry, I couldn't understand the input "
+                           f"'{as_str}'.", e)
+            return
         return result
 
     # this should match the args for wizard.ask

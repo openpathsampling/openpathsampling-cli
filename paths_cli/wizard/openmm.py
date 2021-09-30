@@ -13,6 +13,69 @@ from paths_cli.wizard.parameters import (
     SimpleParameter, InstanceBuilder, load_custom_eval, CUSTOM_EVAL_ERROR
 )
 
+from paths_cli.wizard.wrap_compilers import (
+    WizardProxyParameter, WrapCompilerWizardPlugin
+)
+
+from paths_cli.compiling.engines import OPENMM_PLUGIN as OPENMM_COMPILING
+
+_where_is_xml = "Where is the XML file for your OpenMM {obj_type}?"
+_xml_help = (
+    "You can write OpenMM objects like systems and integrators to XML "
+    "files using the XMLSerializer class. Learn more here:\n"
+    + OPENMM_SERIALIZATION_URL
+)
+
+_OPENMM_REQS = ("To use OpenMM in the OPS wizard, you'll need to provide a "
+                "file with topology information (usually a PDB), as well "
+                "as XML versions of your OpenMM integrator and system "
+                "objects.")
+
+OPENMM_PLUGIN = WrapCompilerWizardPlugin(
+    name="OpenMM",
+    category="engines",
+    description=("OpenMM is an GPU-accelerated library for molecular "
+                 "dynamics. " + _OPENMM_REQS),
+    intro="Great! OpenMM gives you a lots of flexibility" + _OPENMM_REQS,
+    parameters=[
+        WizardProxyParameter(
+            name='topology',
+            ask="Where is a PDB file describing your system?",
+            helper=("We use a PDB file to set up the OpenMM simulation. "
+                    "Please provide the path to your PDB file."),
+            error=FILE_LOADING_ERROR_MSG,
+        ),
+        WizardProxyParameter(
+            name='integrator',
+            ask=_where_is_xml.format(obj_type='integrator'),
+            helper=_xml_help,
+            error=FILE_LOADING_ERROR_MSG,
+        ),
+        WizardProxyParameter(
+            name='system',
+            ask=_where_is_xml.format(obj_type="system"),
+            helper=_xml_help,
+            error=FILE_LOADING_ERROR_MSG,
+        ),
+        WizardProxyParameter(
+            name='n_steps_per_frame',
+            ask="How many MD steps per saved frame?",
+            helper=("Your integrator has a time step associated with it. "
+                    "We need to know how many time steps between the "
+                    "frames we actually save during the run."),
+            error=CUSTOM_EVAL_ERROR,
+        ),
+        WizardProxyParameter(
+            name='n_frames_max',
+            ask="How many frames before aborting a trajectory?",
+            helper=None,
+            error=CUSTOM_EVAL_ERROR,
+        ),
+    ],
+    compiler_plugin=OPENMM_COMPILING,
+)
+
+
 ### TOPOLOGY
 
 def _topology_loader(filename):
@@ -33,8 +96,7 @@ _where_is_xml = "Where is the XML file for your OpenMM {obj_type}?"
 _xml_help = (
     "You can write OpenMM objects like systems and integrators to XML "
     "files using the XMLSerializer class. Learn more here:\n"
-    "http://docs.openmm.org/latest/api-python/generated/"
-    "simtk.openmm.openmm.XmlSerializer.html"
+    + OPENMM_SERIALIZATION_URL
 )
 # TODO: switch to using load_openmm_xml from input file setup
 def _openmm_xml_loader(xml):
@@ -174,5 +236,6 @@ SUPPORTED = {"OpenMM": openmm_builder} if HAS_OPENMM else {}
 if __name__ == "__main__":
     from paths_cli.wizard.wizard import Wizard
     wizard = Wizard([])
-    engine = openmm_builder(wizard)
+    # engine = openmm_builder(wizard)
+    engine = OPENMM_PLUGIN(wizard)
     print(engine)
