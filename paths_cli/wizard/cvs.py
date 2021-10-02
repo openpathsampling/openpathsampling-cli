@@ -25,22 +25,19 @@ else:
     HAS_MDTRAJ = True
 
 _ATOM_INDICES_HELP_STR = (
-    "You should specify atom indicies enclosed in double brackets, e.g. "
+    "You should specify atom indices enclosed in double brackets, e.g. "
     "[{list_range_natoms}]"
 )
 
-def mdtraj_atom_helper(wizard, user_input, n_atoms):  # no-cov
-    wizard.say("You should specify atom indices enclosed in double "
-               "brackets, e.g, [" + str(list(range(n_atoms))) + "]")
-    # TODO: implement the following:
-    # wizard.say("You can specify atoms either as atom indices (which count "
-               # "from zero) or as atom labels of the format "
-               # "CHAIN:RESIDUE-ATOM, e.g., '0:ALA1-CA' for the alpha carbon "
-               # "of alanine 1 (this time counting from one, as in the PDB) "
-               # "of the 0th chain in the topology. You can also use letters "
-               # "for chain IDs, but note that A corresponds to the first "
-               # "chain in your topology, even if its name in the PDB file "
-               # "is B.")
+# TODO: implement so the following can be the help string:
+# _ATOM_INDICES_HELP_STR = (
+#     "You can specify atoms either as atom indices (which count from zero) "
+#     "or as atom labels of the format CHAIN:RESIDUE-ATOM, e.g., '0:ALA1-CA' "
+#     "for the alpha carbon of alanine 1 (this time counting from one, as in "
+#     "the PDB) of the 0th chain in the topology. You can also use letters "
+#     "for chain IDs, but note that A corresponds to the first chain in your "
+#     "topology, even if its name in the PDB file " "is B."
+# )
 
 TOPOLOGY_CV_PREREQ = FromWizardPrerequisite(
     name='topology',
@@ -57,32 +54,6 @@ TOPOLOGY_CV_PREREQ = FromWizardPrerequisite(
 )
 
 
-
-def _get_topology(wizard):
-    from paths_cli.wizard.engines import engines
-    topology = None
-    # TODO: this is very similar to get_missing_object, but has more
-    # reporting; is there some way to add the reporting to
-    # get_missing_object?
-    if len(wizard.engines) == 0:
-        # SHOULD NEVER GET HERE IF WIZARDS ARE DESIGNED CORRECTLY
-        wizard.say("Hey, you need to define an MD engine before you "
-                   "create CVs that refer to it. Let's do that now!")
-        engine = engines(wizard)
-        wizard.register(engine, 'engine', 'engines')
-        wizard.say("Now let's get back to defining your CV.")
-        topology = engine.topology
-    elif len(wizard.engines) == 1:
-        topology = list(wizard.engines.values())[0].topology
-    else:
-        wizard.say("You have defined multiple engines, and need to pick "
-                   "one to use to get a the topology for your CV.")
-        engine = wizard.obj_selector('engines', 'engine', engines)
-        topology = engine.topology
-        wizard.say("Now let's get back to defining your CV.")
-
-    return topology
-
 @get_object
 def _get_atom_indices(wizard, topology, n_atoms, cv_user_str):
     helper = Helper(_ATOM_INDICES_HELP_STR.format(
@@ -95,7 +66,7 @@ def _get_atom_indices(wizard, topology, n_atoms, cv_user_str):
         arr = mdtraj_parse_atomlist(atoms_str, n_atoms, topology)
     except Exception as e:
         wizard.exception(f"Sorry, I didn't understand '{atoms_str}'.", e)
-        mdtraj_atom_helper(wizard, '?', n_atoms)
+        helper("?")
         return
 
     return arr
@@ -180,62 +151,7 @@ if HAS_MDTRAJ:
         summary=_mdtraj_summary,
     )
 
-def _mdtraj_function_cv(wizard, cv_does_str, cv_user_prompt, func,
-                        kwarg_name, n_atoms, period):
-    from openpathsampling.experimental.storage.collective_variables import \
-            MDTrajFunctionCV
-    wizard.say(f"We'll make a CV that measures the {cv_does_str}.")
-    period_min, period_max = period
-    topology = _get_topology(wizard)
-    indices = _get_atom_indices(wizard, topology, n_atoms=n_atoms,
-                                cv_user_str=cv_user_prompt)
-    kwargs = {kwarg_name: indices}
-    atoms_str = " ".join([str(topology.mdtraj.atom(i)) for i in indices[0]])
-
-    summary = ("Here's what we'll create:\n"
-               f"  Function: {func.__name__}\n"
-               f"     Atoms: {atoms_str}\n"
-               f"  Topology: {repr(topology.mdtraj)}")
-    wizard.say(summary)
-
-    return MDTrajFunctionCV(func, topology, period_min=period_min,
-                            period_max=period_max, **kwargs)
-
-def distance(wizard):
-    return _mdtraj_function_cv(
-        wizard=wizard,
-        cv_does_str="distance between two atoms",
-        cv_user_prompt="measure the distance between",
-        func=md.compute_distances,
-        kwarg_name='atom_pairs',
-        n_atoms=2,
-        period=(None, None)
-    )
-
-def angle(wizard):
-    return _mdtraj_function_cv(
-        wizard=wizard,
-        cv_does_str="angle made by three atoms",
-        cv_user_prompt="use to define the angle",
-        func=md.compute_angles,
-        kwarg_name='angle_indices',
-        n_atoms=3,
-        period=(-np.pi, np.pi)
-    )
-
-def dihedral(wizard):
-    return _mdtraj_function_cv(
-        wizard=wizard,
-        cv_does_str="dihedral made by four atoms",
-        cv_user_prompt="use to define the dihedral angle",
-        func=md.compute_dihedrals,
-        kwarg_name='indices',
-        n_atoms=4,
-        period=(-np.pi, np.pi)
-    )
-
-def rmsd(wizard):
-    raise NotImplementedError("RMSD has not yet been implemented")
+    # TODO: add RMSD -- need to figure out how to select a frame
 
 def coordinate(wizard, prereqs=None):
     # TODO: atom_index should be from wizard.ask_custom_eval
@@ -272,22 +188,6 @@ COORDINATE_CV = WizardObjectPlugin(
 
 CV_FROM_FILE = LoadFromOPS('cvs', 'CV')
 
-SUPPORTED_CVS = {}
-
-if HAS_MDTRAJ:
-    SUPPORTED_CVS.update({
-        'Distance': MDTRAJ_DISTANCE,
-        'Angle': MDTRAJ_ANGLE,
-        'Dihedral': MDTRAJ_DIHEDRAL,
-        # 'RMSD': rmsd,
-    })
-
-SUPPORTED_CVS.update({
-    'Coordinate': COORDINATE_CV,
-    # 'Python script': ...,
-    _load_label: CV_FROM_FILE,
-})
-
 CV_PLUGIN = WrapCategory(
     name='cvs',
     intro=("You'll need to describe your system in terms of collective "
@@ -310,13 +210,15 @@ def cvs(wizard):
     cv = SUPPORTED_CVS[cv_type](wizard)
     return cv
 
-# TEMPORARY
-for plugin in [MDTRAJ_DISTANCE, MDTRAJ_ANGLE, MDTRAJ_DIHEDRAL,
-               COORDINATE_CV, CV_FROM_FILE]:
-    CV_PLUGIN.register_plugin(plugin)
-
 if __name__ == "__main__":  # no-cov
     from paths_cli.wizard.wizard import Wizard
+    plugins = [obj for obj in globals().values()
+               if isinstance(obj, WizardObjectPlugin)]
+    from_file = [obj for obj in globals().values()
+                 if isinstance(obj, LoadFromOPS)]
+    for plugin in plugins + from_file:
+        CV_PLUGIN.register_plugin(plugin)
+
     wiz = Wizard({})
     cv = CV_PLUGIN(wiz)
     print(cv)
