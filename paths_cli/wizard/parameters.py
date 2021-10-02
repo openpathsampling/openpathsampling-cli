@@ -1,5 +1,6 @@
 from paths_cli.compiling.tools import custom_eval
 import importlib
+from collections import namedtuple
 
 from paths_cli.wizard.helper import Helper
 
@@ -7,78 +8,157 @@ NO_DEFAULT = object()
 
 NO_PARAMETER_LOADED = object()
 
-CUSTOM_EVAL_ERROR = "Sorry, I couldn't understand the input '{user_str}'"
+ProxyParameter = namedtuple(
+    'ProxyParameter',
+    ['name', 'ask', 'helper', 'default', 'autohelp', 'summarize'],
+    defaults=[None, NO_DEFAULT, False, None]
+)
 
-def do_import(fully_qualified_name):
-    dotted = fully_qualified_name.split('.')
-    thing = dotted[-1]
-    module = ".".join(dotted[:-1])
-    # stole this from SimStore
-    mod = importlib.import_module(module)
-    result = getattr(mod, thing)
-    return result
-
-
-class Parameter:
-    def __init__(self, name, load_method):
+class WizardParameter:
+    def __init__(self, name, ask, loader, helper=None, default=NO_DEFAULT,
+                 autohelp=False, summarize=None):
         self.name = name
-        self.load_method = load_method
-
-    def __call__(self, wizard):
-        result = NO_PARAMETER_LOADED
-        while result is NO_PARAMETER_LOADED:
-            result = self.load_method(wizard)
-        return result
-
-
-class SimpleParameter(Parameter):
-    def __init__(self, name, ask, loader, helper=None, error=None,
-                 default=NO_DEFAULT, autohelp=False):
-        super().__init__(name, self._load_method)
         self.ask = ask
         self.loader = loader
-        if helper is None:
-            helper = Helper("Sorry, no help is available for this "
-                            "parameter.")
-        if not isinstance(helper, Helper):
-            helper = Helper(helper)
         self.helper = helper
-
-        if error is None:
-            error = "Something went wrong processing the input '{user_str}'"
-        self.error = error
         self.default = default
         self.autohelp = autohelp
+        if summarize is None:
+            summarize = lambda obj: str(obj)
+        self.summarize = summarize
 
-    def _process_input(self, wizard, user_str):
+    @classmethod
+    def from_proxy(cls, proxy, compiler_plugin):
+        loader_dict = {p.name: p.loader for p in compiler_plugin.parameters}
+        dct = proxy._asdict()
+        dct['loader'] = loader_dict[proxy.name]
+        return cls(**dct)
+
+    def __call__(self, wizard):
         obj = NO_PARAMETER_LOADED
-        if user_str[0] in ['?', '!']:
-            wizard.say(self.helper(user_str))
-            return NO_PARAMETER_LOADED
-
-        try:
-            obj = self.loader(user_str)
-        except Exception as e:
-            wizard.exception(self.error.format(user_str=user_str), e)
-            if self.autohelp:
-                wizard.say(self.helper("?"))
-
+        while obj is NO_PARAMETER_LOADED:
+            obj = wizard.ask_load(self.ask, self.loader, self.helper,
+                                  autohelp=self.autohelp)
         return obj
 
-    def _load_method(self, wizard):
-        user_str = wizard.ask(self.ask)
-        result = self._process_input(wizard, user_str)
+
+class WizardObjectPlugin:
+    def __init__(self, name, category, builder, prerequisite=None,
+                 intro=None, description=None, summary=None):
+        self.name = name
+        self.category = category
+        self.builder = builder
+        self.prerequisite = prerequisite
+        self.intro = intro
+        self.description = description
+        self._summary = summary  # func to summarize
+
+    def summary(self, obj):
+        if self._summary:
+            return self._summary(obj)
+        else:
+            return "  " + str(obj)
+
+    def __call__(self, wizard):
+        if self.intro is not None:
+            wizard.say(self.intro)
+
+        if self.prerequisite is not None:
+            prereqs = self.prerequisite(wizard)
+        else:
+            prereqs = {}
+
+        result = self.builder(wizard, prereqs)
+        wizard.say("Here's what we'll create:\n" + self.summary(result))
         return result
 
 
-def load_custom_eval(type_=None):
-    if type_ is None:
-        type_ = lambda x: x
-    def parse(input_str):
-        return type_(custom_eval(input_str))
+class WizardParameterObjectPlugin(WizardObjectPlugin):
+    def __init__(self, name, category, parameters, builder, *,
+                 prerequisite=None, intro=None, description=None):
+        super().__init__(name=name, category=category, builder=self._build,
+                         prerequisite=prerequisite, intro=intro,
+                         description=description)
+        self.parameters = parameters
+        self.build_func = builder
+        self.proxy_parameters = []  # non-empty if created from proxies
 
-    return parse
+    @classmethod
+    def from_proxies(cls, name, category, parameters, compiler_plugin,
+                     prerequisite=None, intro=None, description=None):
+        """
+        Use the from_proxies method if you already have a compiler plugin.
+        """
+        params = [WizardParameter.from_proxy(proxy, compiler_plugin)
+                  for proxy in parameters]
+        obj = cls(name=name,
+                  category=category,
+                  parameters=params,
+                  builder=compiler_plugin.builder,
+                  prerequisite=prerequisite,
+                  intro=intro,
+                  description=description)
+        obj.proxy_parameters = parameters
+        return obj
 
+    def _build(self, wizard, prereqs):
+        dct = dict(prereqs)  # shallow copy
+        dct.update({p.name: p(wizard) for p in self.parameters})
+        result = self.build_func(**dct)
+        return result
+
+
+class FromWizardPrerequisite:
+    """Load prerequisites from the wizard.
+    """
+    def __init__(self, name, create_func, category, obj_name, n_required,
+                 say_select=None, say_create=None, say_finish=None,
+                 load_func=None):
+        self.name = name
+        self.create_func = create_func
+        self.category = category
+        self.obj_name = obj_name
+        self.n_required = n_required
+        self.say_select = say_select
+        self.say_create = say_create
+        self.say_finish = say_finish
+        if load_func is None:
+            load_func = lambda x: x
+
+        self.load_func = load_func
+
+    def create_new(self, wizard):
+        if self.say_create:
+            wizard.say(self.say_create)
+        obj = self.create_func(wizard)
+        wizard.register(obj, self.obj_name, self.category)
+        result = self.load_func(obj)
+        return result
+
+    def get_existing(self, wizard):
+        all_objs = list(getattr(wizard, self.category).values())
+        results = [self.load_func(obj) for obj in all_objs]
+        return results
+
+    def select_existing(self, wizard):
+        pass
+
+    def __call__(self, wizard):
+        n_existing = len(getattr(wizard, self.category))
+        if n_existing == self.n_required:
+            # early return in this case (return silently)
+            return {self.name: self.get_existing(wizard)}
+        elif n_existing > self.n_required:
+            dct = {self.name: self.select_existing(wizard)}
+        else:
+            objs = []
+            while len(getattr(wizard, self.category)) < self.n_required:
+                objs.append(self.create_new(wizard))
+            dct = {self.name: objs}
+
+        if self.say_finish:
+            wizard.say(self.say_finish)
+        return dct
 
 class InstanceBuilder:
     """

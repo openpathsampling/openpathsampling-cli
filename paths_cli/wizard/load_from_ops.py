@@ -47,3 +47,14 @@ def load_from_ops(wizard, store_name, obj_name):
     return obj
 
 
+class LoadFromOPS:
+    def __init__(self, category, obj_name):
+        self.category = category
+        self.name = "Load existing from OPS file"
+        self.obj_name = obj_name
+
+    def __call__(self, wizard):
+        wizard.say("Okay, we'll load it from an OPS file.")
+        storage = _get_ops_storage(wizard)
+        obj = _get_ops_storage(wizard, storage, self.category,
+                               self.obj_name)

@@ -2,34 +2,11 @@ NO_PARAMETER_LOADED = object()
 
 from .helper import Helper
 
-class WizardProxyParameter:
-    def __init__(self, name, ask, helper, error):
-        self.name = name
-        self.ask = ask
-        self.helper = Helper(helper)
-        self.error = error
-        self.loader = None
-
-    def register_loader(self, loader):
-        if self.loader is not None:
-            raise RuntimeError("Already have a loader for this parameter")
-        self.loader = loader
-
-    def _process_input(self, user_str):
-        if user_str[0] in ['?', '!']:
-            pass
-
-    def __call__(self, wizard):
-        obj = NO_PARAMETER_LOADED
-        while obj is NO_PARAMETER_LOADED:
-            obj = wizard.ask_load(self.ask, self.loader, self.helper)
-
-        return obj
-
 
 class WrapCompilerWizardPlugin:
     def __init__(self, name, category, parameters, compiler_plugin,
                  prerequisite=None, intro=None, description=None):
+        self.name = name
         self.parameters = parameters
         self.compiler_plugin = compiler_plugin
         self.prerequisite = prerequisite
@@ -39,15 +16,22 @@ class WrapCompilerWizardPlugin:
         for param in self.parameters:
             param.register_loader(loaders[param.name])
 
+    def _builder(self, wizard, prereqs):
+        dct = dict(prereqs)  # make a copy
+        dct.update({param.name: param(wizard) for param in self.parameters})
+        result = self.compiler_plugin(**dct)
+        return result
+
     def __call__(self, wizard):
         if self.intro is not None:
             wizard.say(self.intro)
 
         if self.prerequisite is not None:
-            self.prerequisite(wizard)
+            prereqs = self.prerequisite(wizard)
+        else:
+            prereqs = {}
 
-        dct = {param.name: param(wizard) for param in self.parameters}
-        result = self.compiler_plugin.builder(**dct)
+        result = self._builder(wizard, prereqs)
 
         return result
 

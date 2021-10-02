@@ -1,5 +1,6 @@
 import paths_cli.wizard.openmm as openmm
 from paths_cli.wizard.load_from_ops import (
+    LoadFromOPS,
     load_from_ops, LABEL as load_label
 )
 from functools import partial
@@ -7,8 +8,6 @@ from functools import partial
 from paths_cli.wizard.wrap_compilers import WrapCategory
 
 SUPPORTED_ENGINES = {}
-for module in [openmm]:
-    SUPPORTED_ENGINES.update(module.SUPPORTED)
 
 SUPPORTED_ENGINES[load_label] = partial(load_from_ops,
                                         store_name='engines',
@@ -36,17 +35,19 @@ ENGINE_PLUGIN = WrapCategory(
     helper=_ENGINE_HELP
 )
 
+ENGINE_FROM_FILE = LoadFromOPS('engines', 'engine')
+
+# TEMPORARY
+from .openmm import OPENMM_PLUGIN
+plugins = [OPENMM_PLUGIN, ENGINE_FROM_FILE]
+for plugin in plugins:
+    ENGINE_PLUGIN.register_plugin(plugin)
+
 
 if __name__ == "__main__":
     from paths_cli.wizard import wizard
     wiz = wizard.Wizard([])
-    choices = {
-        "OpenMM": openmm.OPENMM_PLUGIN,
-        load_label: partial(load_from_ops,
-                            store_name='engines',
-                            obj_name='engine')
-    }
-    ENGINE_PLUGIN.choices = choices
+    # TODO: normally will need to register plugins from this file first
     engine = ENGINE_PLUGIN(wiz)
     print(engine)
 
