@@ -71,5 +71,4 @@ jobs:
         run: |
           python -c "import paths_cli"
           py.test -vv --cov --cov-report xml:cov.xml
-      - name: "Report coverage"
-        run: bash <(curl -s https://codecov.io/bash)
+      - uses: codecov/codecov-action@v2
