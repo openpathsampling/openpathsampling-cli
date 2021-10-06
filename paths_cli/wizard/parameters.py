@@ -111,7 +111,10 @@ class WizardObjectPlugin(OPSPlugin):
         return summary
 
 
-    def __call__(self, wizard, context):
+    def __call__(self, wizard, context=None):
+        if context is None:
+            context = {}
+
         if self.intro is not None:
             wizard.say(self.intro)
 

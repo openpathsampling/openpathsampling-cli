@@ -19,17 +19,13 @@ ENGINE_PLUGIN = WrapCategory(
 
 ENGINE_FROM_FILE = LoadFromOPS('engine')
 
-# TEMPORARY
-# from .openmm import OPENMM_PLUGIN
-# plugins = [OPENMM_PLUGIN, ENGINE_FROM_FILE]
-# for plugin in plugins:
-#     ENGINE_PLUGIN.register_plugin(plugin)
-
-
 if __name__ == "__main__":
     from paths_cli.wizard import wizard
+    from paths_cli.wizard.plugins import register_installed_plugins
+    from paths_cli.wizard.plugins import get_category_wizard
+    register_installed_plugins()
+    engines = get_category_wizard('engine')
     wiz = wizard.Wizard([])
-    # TODO: normally will need to register plugins from this file first
-    engine = ENGINE_PLUGIN(wiz)
+    engine = engines(wiz)
     print(engine)
 

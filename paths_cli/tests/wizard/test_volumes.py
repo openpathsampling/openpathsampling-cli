@@ -4,9 +4,10 @@ from unittest import mock
 from paths_cli.tests.wizard.mock_wizard import mock_wizard
 
 from paths_cli.wizard.volumes import (
-    _vol_intro, intersection_volume, union_volume, negated_volume,
-    cv_defined_volume, volumes, SUPPORTED_VOLUMES
+    INTERSECTION_VOLUME_PLUGIN, UNION_VOLUME_PLUGIN, NEGATED_VOLUME_PLUGIN,
+    CV_DEFINED_VOLUME_PLUGIN, VOLUMES_PLUGIN, volume_intro, _VOL_DESC
 )
+
 
 import openpathsampling as paths
 from openpathsampling.experimental.storage.collective_variables import \
@@ -33,20 +34,25 @@ def volume_setup():
 @pytest.mark.parametrize('as_state,has_state', [
     (True, False), (True, True), (False, False)
 ])
-def test_vol_intro(as_state, has_state):
+def test_volume_intro(as_state, has_state):
     wizard = mock_wizard([])
     wizard.requirements['state'] = ('states', 2, float('inf'))
     if has_state:
         wizard.states['foo'] = 'placeholder'
 
-    intro = _vol_intro(wizard, as_state)
+    if as_state:
+        context = {}
+    else:
+        context = {'depth': 1}
+
+    intro = "\n".join(volume_intro(wizard, context))
 
     if as_state and has_state:
         assert "another stable state" in intro
     elif as_state and not has_state:
         assert "You'll need to define" in intro
     elif not as_state:
-        assert intro is None
+        assert intro == _VOL_DESC
     else:
         raise RuntimeError("WTF?")
 
@@ -54,23 +60,25 @@ def _binary_volume_test(volume_setup, func):
     vol1, vol2 = volume_setup
     wizard = mock_wizard([])
     mock_volumes = mock.Mock(side_effect=[vol1, vol2])
-    with mock.patch('paths_cli.wizard.volumes.volumes', new=mock_volumes):
+    patch_loc = 'paths_cli.wizard.volumes.VOLUMES_PLUGIN'
+    with mock.patch(patch_loc, new=mock_volumes):
         vol = func(wizard)
 
-    assert "first volume" in wizard.console.log_text
-    assert "second volume" in wizard.console.log_text
-    assert "Created" in wizard.console.log_text
+    assert "first constituent volume" in wizard.console.log_text
+    assert "second constituent volume" in wizard.console.log_text
+    assert "Here's what we'll make" in wizard.console.log_text
     return wizard, vol
 
 def test_intersection_volume(volume_setup):
-    wizard, vol = _binary_volume_test(volume_setup, intersection_volume)
+    wizard, vol = _binary_volume_test(volume_setup,
+                                      INTERSECTION_VOLUME_PLUGIN)
     assert "intersection" in wizard.console.log_text
     traj = make_1d_traj([0.25, 0.75])
     assert not vol(traj[0])
     assert vol(traj[1])
 
 def test_union_volume(volume_setup):
-    wizard, vol = _binary_volume_test(volume_setup, union_volume)
+    wizard, vol = _binary_volume_test(volume_setup, UNION_VOLUME_PLUGIN)
     assert "union" in wizard.console.log_text
     traj = make_1d_traj([0.25, 0.75, 1.75])
     assert vol(traj[0])
@@ -84,8 +92,9 @@ def test_negated_volume(volume_setup):
     assert not init_vol(traj[1])
     wizard = mock_wizard([])
     mock_vol = mock.Mock(return_value=init_vol)
-    with mock.patch('paths_cli.wizard.volumes.volumes', new=mock_vol):
-        vol = negated_volume(wizard)
+    patch_loc = 'paths_cli.wizard.volumes.VOLUMES_PLUGIN'
+    with mock.patch(patch_loc, new=mock_vol):
+        vol = NEGATED_VOLUME_PLUGIN(wizard)
 
     assert "not in" in wizard.console.log_text
     assert not vol(traj[0])
