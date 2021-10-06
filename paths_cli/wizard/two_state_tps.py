@@ -1,18 +1,31 @@
-from paths_cli.wizard.volumes import volumes
+from paths_cli.wizard.plugins import get_category_wizard
 from paths_cli.wizard.tps import tps_scheme
 from paths_cli.wizard.steps import (
     SINGLE_ENGINE_STEP, CVS_STEP, WizardStep
 )
 from paths_cli.wizard.wizard import Wizard
 
+volumes = get_category_wizard('volume')
+from paths_cli.wizard.volumes import _FIRST_STATE, _VOL_DESC
+
 def two_state_tps(wizard, fixed_length=False):
     import openpathsampling as paths
-    wizard.say("Now let's define the stable states for your system. "
-               "Let's start with your initial state.")
-    initial_state = volumes(wizard, as_state=True, intro="")
+    wizard.requirements['state'] = ('volumes', 2, 2)
+    intro = [
+        _FIRST_STATE.format(n_states_string=2),
+        "Let's start with your initial state.",
+        _VOL_DESC,
+    ]
+    # wizard.say("Now let's define the stable states for your system. "
+    #            "Let's start with your initial state.")
+    initial_state = volumes(wizard, context={'intro': intro})
     wizard.register(initial_state, 'initial state', 'states')
-    wizard.say("Next let's define your final state.")
-    final_state = volumes(wizard, as_state=True, intro="")
+    intro = [
+        "Next let's define your final state.",
+        _VOL_DESC
+    ]
+    # wizard.say("Next let's define your final state.")
+    final_state = volumes(wizard, context={'intro': intro})
     wizard.register(final_state, 'final state', 'states')
     if fixed_length:
         ...  # no-cov  (will add this later)

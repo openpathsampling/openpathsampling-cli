@@ -30,7 +30,7 @@ _OPENMM_REQS = ("To use OpenMM in the OPS wizard, you'll need to provide a "
 if HAS_OPENMM:
     OPENMM_PLUGIN = WizardParameterObjectPlugin.from_proxies(
         name="OpenMM",
-        category="engines",
+        category="engine",
         description=("OpenMM is an GPU-accelerated library for molecular "
                      "dynamics. " + _OPENMM_REQS),
         intro=("Great! OpenMM gives you a lots of flexibility. " +

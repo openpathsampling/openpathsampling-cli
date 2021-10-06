@@ -1,7 +1,7 @@
 NO_PARAMETER_LOADED = object()
 
 from .helper import Helper
-
+from paths_cli.plugin_management import OPSPlugin
 
 class WrapCompilerWizardPlugin:
     def __init__(self, name, category, parameters, compiler_plugin,
@@ -61,13 +61,16 @@ class CategoryHelpFunc:
         return result
 
 
-class WrapCategory:
-    def __init__(self, name, ask, helper=None, intro=None):
+class WrapCategory(OPSPlugin):
+    def __init__(self, name, ask, helper=None, intro=None, set_context=None,
+                 requires_ops=(1,0), requires_cli=(0,3)):
+        super().__init__(requires_ops, requires_cli)
         self.name = name
         if isinstance(intro, str):
             intro = [intro]
         self.intro = intro
         self.ask = ask
+        self._set_context = set_context
         if helper is None:
             helper = Helper(CategoryHelpFunc(self))
         if isinstance(helper, str):
@@ -76,15 +79,53 @@ class WrapCategory:
         self.helper = helper
         self.choices = {}
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.name})"
+
+    def set_context(self, wizard, context, selected):
+        if self._set_context:
+            return self._set_context(wizard, context, selected)
+        else:
+            return context
+
     def register_plugin(self, plugin):
         self.choices[plugin.name] = plugin
 
-    def __call__(self, wizard):
-        for line in self.intro:
+    def get_intro(self, wizard, context):
+        intro = context.get('intro', self.intro)
+
+        try:
+            intro = intro(wizard, context)
+        except TypeError:
+            pass
+
+        if intro is None:
+            intro = []
+
+        return intro
+
+    def get_ask(self, wizard, context):
+        try:
+            ask = self.ask(wizard, context)
+        except TypeError:
+            ask = self.ask.format(**context)
+        return ask
+
+    def __call__(self, wizard, context=None):
+        if context is None:
+            context = {}
+
+        intro = self.get_intro(wizard, context)
+
+        for line in intro:
             wizard.say(line)
 
-        selected = wizard.ask_enumerate_dict(self.ask, self.choices,
+        ask = self.get_ask(wizard, context)
+
+        selected = wizard.ask_enumerate_dict(ask, self.choices,
                                              self.helper)
-        obj = selected(wizard)
+
+        new_context = self.set_context(wizard, context, selected)
+        obj = selected(wizard, new_context)
         return obj
 

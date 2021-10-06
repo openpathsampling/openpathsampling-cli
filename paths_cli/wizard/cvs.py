@@ -1,9 +1,7 @@
-from paths_cli.wizard.engines import engines
-from paths_cli.compiling.tools import custom_eval, mdtraj_parse_atomlist
-from paths_cli.wizard.load_from_ops import load_from_ops, LoadFromOPS
-from paths_cli.wizard.load_from_ops import LABEL as _load_label
+from paths_cli.compiling.tools import mdtraj_parse_atomlist
+from paths_cli.wizard.load_from_ops import LoadFromOPS
 from paths_cli.wizard.core import get_object
-import paths_cli.wizard
+import paths_cli.wizard.engines
 
 from functools import partial
 from collections import namedtuple
@@ -42,7 +40,7 @@ _ATOM_INDICES_HELP_STR = (
 TOPOLOGY_CV_PREREQ = FromWizardPrerequisite(
     name='topology',
     create_func=paths_cli.wizard.engines.ENGINE_PLUGIN,
-    category='engines',
+    category='engine',
     obj_name='engine',
     n_required=1,
     say_create=("Hey, you need to define an MD engine before you create "
@@ -110,7 +108,8 @@ def _mdtraj_cv_builder(wizard, prereqs, func_name):
 
 _MDTRAJ_INTRO = "We'll make a CV that measures the {user_str}."
 
-def _mdtraj_summary(cv):
+def _mdtraj_summary(wizard, context, result):
+    cv = result
     func = cv.func
     topology = cv.topology
     indices = list(cv.kwargs.values())[0]
@@ -118,12 +117,12 @@ def _mdtraj_summary(cv):
     summary = (f"  Function: {func.__name__}\n"
                f"     Atoms: {atoms_str}\n"
                f"  Topology: {repr(topology.mdtraj)}")
-    return summary
+    return [summary]
 
 if HAS_MDTRAJ:
     MDTRAJ_DISTANCE = WizardObjectPlugin(
         name='Distance',
-        category='cvs',
+        category='cv',
         builder=partial(_mdtraj_cv_builder, func_name='compute_distances'),
         prerequisite=TOPOLOGY_CV_PREREQ,
         intro=_MDTRAJ_INTRO.format(user_str="distance between two atoms"),
@@ -133,7 +132,7 @@ if HAS_MDTRAJ:
 
     MDTRAJ_ANGLE = WizardObjectPlugin(
         name="Angle",
-        category='cvs',
+        category='cv',
         builder=partial(_mdtraj_cv_builder, func_name='compute_angles'),
         prerequisite=TOPOLOGY_CV_PREREQ,
         intro=_MDTRAJ_INTRO.format(user_str="angle made by three atoms"),
@@ -143,10 +142,10 @@ if HAS_MDTRAJ:
 
     MDTRAJ_DIHEDRAL = WizardObjectPlugin(
         name="Dihedral",
-        category='cvs',
+        category='cv',
         builder=partial(_mdtraj_cv_builder, func_name='compute_dihedrals'),
         prerequisite=TOPOLOGY_CV_PREREQ,
-        intro=_MDTRAJ_INTRO,
+        intro=_MDTRAJ_INTRO.format(user_str="dihedral made by four atoms"),
         description=...,
         summary=_mdtraj_summary,
     )
@@ -180,16 +179,16 @@ def coordinate(wizard, prereqs=None):
 
 COORDINATE_CV = WizardObjectPlugin(
     name="Coordinate",
-    category="cvs",
+    category="cv",
     builder=coordinate,
     description=("Create a CV based on a specific coordinate (for a "
                  "specific atom)."),
 )
 
-CV_FROM_FILE = LoadFromOPS('cvs', 'CV')
+CV_FROM_FILE = LoadFromOPS('cv')
 
 CV_PLUGIN = WrapCategory(
-    name='cvs',
+    name='cv',
     intro=("You'll need to describe your system in terms of collective "
            "variables (CVs). We'll use these variables to define things "
            "like stable states."),
@@ -212,6 +211,8 @@ def cvs(wizard):
 
 if __name__ == "__main__":  # no-cov
     from paths_cli.wizard.wizard import Wizard
+    from paths_cli.wizard.plugins import register_installed_plugins
+    register_installed_plugins()
     plugins = [obj for obj in globals().values()
                if isinstance(obj, WizardObjectPlugin)]
     from_file = [obj for obj in globals().values()

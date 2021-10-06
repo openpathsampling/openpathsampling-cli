@@ -7,27 +7,9 @@ from functools import partial
 
 from paths_cli.wizard.wrap_compilers import WrapCategory
 
-SUPPORTED_ENGINES = {}
-
-SUPPORTED_ENGINES[load_label] = partial(load_from_ops,
-                                        store_name='engines',
-                                        obj_name='engine')
-
-def engines(wizard):
-    wizard.say("Let's make an engine. An engine describes how you'll do "
-               "the actual dynamics. Most of the details are given "
-               "in files that depend on the specific type of engine.")
-    engine_names = list(SUPPORTED_ENGINES.keys())
-    eng_name = wizard.ask_enumerate(
-        "What will you use for the underlying engine?",
-        options=engine_names
-    )
-    engine = SUPPORTED_ENGINES[eng_name](wizard)
-    return engine
-
 _ENGINE_HELP = "An engine describes how you'll do the actual dynamics."
 ENGINE_PLUGIN = WrapCategory(
-    name='engines',
+    name='engine',
     ask="What will you use for the underlying engine?",
     intro=("Let's make an engine. " + _ENGINE_HELP + " Most of the "
            "details are given in files that depend on the specific "
@@ -35,13 +17,13 @@ ENGINE_PLUGIN = WrapCategory(
     helper=_ENGINE_HELP
 )
 
-ENGINE_FROM_FILE = LoadFromOPS('engines', 'engine')
+ENGINE_FROM_FILE = LoadFromOPS('engine')
 
 # TEMPORARY
-from .openmm import OPENMM_PLUGIN
-plugins = [OPENMM_PLUGIN, ENGINE_FROM_FILE]
-for plugin in plugins:
-    ENGINE_PLUGIN.register_plugin(plugin)
+# from .openmm import OPENMM_PLUGIN
+# plugins = [OPENMM_PLUGIN, ENGINE_FROM_FILE]
+# for plugin in plugins:
+#     ENGINE_PLUGIN.register_plugin(plugin)
 
 
 if __name__ == "__main__":
