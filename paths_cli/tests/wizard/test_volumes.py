@@ -120,28 +120,9 @@ def test_cv_defined_volume(periodic):
         out_state = make_1d_traj([-0.1, 1.1])
     wizard = mock_wizard(inputs)
     wizard.cvs[cv.name] = cv
-    vol = cv_defined_volume(wizard)
+    vol = CV_DEFINED_VOLUME_PLUGIN(wizard)
     assert "interval" in wizard.console.log_text
     for snap in in_state:
         assert vol(snap)
     for snap in out_state:
         assert not vol(snap)
-
-@pytest.mark.parametrize('intro', [None, "", "foo"])
-def test_volumes(intro):
-    say_hello = mock.Mock(return_value="hello!")
-    wizard = mock_wizard(['Hello world'])
-    with mock.patch.dict(SUPPORTED_VOLUMES, {'Hello world': say_hello}):
-        assert volumes(wizard, intro=intro) == "hello!"
-        assert wizard.console.input_call_count == 1
-
-
-    n_statements = 2 * (1 + 3)
-    # 2: line and blank; (1 + 3): 1 in volumes + 3 in ask_enumerate
-
-    if intro == 'foo':
-        assert 'foo' in wizard.console.log_text
-        assert len(wizard.console.log) == n_statements + 2  # from intro
-    else:
-        assert 'foo' not in wizard.console.log_text
-        assert len(wizard.console.log) == n_statements
