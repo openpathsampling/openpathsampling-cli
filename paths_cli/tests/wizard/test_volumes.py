@@ -103,7 +103,6 @@ def test_negated_volume(volume_setup):
 @pytest.mark.parametrize('periodic', [True, False])
 def test_cv_defined_volume(periodic):
     if periodic:
-        breakpoint()
         min_ = 0.0
         max_ = 1.0
         cv = CoordinateFunctionCV(
