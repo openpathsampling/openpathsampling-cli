@@ -50,6 +50,8 @@ class TestBuildCVVolume:
         elif inline == 'internal':
             vol = build_cv_volume(dct)
         assert vol.collectivevariable(1) == 0.5
+        snap = make_1d_traj([0.5])[0]
+        assert vol(snap)
         expected_class = {
             'nonperiodic': paths.CVDefinedVolume,
             'periodic': paths.PeriodicCVDefinedVolume

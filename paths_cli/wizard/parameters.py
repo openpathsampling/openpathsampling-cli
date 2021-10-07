@@ -211,7 +211,9 @@ class FromWizardPrerequisite:
         return results
 
     def select_existing(self, wizard):
-        pass
+        obj = wizard.obj_selector(self.store_name, self.obj_name,
+                                  self.create_func)
+        return [self.load_func(obj)]
 
     def __call__(self, wizard):
         n_existing = len(getattr(wizard, self.store_name))
@@ -229,48 +231,3 @@ class FromWizardPrerequisite:
         if self.say_finish:
             wizard.say(self.say_finish)
         return dct
-
-class InstanceBuilder:
-    """
-
-    Parameters
-    ----------
-    parameters: List[:class:`.Parameter`]
-    category: str
-    cls: Union[str, type]
-    intro: str
-    help_str: str
-    remapper: Callable[dict, dict]
-    make_summary: Callable[dict, str]
-        Function to create an output string to summarize the object that has
-        been created. Optional.
-    """
-    def __init__(self, parameters, category, cls, intro=None, help_str=None,
-                 remapper=None, make_summary=None):
-        self.parameters = parameters
-        self.param_dict = {p.name: p for p in parameters}
-        self.category = category
-        self._cls = cls
-        self.intro = intro
-        self.help_str = help_str
-        if remapper is None:
-            remapper = lambda x: x
-        self.remapper = remapper
-        if make_summary is None:
-            make_summary = lambda dct: None
-        self.make_summary = make_summary
-
-    @property
-    def cls(self):
-        # trick to delay slow imports
-        if isinstance(self._cls, str):
-            self._cls = do_import(self._cls)
-        return self._cls
-
-    def __call__(self, wizard):
-        if self.intro is not None:
-            wizard.say(self.intro)
-
-        param_dict = {p.name: p(wizard) for p in self.parameters}
-        kwargs = self.remapper(param_dict)
-        return self.cls(**kwargs)

@@ -74,8 +74,8 @@ class TestWizard:
     def test_ask_help(self):
         console = MockConsole(['?helpme', 'foo'])
         self.wizard.console = console
-        def helper(wizard, result):
-            wizard.say(f"You said: {result[1:]}")
+        def helper(result):
+            return f"You said: {result[1:]}"
 
         result = self.wizard.ask('bar', helper=helper)
         assert result == 'foo'
