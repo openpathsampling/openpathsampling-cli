@@ -19,7 +19,7 @@ ProxyParameter = namedtuple(
 
 
 class WizardParameter:
-    def __init__(self, name, ask, loader, helper=None, default=NO_DEFAULT,
+    def __init__(self, name, ask, loader, *, helper=None, default=NO_DEFAULT,
                  autohelp=False, summarize=None):
         self.name = name
         self.ask = ask
@@ -57,7 +57,7 @@ class WizardParameter:
 
 
 class ExistingObjectParameter(WizardParameter):
-    def __init__(self, name, ask, loader, store_name, helper=None,
+    def __init__(self, name, ask, loader, store_name, *, helper=None,
                  default=NO_DEFAULT, autohelp=False, summarize=None):
         super().__init__(name=name, ask=ask, loader=loader, helper=helper,
                          default=default, autohelp=autohelp,
@@ -75,7 +75,7 @@ class ExistingObjectParameter(WizardParameter):
 
 
 class WizardObjectPlugin(OPSPlugin):
-    def __init__(self, name, category, builder, prerequisite=None,
+    def __init__(self, name, category, builder, *, prerequisite=None,
                  intro=None, description=None, summary=None,
                  requires_ops=(1,0), requires_cli=(0,3)):
         super().__init__(requires_ops, requires_cli)
@@ -175,7 +175,7 @@ class WizardParameterObjectPlugin(WizardObjectPlugin):
 class FromWizardPrerequisite:
     """Load prerequisites from the wizard.
     """
-    def __init__(self, name, create_func, category, n_required,
+    def __init__(self, name, create_func, category, n_required, *,
                  obj_name=None, store_name=None, say_select=None,
                  say_create=None, say_finish=None, load_func=None):
         self.name = name
