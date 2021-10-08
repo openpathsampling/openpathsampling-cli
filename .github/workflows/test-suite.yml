@@ -71,3 +71,5 @@ jobs:
           python -c "import paths_cli"
           py.test -vv --cov --cov-report xml:cov.xml
       - uses: codecov/codecov-action@v2
+        with:
+          files: ./cov.xml
