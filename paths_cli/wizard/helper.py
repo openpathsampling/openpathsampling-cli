@@ -1,3 +1,5 @@
+from .errors import RestartObjectException
+
 class QuitWizard(BaseException):
     pass
 
