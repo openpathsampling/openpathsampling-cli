@@ -199,16 +199,6 @@ CV_PLUGIN = WrapCategory(
             "you can also create your own and load it from a file.")
 )
 
-def cvs(wizard):
-    wizard.say("You'll need to describe your system in terms of "
-               "collective variables (CVs). We'll use these to define "
-               "things like stable states.")
-    cv_names = list(SUPPORTED_CVS.keys())
-    cv_type = wizard.ask_enumerate("What kind of CV do you want to "
-                                   "define?", options=cv_names)
-    cv = SUPPORTED_CVS[cv_type](wizard)
-    return cv
-
 if __name__ == "__main__":  # no-cov
     from paths_cli.wizard.wizard import Wizard
     from paths_cli.wizard.plugins import register_installed_plugins

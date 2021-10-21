@@ -6,7 +6,6 @@ from paths_cli.wizard.load_from_ops import LoadFromOPS
 from paths_cli.wizard.plugins import get_category_wizard
 from paths_cli.wizard.wrap_compilers import WrapCategory
 from paths_cli.wizard.core import interpret_req
-from paths_cli.wizard.cvs import cvs
 import paths_cli.compiling.volumes
 from functools import partial
 

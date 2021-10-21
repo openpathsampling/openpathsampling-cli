@@ -68,7 +68,12 @@ class Helper:
 
     def run_command(self, command, context):
         cmd_split = command.split()
-        key = cmd_split[0]
+        try:
+            key = cmd_split[0]
+        except IndexError:
+            return ("Please provide a command. "
+                    + self.command_help("", context))
+
         args = " ".join(cmd_split[1:])
         try:
             cmd = self.commands[key]

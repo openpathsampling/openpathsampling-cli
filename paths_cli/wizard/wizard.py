@@ -9,6 +9,7 @@ from paths_cli.wizard.errors import (
     FILE_LOADING_ERROR_MSG, RestartObjectException
 )
 from paths_cli.wizard.joke import name_joke
+from paths_cli.wizard.helper import Helper
 from paths_cli.compiling.tools import custom_eval
 
 import shutil
@@ -72,6 +73,8 @@ class Wizard:
     def ask(self, question, options=None, default=None, helper=None,
             autohelp=False):
         # TODO: if helper is None, create a default helper
+        if isinstance(helper, str):
+            helper = Helper(helper)
         result = self.console.input("🧙 " + question + " ")
         self.console.print()
         if helper and result[0] in ["?", "!"]:
@@ -188,7 +191,10 @@ class Wizard:
         self.say(f"Now let's name your {obj_type}.")
         name = None
         while name is None:
-            name = self.ask("What do you want to call it?")
+            name_help = ("Objects in OpenPathSampling can be named. You'll "
+                         "use these names to refer back to these objects "
+                         "or to load them from a storage file.")
+            name = self.ask("What do you want to call it?", helper=name_help)
             if name in getattr(self, store_name):
                 self.bad_input(f"Sorry, you already have {a_an(obj_type)} "
                                f"named {name}. Please try another name.")

@@ -67,6 +67,9 @@ class TestHelper:
         # unknown command names should just report an unknown command
         assert "Unknown command" in self.helper("!foo")
 
+    def test_run_command_no_argument(self):
+        assert "Please provide a command. The following" in self.helper("!")
+
     def test_empty_helper(self):
         empty = Helper(help_func=None)
         assert "no help available" in empty("?")
