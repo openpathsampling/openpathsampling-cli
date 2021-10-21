@@ -1,8 +1,8 @@
 import operator
-from paths_cli.wizard.parameters import (
-    ProxyParameter, WizardParameterObjectPlugin, WizardObjectPlugin
+from paths_cli.wizard.parameters import ProxyParameter
+from paths_cli.wizard.plugin_classes import (
+    LoadFromOPS, WizardParameterObjectPlugin, WizardObjectPlugin
 )
-from paths_cli.wizard.plugin_classes import LoadFromOPS
 from paths_cli.wizard.plugin_registration import get_category_wizard
 from paths_cli.wizard.wrap_compilers import WrapCategory
 from paths_cli.wizard.core import interpret_req

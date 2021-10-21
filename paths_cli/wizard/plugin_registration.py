@@ -1,8 +1,9 @@
 from collections import defaultdict
 
-from paths_cli.wizard.parameters import WizardObjectPlugin
 from paths_cli.wizard.wrap_compilers import WrapCategory
-from paths_cli.wizard.plugin_classes import LoadFromOPS
+from paths_cli.wizard.plugin_classes import (
+    LoadFromOPS, WizardObjectPlugin
+)
 from paths_cli.utils import get_installed_plugins
 from paths_cli.plugin_management import NamespacePluginLoader
 

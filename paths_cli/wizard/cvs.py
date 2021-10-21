@@ -1,5 +1,7 @@
 from paths_cli.compiling.tools import mdtraj_parse_atomlist
-from paths_cli.wizard.plugin_classes import LoadFromOPS
+from paths_cli.wizard.plugin_classes import (
+    LoadFromOPS, WizardObjectPlugin
+)
 from paths_cli.wizard.core import get_object
 import paths_cli.wizard.engines
 
@@ -8,7 +10,7 @@ from collections import namedtuple
 import numpy as np
 
 from paths_cli.wizard.parameters import (
-    WizardObjectPlugin, FromWizardPrerequisite
+    FromWizardPrerequisite
 )
 
 from paths_cli.wizard.helper import Helper

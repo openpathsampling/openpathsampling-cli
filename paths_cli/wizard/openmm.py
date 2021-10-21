@@ -9,9 +9,8 @@ OPENMM_SERIALIZATION_URL=(
     "openmm.openmm.XmlSerializer.html"
 )
 
-from paths_cli.wizard.parameters import (
-    ProxyParameter, WizardParameterObjectPlugin
-)
+from paths_cli.wizard.parameters import ProxyParameter
+from paths_cli.wizard.plugin_classes import WizardParameterObjectPlugin
 
 from paths_cli.compiling.engines import OPENMM_PLUGIN as OPENMM_COMPILING
 
