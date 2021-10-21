@@ -3,7 +3,7 @@ from paths_cli.wizard.parameters import (
     ProxyParameter, WizardParameterObjectPlugin, WizardObjectPlugin
 )
 from paths_cli.wizard.load_from_ops import LoadFromOPS
-from paths_cli.wizard.plugins import get_category_wizard
+from paths_cli.wizard.plugin_registration import get_category_wizard
 from paths_cli.wizard.wrap_compilers import WrapCategory
 from paths_cli.wizard.core import interpret_req
 import paths_cli.compiling.volumes
@@ -121,17 +121,6 @@ VOLUMES_PLUGIN = WrapCategory(
     helper="No volume help yet"
 )
 
-
 if __name__ == "__main__":  # no-cov
-    from paths_cli.wizard.wizard import Wizard
-    from paths_cli.wizard.plugins import register_installed_plugins
-    register_installed_plugins()
-    plugins = [obj for obj in globals().values()
-               if isinstance(obj, WizardObjectPlugin)]
-    from_file = [obj for obj in globals().values()
-                 if isinstance(obj, LoadFromOPS)]
-    for plugin in plugins + from_file:
-        VOLUMES_PLUGIN.register_plugin(plugin)
-    wiz = Wizard([])
-    wiz.requirements['state'] = ('volumes', 1, 1)
-    VOLUMES_PLUGIN(wiz)
+    from paths_cli.wizard.run_module import run_category
+    run_category('volume', {'state': ('volumes', 1, 1)})

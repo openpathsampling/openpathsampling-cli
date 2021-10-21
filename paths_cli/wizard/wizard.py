@@ -323,6 +323,3 @@ class Wizard:
 # TWO_STATE_TIS_WIZARD
 # MULTIPLE_STATE_TIS_WIZARD
 # MULTIPLE_INTERFACE_SET_TIS_WIZARD
-
-if __name__ == "__main__":
-    FLEX_LENGTH_TPS_WIZARD.run_wizard()

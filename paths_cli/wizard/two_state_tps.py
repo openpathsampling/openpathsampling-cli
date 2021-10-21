@@ -1,4 +1,4 @@
-from paths_cli.wizard.plugins import get_category_wizard
+from paths_cli.wizard.plugin_registration import get_category_wizard
 from paths_cli.wizard.tps import tps_scheme
 from paths_cli.wizard.steps import (
     SINGLE_ENGINE_STEP, CVS_STEP, WizardStep

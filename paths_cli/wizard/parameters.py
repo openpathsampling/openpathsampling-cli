@@ -67,7 +67,8 @@ class WizardParameter:
         dct = proxy._asdict()
         loader = loader_dict[proxy.name]
         if isinstance(loader, _CategoryCompilerProxy):
-            from paths_cli.wizard.plugins import get_category_wizard
+            # TODO: can this import now be moved to top of file?
+            from paths_cli.wizard.plugin_registration import get_category_wizard
             category = loader.category
             dct['loader'] = get_category_wizard(category)
             dct['ask'] = get_category_info(category).singular

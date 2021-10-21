@@ -2,7 +2,7 @@ from functools import partial
 
 from paths_cli.wizard.core import get_missing_object
 # from paths_cli.wizard.engines import engines
-from paths_cli.wizard.plugins import get_category_wizard
+from paths_cli.wizard.plugin_registration import get_category_wizard
 from paths_cli.compiling.tools import custom_eval
 
 engines = get_category_wizard('engine')

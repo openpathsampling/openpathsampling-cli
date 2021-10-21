@@ -3,10 +3,9 @@ from functools import partial
 
 # from paths_cli.wizard.cvs import cvs
 # from paths_cli.wizard.engines import engines
-from paths_cli.wizard.plugins import get_category_wizard
+from paths_cli.wizard.plugin_registration import get_category_wizard
 from paths_cli.wizard.tps import tps_scheme
 
-from paths_cli.wizard.plugins import get_category_wizard
 volumes = get_category_wizard('volume')
 
 WizardStep = namedtuple('WizardStep', ['func', 'display_name', 'store_name',

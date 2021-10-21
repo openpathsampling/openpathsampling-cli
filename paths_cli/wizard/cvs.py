@@ -200,16 +200,5 @@ CV_PLUGIN = WrapCategory(
 )
 
 if __name__ == "__main__":  # no-cov
-    from paths_cli.wizard.wizard import Wizard
-    from paths_cli.wizard.plugins import register_installed_plugins
-    register_installed_plugins()
-    plugins = [obj for obj in globals().values()
-               if isinstance(obj, WizardObjectPlugin)]
-    from_file = [obj for obj in globals().values()
-                 if isinstance(obj, LoadFromOPS)]
-    for plugin in plugins + from_file:
-        CV_PLUGIN.register_plugin(plugin)
-
-    wiz = Wizard({})
-    cv = CV_PLUGIN(wiz)
-    print(cv)
+    from paths_cli.wizard.run_module import run_category
+    run_category('cv')

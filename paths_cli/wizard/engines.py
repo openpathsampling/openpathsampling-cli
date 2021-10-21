@@ -19,13 +19,7 @@ ENGINE_PLUGIN = WrapCategory(
 
 ENGINE_FROM_FILE = LoadFromOPS('engine')
 
-if __name__ == "__main__":
-    from paths_cli.wizard import wizard
-    from paths_cli.wizard.plugins import register_installed_plugins
-    from paths_cli.wizard.plugins import get_category_wizard
-    register_installed_plugins()
-    engines = get_category_wizard('engine')
-    wiz = wizard.Wizard([])
-    engine = engines(wiz)
-    print(engine)
+if __name__ == "__main__":  # no-cov
+    from paths_cli.wizard.run_module import run_category
+    run_category('engine')
 

@@ -1,5 +1,5 @@
 import click
-from paths_cli.wizard.plugins import register_installed_plugins
+from paths_cli.wizard.plugin_registration import register_installed_plugins
 from paths_cli.wizard.two_state_tps import TWO_STATE_TPS_WIZARD
 from paths_cli import OPSCommandPlugin
 

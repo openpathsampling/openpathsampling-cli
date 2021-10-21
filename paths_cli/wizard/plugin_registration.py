@@ -6,6 +6,7 @@ from paths_cli.wizard.load_from_ops import LoadFromOPS
 from paths_cli.utils import get_installed_plugins
 from paths_cli.plugin_management import NamespacePluginLoader
 
+
 class CategoryWizardPluginRegistrationError(Exception):
     pass
 
