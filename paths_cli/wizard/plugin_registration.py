@@ -2,7 +2,7 @@ from collections import defaultdict
 
 from paths_cli.wizard.parameters import WizardObjectPlugin
 from paths_cli.wizard.wrap_compilers import WrapCategory
-from paths_cli.wizard.load_from_ops import LoadFromOPS
+from paths_cli.wizard.plugin_classes import LoadFromOPS
 from paths_cli.utils import get_installed_plugins
 from paths_cli.plugin_management import NamespacePluginLoader
 
@@ -22,6 +22,7 @@ def get_category_wizard(category):
             )
         return plugin(wizard, context)
     return inner
+
 
 def _register_category_plugin(plugin):
     if plugin.name in _CATEGORY_PLUGINS:

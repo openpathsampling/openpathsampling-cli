@@ -1,5 +1,5 @@
 from paths_cli.compiling.tools import mdtraj_parse_atomlist
-from paths_cli.wizard.load_from_ops import LoadFromOPS
+from paths_cli.wizard.plugin_classes import LoadFromOPS
 from paths_cli.wizard.core import get_object
 import paths_cli.wizard.engines
 

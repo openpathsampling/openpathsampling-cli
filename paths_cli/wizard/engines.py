@@ -1,8 +1,5 @@
 import paths_cli.wizard.openmm as openmm
-from paths_cli.wizard.load_from_ops import (
-    LoadFromOPS,
-    load_from_ops, LABEL as load_label
-)
+from paths_cli.wizard.plugin_classes import LoadFromOPS
 from functools import partial
 
 from paths_cli.wizard.wrap_compilers import WrapCategory

@@ -46,34 +46,3 @@ def load_from_ops(wizard, store_name, obj_name):
     storage = _get_ops_storage(wizard)
     obj = _get_ops_object(wizard, storage, store_name, obj_name)
     return obj
-
-
-from paths_cli.plugin_management import OPSPlugin
-class LoadFromOPS(OPSPlugin):
-    def __init__(self, category, obj_name=None, store_name=None,
-                 requires_ops=(1,0), requires_cli=(0,3)):
-        super().__init__(requires_ops, requires_cli)
-        self.category = category
-        self.name = "Load existing from OPS file"
-        if obj_name is None:
-            obj_name = self._get_category_info(category).singular
-
-        if store_name is None:
-            store_name = self._get_category_info(category).storage
-            
-        self.obj_name = obj_name
-        self.store_name = store_name
-
-    @staticmethod
-    def _get_category_info(category):
-        try:
-            return CATEGORIES[category]
-        except KeyError:
-            raise RuntimeError(f"No category {category}. Extra names must "
-                               "be given explicitly")
-
-    def __call__(self, wizard):
-        wizard.say("Okay, we'll load it from an OPS file.")
-        storage = _get_ops_storage(wizard)
-        obj = _get_ops_storage(wizard, storage, self.store_name,
-                               self.obj_name)

@@ -41,7 +41,7 @@ def name_joke(name, obj_type):  # no-cov
     joke = random.choices(jokes, weights=weights)[0]
     return joke(name, obj_type)
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # no-cov
     for _ in range(5):
         print()
         print(name_joke('AD_300K', 'engine'))

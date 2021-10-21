@@ -3,7 +3,7 @@ from paths_cli.wizard.wizard import Wizard
 from paths_cli.wizard.plugin_registration import get_category_wizard
 
 from paths_cli.wizard.parameters import WizardObjectPlugin
-from paths_cli.wizard.load_from_ops import LoadFromOPS
+from paths_cli.wizard.plugin_classes import LoadFromOPS
 
 # TODO: for now we ignore this for coverage -- it's mainly used for UX
 # testing by allowing each module to be run with, e.g.:
