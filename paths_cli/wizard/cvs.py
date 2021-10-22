@@ -46,8 +46,9 @@ TOPOLOGY_CV_PREREQ = FromWizardPrerequisite(
     n_required=1,
     say_create=("Hey, you need to define an MD engine before you create "
                 "CVs that refer to it. Let's do that now!"),
-    say_select=("You have defined multiple engines, and need to pick one "
-                "to use to get a topology for your CV."),
+    # TODO: consider for future -- is it worth adding say_select support?
+    # say_select=("You have defined multiple engines, and need to pick one "
+    #             "to use to get a topology for your CV."),
     say_finish="Now let's get back to defining your CV.",
     load_func=lambda engine: engine.topology
 )

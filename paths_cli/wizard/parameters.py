@@ -113,8 +113,8 @@ class FromWizardPrerequisite:
     """Load prerequisites from the wizard.
     """
     def __init__(self, name, create_func, category, n_required, *,
-                 obj_name=None, store_name=None, say_select=None,
-                 say_create=None, say_finish=None, load_func=None):
+                 obj_name=None, store_name=None, say_create=None,
+                 say_finish=None, load_func=None):
         self.name = name
         self.create_func = create_func
         self.category = category
@@ -126,7 +126,6 @@ class FromWizardPrerequisite:
         self.obj_name = obj_name
         self.store_name = store_name
         self.n_required = n_required
-        self.say_select = say_select
         self.say_create = say_create
         self.say_finish = say_finish
         if load_func is None:
@@ -147,10 +146,10 @@ class FromWizardPrerequisite:
         results = [self.load_func(obj) for obj in all_objs]
         return results
 
-    def select_existing(self, wizard):
+    def select_single_existing(self, wizard):
         obj = wizard.obj_selector(self.store_name, self.obj_name,
                                   self.create_func)
-        return [self.load_func(obj)]
+        return self.load_func(obj)
 
     def __call__(self, wizard):
         n_existing = len(getattr(wizard, self.store_name))
@@ -158,9 +157,11 @@ class FromWizardPrerequisite:
             # early return in this case (return silently)
             return {self.name: self.get_existing(wizard)}
         elif n_existing > self.n_required:
-            dct = {self.name: self.select_existing(wizard)}
+            sel = [self.select_single_existing(wizard)
+                   for _ in range(self.n_required)]
+            dct = {self.name: sel}
         else:
-            objs = []
+            objs = self.get_existing(wizard)
             while len(getattr(wizard, self.store_name)) < self.n_required:
                 objs.append(self.create_new(wizard))
             dct = {self.name: objs}

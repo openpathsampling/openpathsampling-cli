@@ -167,6 +167,9 @@ class WizardParameterObjectPlugin(WizardObjectPlugin):
         compiler_plugin : :class:`.InstanceCompilerPlugin`
             the compiler plugin to use to create the object
         """ + textwrap.indent(_WIZARD_KWONLY, ' ' * 4)
+        # TODO: it perhaps we can make this so that we have a method
+        # proxy.to_parameter(compiler_plugin) -- this might break some
+        # circular dependencies
         params = [WizardParameter.from_proxy(proxy, compiler_plugin)
                   for proxy in parameters]
         obj = cls(name=name, category=category, parameters=params,
@@ -174,7 +177,7 @@ class WizardParameterObjectPlugin(WizardObjectPlugin):
                   prerequisite=prerequisite, intro=intro,
                   description=description, summary=summary,
                   requires_ops=requires_ops, requires_cli=requires_cli)
-        obj.proxy_parameters = parameters
+        obj.proxy_parameters = parameters  # stored for future debugging
         return obj
 
     def _build(self, wizard, prereqs):
