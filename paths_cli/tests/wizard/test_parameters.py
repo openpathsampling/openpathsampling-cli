@@ -1,5 +1,5 @@
 import pytest
-import mock
+from unittest import mock
 
 from paths_cli.tests.wizard.mock_wizard import mock_wizard
 import paths_cli.compiling.core as compiling
