@@ -1,10 +1,10 @@
 import operator
 from paths_cli.wizard.parameters import ProxyParameter
 from paths_cli.wizard.plugin_classes import (
-    LoadFromOPS, WizardParameterObjectPlugin, WizardObjectPlugin
+    LoadFromOPS, WizardParameterObjectPlugin, WizardObjectPlugin,
+    WrapCategory
 )
 from paths_cli.wizard.plugin_registration import get_category_wizard
-from paths_cli.wizard.wrap_compilers import WrapCategory
 from paths_cli.wizard.core import interpret_req
 import paths_cli.compiling.volumes
 from functools import partial

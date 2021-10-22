@@ -1,6 +1,6 @@
 from paths_cli.compiling.tools import mdtraj_parse_atomlist
 from paths_cli.wizard.plugin_classes import (
-    LoadFromOPS, WizardObjectPlugin
+    LoadFromOPS, WizardObjectPlugin, WrapCategory
 )
 from paths_cli.wizard.core import get_object
 import paths_cli.wizard.engines
@@ -15,7 +15,6 @@ from paths_cli.wizard.parameters import (
 
 from paths_cli.wizard.helper import Helper
 
-from paths_cli.wizard.wrap_compilers import WrapCategory
 
 try:
     import mdtraj as md
