@@ -56,6 +56,16 @@ def select_loader(filename):
     except KeyError:
         raise RuntimeError(f"Unknown file extension: {ext}")
 
+def register_installed_plugins():
+    plugin_types = (InstanceCompilerPlugin, CategoryPlugin)
+    plugins = get_installed_plugins(
+        default_loader=NamespacePluginLoader('paths_cli.compiling',
+                                             plugin_types),
+        plugin_types=plugin_types
+    )
+    register_plugins(plugins)
+
+
 @click.command(
     'compile',
 )
@@ -66,13 +76,7 @@ def compile_(input_file, output_file):
     with open(input_file, mode='r') as f:
         dct = loader(f)
 
-    plugin_types = (InstanceCompilerPlugin, CategoryPlugin)
-    plugins = get_installed_plugins(
-        default_loader=NamespacePluginLoader('paths_cli.compiling',
-                                             plugin_types),
-        plugin_types=plugin_types
-    )
-    register_plugins(plugins)
+    register_installed_plugins()
 
     objs = do_compile(dct)
     print(f"Saving {len(objs)} user-specified objects to {output_file}....")
