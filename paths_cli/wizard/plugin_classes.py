@@ -42,6 +42,43 @@ class LoadFromOPS(OPSPlugin):
     def __call__(self, wizard):
         return load_from_ops(wizard, self.store_name, self.obj_name)
 
+def get_text_from_context(name, instance, default, wizard, context, *args,
+                          **kwargs):
+    """Generic method for getting text from context of other sources.
+
+    A lot of this motif seemed to be repeating in the plugins, so it has
+    been refactored into its own function.
+
+    Parameters
+    ----------
+    name : str
+        the name in the context dict
+    instance :
+        the object as kept as a user-given value
+    default :
+        default value to use if neither context nor user-given values exist
+    wizard : :class:`.Wizard`
+        the wizard
+    context : dict
+        the context dict
+    """
+    text = context.get(name, instance)
+    if text is None:
+        text = default
+
+    try:
+        text = text(wizard, context, *args, **kwargs)
+    except TypeError:
+        pass
+
+    if text is None:
+        text = []
+
+    if isinstance(text, str):
+        text = [text]
+
+    return text
+
 
 class WizardObjectPlugin(OPSPlugin):
     """Base class for wizard plugins to create OPS objects.
@@ -77,22 +114,14 @@ class WizardObjectPlugin(OPSPlugin):
     def get_summary(self, wizard, context, result):
         # TODO: this pattern has been repeated -- make it a function (see
         # also get_intro)
-        summarize = context.get('summarize', self._summary)
-        if summarize is None:
-            summarize = self.default_summarize
-
-        try:
-            summary = summarize(wizard, context, result)
-        except TypeError:
-            summary = summarize
-
-        if summary is None:
-            summary = []
-
-        if isinstance(summary, str):
-            summary = [summary]
-
-        return summary
+        return get_text_from_context(
+            name='summarize',
+            instance=self._summary,
+            default=self.default_summarize,
+            wizard=wizard,
+            context=context,
+            result=result
+        )
 
     def __call__(self, wizard, context=None):
         if context is None:
@@ -247,17 +276,13 @@ class WrapCategory(OPSPlugin):
         self.choices[plugin.name] = plugin
 
     def get_intro(self, wizard, context):
-        intro = context.get('intro', self.intro)
-
-        try:
-            intro = intro(wizard, context)
-        except TypeError:
-            pass
-
-        if intro is None:
-            intro = []
-
-        return intro
+        return get_text_from_context(
+            name='intro',
+            instance=self.intro,
+            default=None,
+            wizard=wizard,
+            context=context
+        )
 
     def get_ask(self, wizard, context):
         try:
