@@ -1,9 +1,9 @@
+import textwrap
 from paths_cli.plugin_management import OPSPlugin
 from paths_cli.wizard.standard_categories import get_category_info
 from paths_cli.wizard.load_from_ops import load_from_ops
 from paths_cli.wizard.parameters import WizardParameter
 from paths_cli.wizard.helper import Helper
-import textwrap
 
 _WIZARD_KWONLY = """
     prerequisite : Callable
@@ -21,8 +21,6 @@ _WIZARD_KWONLY = """
     requires_cli : Tuple[int, int]
         version of the OpenPathSampling CLI required for this plugin
 """
-
-
 
 class LoadFromOPS(OPSPlugin):
     def __init__(self, category, obj_name=None, store_name=None,
@@ -72,6 +70,7 @@ def get_text_from_context(name, instance, default, wizard, context, *args,
         pass
 
     if text is None:
+        # note that this only happens if the default is None
         text = []
 
     if isinstance(text, str):
@@ -112,8 +111,6 @@ class WizardObjectPlugin(OPSPlugin):
         return [f"Here's what we'll make:\n  {str(result)}"]
 
     def get_summary(self, wizard, context, result):
-        # TODO: this pattern has been repeated -- make it a function (see
-        # also get_intro)
         return get_text_from_context(
             name='summarize',
             instance=self._summary,
@@ -308,4 +305,3 @@ class WrapCategory(OPSPlugin):
         new_context = self.set_context(wizard, context, selected)
         obj = selected(wizard, new_context)
         return obj
-
