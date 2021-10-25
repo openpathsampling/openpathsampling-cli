@@ -151,7 +151,7 @@ class FromWizardPrerequisite:
                                   self.create_func)
         return self.load_func(obj)
 
-    def __call__(self, wizard):
+    def __call__(self, wizard, context=None):
         n_existing = len(getattr(wizard, self.store_name))
         if n_existing == self.n_required:
             # early return in this case (return silently)

@@ -10,22 +10,16 @@ import paths_cli.compiling.volumes
 from functools import partial
 
 def _binary_func_volume(wizard, context, op):
-    def summarize(volname):
-        def inner(wizard, context, result):
-            return f"The {volname} volume is:\n  {str(result)}"
-
     as_state = context.get('depth', 0) == 0
     wizard.say("Let's make the first constituent volume:")
     new_context = volume_set_context(wizard, context, selected=None)
     new_context['part'] = 1
-    new_context['summarize'] = summarize("first")
     vol1 = VOLUMES_PLUGIN(wizard, new_context)
     wizard.say("Let's make the second constituent volume:")
     new_context['part'] = 2
-    new_context['summarize'] = summarize("second")
     vol2 = VOLUMES_PLUGIN(wizard, new_context)
+    wizard.say("Now we'll combine those two constituent volumes...")
     vol = op(vol1, vol2)
-    # wizard.say(f"Created a volume:\n{vol}")
     return vol
 
 _LAMBDA_STR = ("What is the {minmax} allowed value for "

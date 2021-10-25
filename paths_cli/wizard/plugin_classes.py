@@ -145,12 +145,11 @@ class WizardObjectPlugin(OPSPlugin):
             wizard.say(self.intro)
 
         if self.prerequisite is not None:
-            prereqs = self.prerequisite(wizard)
+            prereqs = self.prerequisite(wizard, context)
         else:
             prereqs = {}
 
-        context.update(prereqs)
-        result = self.builder(wizard, context)
+        result = self.builder(wizard, prereqs)
         summary = self.get_summary(wizard, context, result)
         for line in summary:
             wizard.say(line)

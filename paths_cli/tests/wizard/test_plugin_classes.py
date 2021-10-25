@@ -110,7 +110,7 @@ class TestWizardObjectPlugin:
 
     def test_call_with_prereq(self):
         # ensure that prerequisites get run if they are provided
-        def prereq(wizard):
+        def prereq(wizard, context):
             wizard.say("Running prereq")
             return {'prereq': ['results']}
 
@@ -258,8 +258,9 @@ class TestWrapCategory:
         self.plugin_format = WizardObjectPlugin(
             name="bar",
             category="foo",
-            builder=(lambda wizard, context:
-                     "bar_obj baz={baz}".format(**context)),
+            prerequisite=lambda wizard, context: {'baz': context['baz']},
+            builder=(lambda wizard, prereq:
+                     "bar_obj baz={baz}".format(**prereq)),
         )
 
     @pytest.mark.parametrize('input_type', ['method', 'None'])

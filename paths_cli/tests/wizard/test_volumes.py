@@ -5,7 +5,8 @@ from paths_cli.tests.wizard.mock_wizard import mock_wizard
 
 from paths_cli.wizard.volumes import (
     INTERSECTION_VOLUME_PLUGIN, UNION_VOLUME_PLUGIN, NEGATED_VOLUME_PLUGIN,
-    CV_DEFINED_VOLUME_PLUGIN, VOLUMES_PLUGIN, volume_intro, _VOL_DESC
+    CV_DEFINED_VOLUME_PLUGIN, VOLUMES_PLUGIN, volume_intro, _VOL_DESC,
+    volume_ask
 )
 
 
@@ -99,6 +100,19 @@ def test_negated_volume(volume_setup):
     assert "not in" in wizard.console.log_text
     assert not vol(traj[0])
     assert vol(traj[1])
+
+@pytest.mark.parametrize('depth', [0, 1, None])
+def test_volume_ask(depth):
+    context = {0: {'depth': 0},
+               1: {'depth': 1},
+               None: {}}[depth]
+    wiz = mock_wizard([])
+    result = volume_ask(wiz, context)
+    if depth == 1:
+        assert result == "What describes this volume?"
+    else:
+        assert result == "What describes this state?"
+
 
 @pytest.mark.parametrize('periodic', [True, False])
 def test_cv_defined_volume(periodic):
