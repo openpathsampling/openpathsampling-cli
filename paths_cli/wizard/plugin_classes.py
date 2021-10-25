@@ -111,6 +111,23 @@ class WizardObjectPlugin(OPSPlugin):
         return [f"Here's what we'll make:\n  {str(result)}"]
 
     def get_summary(self, wizard, context, result):
+        """Generate the summary statement describing the created object
+
+        Parameters
+        ----------
+        wizard : :class:`.Wizard`
+            wizard to use
+        context : dict
+            context dict
+        result : Any
+            object that has been created, and should be described.
+
+        Returns
+        -------
+        List[str]
+            statements for the wizard to say (one speech line per list
+            element)
+        """
         return get_text_from_context(
             name='summarize',
             instance=self._summary,

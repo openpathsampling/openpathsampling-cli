@@ -3,6 +3,11 @@ from unittest import mock
 from paths_cli.wizard.plugin_classes import *
 from paths_cli.tests.wizard.test_helper import mock_wizard
 from paths_cli.wizard.standard_categories import Category
+from paths_cli.wizard.parameters import WizardParameter, ProxyParameter
+
+from paths_cli import compiling
+
+import openpathsampling as paths
 
 
 class TestLoadOPS:
@@ -70,16 +75,110 @@ def test_get_text_from_context(context, instance, default, expected):
 
 class TestWizardObjectPlugin:
     def setup(self):
-        pass
+        self.plugin = WizardObjectPlugin(
+            name="foo",
+            category="foo_category",
+            builder=lambda wizard, context: "foo_obj",
+            intro="foo intro",
+            summary="foo summary",
+        )
 
     def test_default_summarize(self):
-        pytest.skip()
-
-    def test_get_summary(self):
-        pytest.skip()
+        wizard = mock_wizard([])
+        context = {}
+        result = "foo"
+        summ = self.plugin.default_summarize(wizard, context, result)
+        assert len(summ) == 1
+        assert "Here's what we'll make" in summ[0]
+        assert "foo" in summ[0]
 
     def test_call(self):
-        pytest.skip()
+        wizard = mock_wizard([])
+        res = self.plugin(wizard)
+        assert "foo intro" in wizard.console.log_text
+        assert "foo summary" in wizard.console.log_text
+        assert res == "foo_obj"
+
+    def test_call_with_prereq(self):
+        def prereq(wizard):
+            wizard.say("Running prereq")
+            return {'prereq': ['results']}
+
+        plugin = WizardObjectPlugin(
+            name="foo",
+            category="foo_category",
+            builder=lambda wizard, context: "foo_obj",
+            prerequisite=prereq,
+        )
+
+        wizard = mock_wizard([])
+        result = plugin(wizard, context={})
+        assert result == "foo_obj"
+        assert "Running prereq" in wizard.console.log_text
 
 
+class TestWizardParameterObjectPlugin:
+    class MyClass(paths.netcdfplus.StorableNamedObject):
+        def __init__(self, foo, bar):
+            self.foo = foo
+            self.bar = bar
 
+    def setup(self):
+        self.parameters = [
+            WizardParameter(name="foo",
+                            ask="Gimme a foo!",
+                            loader=int),
+            WizardParameter(name="bar",
+                            ask="Tell me bar!",
+                            loader=str)
+        ]
+        self.plugin = WizardParameterObjectPlugin(
+            name="baz",
+            category="baz_cat",
+            parameters=self.parameters,
+            builder=self.MyClass,
+        )
+        self.wizard = mock_wizard(['11', '22'])
+
+    def _check_call(self, result, wizard):
+        assert isinstance(result, self.MyClass)
+        assert result.foo == 11
+        assert result.bar == "22"
+        assert "Gimme a foo" in wizard.console.log_text
+        assert "Tell me bar" in wizard.console.log_text
+
+    def test_call(self):
+        result = self.plugin(self.wizard)
+        self._check_call(result, self.wizard)
+
+    def test_from_proxies(self):
+        object_compiler = compiling.InstanceCompilerPlugin(
+            builder=self.MyClass,
+            parameters=[
+                compiling.Parameter(name="foo", loader=int),
+                compiling.Parameter(name="bar", loader=str),
+            ]
+        )
+        proxies = [
+            ProxyParameter(name="foo",
+                           ask="Gimme a foo!"),
+            ProxyParameter(name="bar",
+                           ask="Tell me bar!"),
+
+        ]
+        plugin = WizardParameterObjectPlugin.from_proxies(
+            name="baz",
+            category="baz_cat",
+            parameters=proxies,
+            compiler_plugin=object_compiler
+        )
+        result = plugin(self.wizard)
+        self._check_call(result, self.wizard)
+
+
+class TestCategoryHelpFunc:
+    pass
+
+
+class TestWrapCategory:
+    pass
