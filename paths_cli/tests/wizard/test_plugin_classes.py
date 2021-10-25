@@ -52,6 +52,12 @@ class TestLoadOPS:
     ('empty', 'empty', 'None', []),
 ])
 def test_get_text_from_context(context, instance, default, expected):
+    # get_text_from_context should obtain the appropriate resulting wizard
+    # text regardless for various combinations of its inputs, which can be
+    # None (empty) or a method to be called or a string to be used directly,
+    # and can be selected from context (highest precedence) or a value
+    # typically associated with the instance (next precedence) or the class
+    # default (lowest precedence).
     def make_method(carrier):
         def method(wizard, context, *args, **kwargs):
             return f"{carrier}_method"
@@ -177,8 +183,108 @@ class TestWizardParameterObjectPlugin:
 
 
 class TestCategoryHelpFunc:
-    pass
+    def setup(self):
+        pass
+
+    @pytest.mark.parametrize('input_type', ['int', 'str'])
+    def test_call(self, input_type):
+        pytest.skip()
+
+    def test_call_empty(self):
+        pytest.skip()
+
+    def test_call_empty_no_description(self):
+        pytest.skip()
+
+    @pytest.mark.parametrize('input_type', ['int', 'str'])
+    def test_bad_arg(self, input_type):
+        pytest.skip()
 
 
 class TestWrapCategory:
-    pass
+    def setup(self):
+        # TODO: finishing this now
+        self.wrapper = WrapCategory("foo", "ask foo", intro="intro_foo")
+        self.plugin_no_format = WizardObjectPlugin(
+            name="bar",
+            category="foo",
+            builder=lambda wizard, context: "bar_obj",
+        )
+        self.plugin_format = WizardObjectPlugin(
+            name="bar",
+            category="foo",
+            builder=(lambda wizard, context:
+                     "bar_obj baz={baz}".format(**context)),
+        )
+
+    @pytest.mark.parametrize('input_type', ['method', 'None'])
+    def test_set_context(self, input_type):
+        # set_context should create a new context dict if given a method to
+        # create a new context, or return the is-identical input if give no
+        # method
+        old_context = {'baz': 'qux'}
+        new_context = {'foo': 'bar'}
+        set_context = {
+            'method': lambda wizard, context, selected: new_context,
+            'None': None,
+        }[input_type]
+        expected = {
+            'method': new_context,
+            'None': old_context,
+        }[input_type]
+        wrapper = WrapCategory("foo", "ask foo", set_context=set_context)
+        wizard = mock_wizard([])
+        context = wrapper.set_context(wizard, old_context, selected=None)
+        assert context == expected
+        if input_type == 'None':
+            assert context is expected
+
+    def test_register_plugin(self):
+        # register_plugin should add the plugin to the choices
+        assert len(self.wrapper.choices) == 0
+        self.wrapper.register_plugin(self.plugin_no_format)
+        assert len(self.wrapper.choices) == 1
+        assert self.wrapper.choices['bar'] == self.plugin_no_format
+        # TODO: what is the desired behavior if more that one plugin tries
+        # to register with the same name? override or error? currently
+        # overrides, but that should not be considered API
+
+    @pytest.mark.parametrize('input_type', ['method', 'format', 'string'])
+    def test_get_ask(self, input_type):
+        # wrapper.get_ask should create the appropriate input string whether
+        # it is a plain string, or a string that is formatted by the context
+        # dict, or a method that takes wizard and context to return a string
+        ask = {
+            'method': lambda wizard, context: f"Bar is {context['bar']}",
+            'format': "Bar is {bar}",
+            'string': "Bar is 10"
+        }[input_type]
+        context = {'bar': 10}
+        wrapper = WrapCategory("foo", ask)
+        wizard = mock_wizard([])
+        ask_string = wrapper.get_ask(wizard, context)
+        assert ask_string == "Bar is 10"
+
+    @pytest.mark.parametrize('context_type', ['None', 'dict'])
+    def test_call(self, context_type):
+        # test that the call works both when the context is unimportant (and
+        # not given) and when the context is used in the builder
+        context = {
+            'None': None,
+            'dict': {'baz': 11},
+        }[context_type]
+        expected = {
+            'None': "bar_obj",
+            'dict': "bar_obj baz=11",
+        }[context_type]
+        self.wrapper.choices['bar'] = {
+            'None': self.plugin_no_format,
+            'dict': self.plugin_format,
+        }[context_type]
+
+        wizard = mock_wizard(['1'])
+        result = self.wrapper(wizard, context)
+        assert "intro_foo" in wizard.console.log_text
+        assert "ask foo" in wizard.console.log_text
+        assert "1. bar" in wizard.console.log_text
+        assert result == expected

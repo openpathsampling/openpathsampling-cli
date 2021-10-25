@@ -7,7 +7,6 @@ import os
 class PluginRegistrationError(RuntimeError):
     pass
 
-# TODO: make more generic than OPS (requires_ops => requires_lib)
 class Plugin(object):
     """Generic plugin object
 

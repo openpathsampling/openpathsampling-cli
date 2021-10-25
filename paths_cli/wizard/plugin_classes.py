@@ -149,7 +149,8 @@ class WizardObjectPlugin(OPSPlugin):
         else:
             prereqs = {}
 
-        result = self.builder(wizard, prereqs)
+        context.update(prereqs)
+        result = self.builder(wizard, context)
         summary = self.get_summary(wizard, context, result)
         for line in summary:
             wizard.say(line)
