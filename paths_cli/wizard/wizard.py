@@ -73,6 +73,8 @@ class Wizard:
     def ask(self, question, options=None, default=None, helper=None,
             autohelp=False):
         # TODO: if helper is None, create a default helper
+        if helper is None:
+            helper = Helper(None)
         if isinstance(helper, str):
             helper = Helper(helper)
         result = self.console.input("🧙 " + question + " ")
@@ -103,10 +105,6 @@ class Wizard:
                                 for i, opt in enumerate(options)])
         self.say(opt_string, preface=" "*3)
         choice = self.ask("Please select an option:", helper=helper)
-
-        # indicates input was handled by helper -- so ask again
-        if choice is None:
-           return None
 
         # select by string
         if choice in options:

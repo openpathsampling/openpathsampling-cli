@@ -44,9 +44,13 @@ COMMAND_HELP_STR = {
 class Helper:
     def __init__(self, help_func):
         # TODO: generalize to get help on specific aspects?
+        if help_func is None:
+            help_func = "Sorry, no help available."
+
         if isinstance(help_func, str):
             text = str(help_func)
             help_func = lambda args, ctx: text
+
         self.helper = help_func
         self.commands = HELPER_COMMANDS.copy()  # allows per-instance custom
         self.command_help_str = COMMAND_HELP_STR.copy()
