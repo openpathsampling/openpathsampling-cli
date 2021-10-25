@@ -90,6 +90,7 @@ class TestWizardObjectPlugin:
         )
 
     def test_default_summarize(self):
+        # ensure that we get the correct output from default_summarize
         wizard = mock_wizard([])
         context = {}
         result = "foo"
@@ -99,6 +100,8 @@ class TestWizardObjectPlugin:
         assert "foo" in summ[0]
 
     def test_call(self):
+        # check that calling the plugin creates the correct object and
+        # outputs intro/summary to the wizard
         wizard = mock_wizard([])
         res = self.plugin(wizard)
         assert "foo intro" in wizard.console.log_text
@@ -106,6 +109,7 @@ class TestWizardObjectPlugin:
         assert res == "foo_obj"
 
     def test_call_with_prereq(self):
+        # ensure that prerequisites get run if they are provided
         def prereq(wizard):
             wizard.say("Running prereq")
             return {'prereq': ['results']}
@@ -154,10 +158,14 @@ class TestWizardParameterObjectPlugin:
         assert "Tell me bar" in wizard.console.log_text
 
     def test_call(self):
+        # when provided parameters and a builder function, we should get the
+        # expected result and log from the wizard
         result = self.plugin(self.wizard)
         self._check_call(result, self.wizard)
 
     def test_from_proxies(self):
+        # when provided proxy parameters and an InstanceCompilerPlugin, we
+        # should get the expected result and log from the wizard
         object_compiler = compiling.InstanceCompilerPlugin(
             builder=self.MyClass,
             parameters=[
@@ -184,21 +192,58 @@ class TestWizardParameterObjectPlugin:
 
 class TestCategoryHelpFunc:
     def setup(self):
-        pass
+        self.category = WrapCategory("foo", "ask foo")
+        self.plugin = WizardObjectPlugin(
+            name="bar",
+            category="foo",
+            builder=lambda wizard, context: "bar_obj",
+            description="bar_help",
+        )
+        self.category.choices['bar'] = self.plugin
+        self.helper = CategoryHelpFunc(
+            category=self.category,
+            basic_help="help for foo category"
+        )
 
     @pytest.mark.parametrize('input_type', ['int', 'str'])
     def test_call(self, input_type):
-        pytest.skip()
+        # we should get the help for a category item whether it is requested
+        # by number or by name
+        inp = {'int': "1", 'str': "bar"}[input_type]
+        assert self.helper(inp, {}) == "bar_help"
+
+    @pytest.mark.parametrize('input_type', ['int', 'str'])
+    def test_call_no_description(self, input_type):
+        # when no description for a category item is provided, we should get
+        # the "no help available" message
+        plugin = WizardObjectPlugin(
+            name="bar",
+            category="foo",
+            builder=lambda wizard, context: "bar_obj"
+        )
+        # override with local plugin, no description
+        self.category.choices['bar'] = plugin
+
+        inp = {'int': "1", 'str': "bar"}[input_type]
+        assert self.helper(inp, {}) == "Sorry, no help available for 'bar'."
 
     def test_call_empty(self):
-        pytest.skip()
+        # when called with the empty string, we should get the help for the
+        # category
+        assert self.helper("", {}) == "help for foo category"
 
     def test_call_empty_no_description(self):
-        pytest.skip()
+        # when called with empty string and no category help defined, we
+        # should get the "no help available" message
+        helper = CategoryHelpFunc(category=self.category)
+        assert helper("", {}) == "Sorry, no help available for foo."
 
     @pytest.mark.parametrize('input_type', ['int', 'str'])
     def test_bad_arg(self, input_type):
-        pytest.skip()
+        # if a bad argument is passed to help, the help should return None
+        # (causing the error message to be issued higher in the stack)
+        inp = {'int': "2", 'str': "baz"}[input_type]
+        assert self.helper(inp, {}) is None
 
 
 class TestWrapCategory:

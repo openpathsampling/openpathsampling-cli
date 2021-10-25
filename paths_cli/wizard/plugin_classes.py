@@ -246,10 +246,13 @@ class CategoryHelpFunc:
             return self.basic_help
         help_dict = {}
         for num, (name, obj) in enumerate(self.category.choices.items()):
-            try:
-                help_str = obj.description
-            except Exception:
+            # note: previously had a try/except around obj.description --
+            # keep an eye out in case that was actually needed
+            if obj.description is None:
                 help_str = f"Sorry, no help available for '{name}'."
+            else:
+                help_str = obj.description
+
             help_dict[str(num+1)] = help_str
             help_dict[name] = help_str
 
