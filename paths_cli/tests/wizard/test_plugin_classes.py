@@ -280,7 +280,7 @@ class TestWrapCategory:
         }[input_type]
         wrapper = WrapCategory("foo", "ask foo", set_context=set_context)
         wizard = mock_wizard([])
-        context = wrapper.set_context(wizard, old_context, selected=None)
+        context = wrapper._set_context(wizard, old_context, selected=None)
         assert context == expected
         if input_type == 'None':
             assert context is expected
@@ -308,7 +308,7 @@ class TestWrapCategory:
         context = {'bar': 10}
         wrapper = WrapCategory("foo", ask)
         wizard = mock_wizard([])
-        ask_string = wrapper.get_ask(wizard, context)
+        ask_string = wrapper._get_ask(wizard, context)
         assert ask_string == "Bar is 10"
 
     @pytest.mark.parametrize('context_type', ['None', 'dict'])

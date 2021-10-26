@@ -1,5 +1,3 @@
-from collections import defaultdict
-
 from paths_cli.wizard.plugin_classes import (
     LoadFromOPS, WizardObjectPlugin, WrapCategory
 )
@@ -13,18 +11,34 @@ class CategoryWizardPluginRegistrationError(Exception):
 _CATEGORY_PLUGINS = {}
 
 def get_category_wizard(category):
+    """Get the wizard category object of the given name.
+
+    This is the user-facing way to load the wizard category plugins after
+    they have been registered.
+
+    Parameters
+    ----------
+    category : str
+        name of the category to load
+
+    Returns
+    -------
+    :class:`.WrapCategory` :
+        wizard category plugin for the specified category
+    """
     def inner(wizard, context=None):
         try:
             plugin = _CATEGORY_PLUGINS[category]
-        except KeyError:
+        except KeyError as exc:
             raise CategoryWizardPluginRegistrationError(
                 f"No wizard plugin for '{category}'"
-            )
+            ) from exc
         return plugin(wizard, context)
     return inner
 
 
 def _register_category_plugin(plugin):
+    """convenience to register plugin or error if already registered"""
     if plugin.name in _CATEGORY_PLUGINS:
         raise CategoryWizardPluginRegistrationError(
             f"The category '{plugin.name}' has already been reserved "
@@ -34,6 +48,14 @@ def _register_category_plugin(plugin):
 
 
 def register_plugins(plugins):
+    """Register the given plugins for use with the wizard.
+
+    Parameters
+    ----------
+    plugins : List[:class:`.OPSPlugin`]
+        wizard plugins to register (including category plugins and object
+        plugins)
+    """
     categories = []
     object_plugins = []
     for plugin in plugins:
@@ -53,6 +75,12 @@ def register_plugins(plugins):
         category.register_plugin(plugin)
 
 def register_installed_plugins():
+    """Register all Wizard plugins found in standard locations.
+
+    This is a convenience to avoid repeating identification of wizard
+    plugins. If something external needs to load all plugins (e.g., for
+    testing or for a custom script), this is the method to use.
+    """
     plugin_types = (WrapCategory, WizardObjectPlugin)
     plugins = get_installed_plugins(
         default_loader=NamespacePluginLoader('paths_cli.wizard',
@@ -67,5 +95,3 @@ def register_installed_plugins():
         plugin_types=LoadFromOPS
     )
     register_plugins(file_loader_plugins)
-
-

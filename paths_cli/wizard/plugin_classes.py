@@ -5,6 +5,13 @@ from paths_cli.wizard.load_from_ops import load_from_ops
 from paths_cli.wizard.parameters import WizardParameter
 from paths_cli.wizard.helper import Helper
 
+_PLUGIN_DOCSTRING = """
+    requires_ops : Tuple[int, int]
+        version of OpenPathSampling required for this plugin
+    requires_cli : Tuple[int, int]
+        version of the OpenPathSampling CLI required for this plugin
+"""
+
 _WIZARD_KWONLY = """
     prerequisite : Callable
         method to use to create any objects required for the target object
@@ -16,14 +23,22 @@ _WIZARD_KWONLY = """
     summary : Callable
         method to create the summary string describing the object that is
         created
-    requires_ops : Tuple[int, int]
-        version of OpenPathSampling required for this plugin
-    requires_cli : Tuple[int, int]
-        version of the OpenPathSampling CLI required for this plugin
-"""
+""" + _PLUGIN_DOCSTRING
 
 class LoadFromOPS(OPSPlugin):
-    def __init__(self, category, obj_name=None, store_name=None,
+    """Wizard plugin type to load from an existing OPS file.
+
+    Parameters
+    ----------
+    category : str
+        the plugin category associated with this plugin
+    obj_name : str
+        name of the object (singular) for use in user interaction
+    store_name : str
+        nanme of the store within the OPS file where objects of this type
+        can be found
+    """ + _PLUGIN_DOCSTRING
+    def __init__(self, category, *, obj_name=None, store_name=None,
                  requires_ops=(1,0), requires_cli=(0,3)):
         super().__init__(requires_ops, requires_cli)
         self.category = category
@@ -36,8 +51,10 @@ class LoadFromOPS(OPSPlugin):
 
         self.obj_name = obj_name
         self.store_name = store_name
+        self.description = (f"Load the {self.obj_name} from an OPS .db "
+                            "file.")
 
-    def __call__(self, wizard):
+    def __call__(self, wizard, context=None):
         return load_from_ops(wizard, self.store_name, self.obj_name)
 
 def get_text_from_context(name, instance, default, wizard, context, *args,
@@ -56,7 +73,7 @@ def get_text_from_context(name, instance, default, wizard, context, *args,
     default :
         default value to use if neither context nor user-given values exist
     wizard : :class:`.Wizard`
-        the wizard
+        the wizard to use for user interaction
     context : dict
         the context dict
     """
@@ -188,7 +205,7 @@ class WizardParameterObjectPlugin(WizardObjectPlugin):
         self.proxy_parameters = []  # non-empty if created from proxies
 
     @classmethod
-    def from_proxies(cls, name, category, parameters, compiler_plugin,
+    def from_proxies(cls, name, category, parameters, compiler_plugin, *,
                      prerequisite=None, intro=None, description=None,
                      summary=None, requires_ops=(1,0), requires_cli=(0,3)):
         """
@@ -234,6 +251,17 @@ class WizardParameterObjectPlugin(WizardObjectPlugin):
 
 
 class CategoryHelpFunc:
+    """Help function for wizard category wrappers.
+
+    An instance of this is used as input to :class:`.Helper`.
+
+    Parameters
+    ----------
+    category : :class:`.WrapCategory`
+        the category wrapper for which this is the help function.
+    basic_help : str
+        help statement for the category as a whole
+    """
     def __init__(self, category, basic_help=None):
         self.category = category
         if basic_help is None:
@@ -241,6 +269,21 @@ class CategoryHelpFunc:
         self.basic_help = basic_help
 
     def __call__(self, help_args, context):
+        """Get help based on user input ``help_args`` and context.
+
+        Parameters
+        ----------
+        help_args : str
+            use input arguments to help function
+        context : dict
+            context dict
+
+        Returns
+        -------
+        str :
+            help statement based on user input. Returns ``None`` if there
+            was an error in the user input.
+        """
         if not help_args:
             return self.basic_help
         help_dict = {}
@@ -263,15 +306,35 @@ class CategoryHelpFunc:
 
 
 class WrapCategory(OPSPlugin):
-    def __init__(self, name, ask, helper=None, intro=None, set_context=None,
-                 requires_ops=(1,0), requires_cli=(0,3)):
+    """Container for plugins to organize them by "category."
+
+    A category here is a specific role within OPS. For example, engines make
+    one category, volumes make another. Objects within a category are (in
+    principle) interchangeable from a software standardpoint.
+
+    This is the Wizard equivalent of the CategoryCompiler in the compiling
+    subpackage.
+
+    Parameters
+    ----------
+    name : str
+        Name of this category. This should be in the singular.
+    ask : str or Callable[:class:`.Wizard`, dict] -> str
+        string or callable to create string that for the question asked of
+        the user when creating an object of this type
+        helper : :class:`.Helper` or str
+        helper tool
+
+    """
+    def __init__(self, name, ask, helper=None, *, intro=None,
+                 set_context=None, requires_ops=(1,0), requires_cli=(0,3)):
         super().__init__(requires_ops, requires_cli)
         self.name = name
         if isinstance(intro, str):
             intro = [intro]
         self.intro = intro
         self.ask = ask
-        self._set_context = set_context
+        self._user_set_context = set_context
         if helper is None:
             helper = Helper(CategoryHelpFunc(self))
         if isinstance(helper, str):
@@ -283,16 +346,25 @@ class WrapCategory(OPSPlugin):
     def __repr__(self):
         return f"{self.__class__.__name__}({self.name})"
 
-    def set_context(self, wizard, context, selected):
-        if self._set_context:
-            return self._set_context(wizard, context, selected)
+    def _set_context(self, wizard, context, selected):
+        """If user has provided a funtion to create context, use it."""
+        if self._user_set_context:
+            return self._user_set_context(wizard, context, selected)
         else:
             return context
 
     def register_plugin(self, plugin):
+        """Register a :class:`.WizardObjectPlugin` with this category.
+
+        Parameters
+        ----------
+        plugin : :class:`.WizardObjectPlugin`
+            the plugin to register
+        """
         self.choices[plugin.name] = plugin
 
-    def get_intro(self, wizard, context):
+    def _get_intro(self, wizard, context):
+        """get the intro test to be said by the wizard"""
         return get_text_from_context(
             name='intro',
             instance=self.intro,
@@ -301,7 +373,8 @@ class WrapCategory(OPSPlugin):
             context=context
         )
 
-    def get_ask(self, wizard, context):
+    def _get_ask(self, wizard, context):
+        """get the ask text to be said by the wizard"""
         try:
             ask = self.ask(wizard, context)
         except TypeError:
@@ -309,19 +382,33 @@ class WrapCategory(OPSPlugin):
         return ask
 
     def __call__(self, wizard, context=None):
+        """Create an instance for this category.
+
+        Parameters
+        ----------
+        wizard : :class:`.Wizard`
+            the wizard to use for user interaction
+        context : dict
+            the context dict
+
+        Returns
+        -------
+        Any :
+            instance of the type created by this category
+        """
         if context is None:
             context = {}
 
-        intro = self.get_intro(wizard, context)
+        intro = self._get_intro(wizard, context)
 
         for line in intro:
             wizard.say(line)
 
-        ask = self.get_ask(wizard, context)
+        ask = self._get_ask(wizard, context)
 
         selected = wizard.ask_enumerate_dict(ask, self.choices,
                                              self.helper)
 
-        new_context = self.set_context(wizard, context, selected)
+        new_context = self._set_context(wizard, context, selected)
         obj = selected(wizard, new_context)
         return obj
