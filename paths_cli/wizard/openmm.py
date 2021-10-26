@@ -61,7 +61,12 @@ if HAS_OPENMM:
             ProxyParameter(
                 name='n_frames_max',
                 ask="How many frames before aborting a trajectory?",
-                helper=None,
+                helper=("Sometimes trajectories can get stuck in "
+                        "unexpected basins. To prevent your trajectory "
+                        "from running forever, you need to add a cutoff "
+                        "trajectory length. This should be significantly "
+                        "longer than you would expect a transition to "
+                        "take."),
             ),
         ],
         compiler_plugin=OPENMM_COMPILING,

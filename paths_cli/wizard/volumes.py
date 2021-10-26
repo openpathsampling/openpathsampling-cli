@@ -28,6 +28,7 @@ _LAMBDA_HELP = ("This is the {minmax} boundary value for this volume. "
                 "outside the periodic bounds.")
 _LAMBDA_STR = ("What is the {minmax} allowed value for "
                "'{{obj_dict[cv].name}}' in this volume?")
+
 CV_DEFINED_VOLUME_PLUGIN = WizardParameterObjectPlugin.from_proxies(
     name="CV-defined volume (allowed values of CV)",
     category="volume",
@@ -64,6 +65,9 @@ INTERSECTION_VOLUME_PLUGIN = WizardObjectPlugin(
            "This means that it only allows phase space points that are "
            "in both of the constituent volumes."),
     builder=partial(_binary_func_volume, op=operator.__and__),
+    description=("Create a volume that is the intersection of two existing "
+                 "volumes -- that is, all points in this volume are in "
+                 "both of the volumes that define it."),
 )
 
 UNION_VOLUME_PLUGIN = WizardObjectPlugin(
@@ -73,6 +77,9 @@ UNION_VOLUME_PLUGIN = WizardObjectPlugin(
            "This means that it allows phase space points that are in "
            "either of the constituent volumes."),
     builder=partial(_binary_func_volume, op=operator.__or__),
+    description=("Create a volume that is the union of two existing "
+                 "volumes -- that is, any point in either of the volumes "
+                 "that define this are also in this volume"),
 )
 
 NEGATED_VOLUME_PLUGIN = WizardObjectPlugin(
@@ -80,6 +87,8 @@ NEGATED_VOLUME_PLUGIN = WizardObjectPlugin(
     category='volume',
     intro="This volume will be everything not in the subvolume.",
     builder=lambda wizard, context: ~VOLUMES_PLUGIN(wizard, context),
+    description=("Create a volume that includes every that is NOT "
+                 "in the existing volume."),
 )
 
 _FIRST_STATE = ("Now  let's define state states for your system. "
@@ -115,12 +124,17 @@ def volume_ask(wizard, context):
     obj = {True: 'state', False: 'volume'}[as_state]
     return f"What describes this {obj}?"
 
+VOLUME_FROM_FILE = LoadFromOPS('volume')
+
 VOLUMES_PLUGIN = WrapCategory(
     name='volume',
     intro=volume_intro,
     ask=volume_ask,
     set_context=volume_set_context,
-    helper="No volume help yet"
+    helper=("This will define a (hyper)volume in phase space. States and "
+            "interfaces in OPS are described by volumes. You can combine "
+            "ranges along different CVs in any way you want to defined the "
+            "volume.")
 )
 
 if __name__ == "__main__":  # no-cov
