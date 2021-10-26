@@ -1,5 +1,6 @@
 from .errors import RestartObjectException
 
+
 class QuitWizard(BaseException):
     pass
 
@@ -10,12 +11,15 @@ class QuitWizard(BaseException):
 def raise_quit(cmd, ctx):
     raise QuitWizard()
 
+
 def raise_restart(cmd, ctx):
     raise RestartObjectException()
+
 
 def force_exit(cmd, ctx):
     print("Exiting...")
     exit()
+
 
 HELPER_COMMANDS = {
     'q': raise_quit,
@@ -46,15 +50,23 @@ COMMAND_HELP_STR = {
 }
 
 
-_SHORT_EVAL_HELP = ("This parameter can be generated using our custom "
-                    "evaluation method. For details, ask for help with "
-                    "'?eval'.")
-_LONG_EVAL_HELP = ("The value for this parameter can be generated using a "
-                   "Python-like syntax. You're limited to a single "
-                   "expression (generally, a single line of Python) and "
-                   "the imports math and numpy (as np). However, this "
-                   "allows you to do simple calculations such as:\n"
-                   "   100 * np.pi / 180  # 100 degrees in radians")
+_SHORT_EVAL_HELP = ("You can use expression evaluation with this "
+                    "parameter! For details, ask for help with '?eval'.")
+_LONG_EVAL_HELP = (
+    "You can use a Python expression to create the value for this "
+    "parameter. However, there are a few limitations:\n\n",
+    " * You're limited to a single expression. That basically means a "
+    "single line of Python, and no control structures like for loops.\n\n"
+    " * You can't import any libraries. However, math and numpy are "
+    "included (use numpy as 'np').\n\n"
+    "The expression evaluator means that you can use simple expressions "
+    "as input. For example, say you wanted 100 degrees in radians. You "
+    "could just type\n\n"
+    "  100 * np.pi / 180\n\n"
+    "as your input for the parameter."
+)
+
+
 class EvalHelperFunc:
     """Helper function (input to :class:`.Helper`) for evaluated parameters.
 
@@ -64,17 +76,18 @@ class EvalHelperFunc:
         help string or method that takes arguments and context dict and
         results the help string
     """
-    def __init__(self, param_helper, context=None):
+    def __init__(self, param_helper):
         if isinstance(param_helper, str):
             helper = lambda wizard, context: param_helper
         else:
             helper = param_helper
         self.helper = helper
 
-    def __call__(self, helpargs, context):
+    def __call__(self, helpargs, context=None):
         if helpargs == "eval":
             return _LONG_EVAL_HELP
         return self.helper(helpargs, context) + "\n\n" + _SHORT_EVAL_HELP
+
 
 class Helper:
     """Manage help and command passing on command line.
@@ -120,7 +133,6 @@ class Helper:
                 result = f"No help for !{help_args}."
 
         return result
-
 
     def _run_command(self, command, context):
         """Runs a the given command.

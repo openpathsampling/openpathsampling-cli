@@ -1,6 +1,7 @@
 import pytest
 
 from paths_cli.wizard.helper import *
+from paths_cli.wizard.helper import _LONG_EVAL_HELP
 from paths_cli.tests.wizard.mock_wizard import mock_wizard
 
 def test_raise_quit():
@@ -14,6 +15,29 @@ def test_restart():
 def test_force_exit():
     with pytest.raises(SystemExit):
         force_exit("foo", None)
+
+class TestEvalHelperFunc:
+    def setup(self):
+        self.param_helper = {
+            'str': "help_string",
+            'method': lambda help_args, context: f"help_{help_args}"
+        }
+        self.expected = {
+            'str': "help_string",
+            'method': "help_foo"
+        }
+
+    @pytest.mark.parametrize('helper_type', ['str', 'method'])
+    def test_call(self, helper_type):
+        help_func = EvalHelperFunc(self.param_helper[helper_type])
+        help_str = help_func("foo")
+        assert self.expected[helper_type] in help_str
+        assert "ask for help with '?eval'" in help_str
+
+    @pytest.mark.parametrize('helper_type', ['str', 'method'])
+    def test_call_eval(self, helper_type):
+        help_func = EvalHelperFunc(self.param_helper[helper_type])
+        assert help_func("eval") == _LONG_EVAL_HELP
 
 class TestHelper:
     def setup(self):
