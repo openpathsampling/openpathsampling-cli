@@ -48,10 +48,12 @@ class Wizard:
     def _patch(self):  # no-cov
         import openpathsampling as paths
         from openpathsampling.experimental.storage import monkey_patch_all
+        from paths_cli.param_core import StorageLoader
         if not self._patched:
             paths = monkey_patch_all(paths)
             paths.InterfaceSet.simstore = True
             self._patched = True
+            StorageLoader.has_simstore_patch = True
 
     def debug(content):  # no-cov
         # debug does no pretty-printing
