@@ -3,6 +3,10 @@ from .errors import RestartObjectException
 class QuitWizard(BaseException):
     pass
 
+
+# the following command functions take cmd and ctx -- future commands might
+# use the full command text or the context internally.
+
 def raise_quit(cmd, ctx):
     raise QuitWizard()
 
@@ -42,11 +46,24 @@ COMMAND_HELP_STR = {
 }
 
 class Helper:
+    """Manage help and command passing on command line.
+
+    Any user input beginning with "?" or "!" is passed to the helper. Input
+    beginning with "!" is used to call commands, which allow the user to
+    interact with the system or to force control flow that isn't built into
+    the wizard. Input beginning with "?" is interpreted as a request for
+    help, and the text after "?" is passed from the Helper to its help_func
+    (or to the tools for help about commands.)
+
+    Parameters
+    ----------
+    help_func : str or Callable[str, dict] -> str
+        If a Callable, it must take the user-provided string and the context
+        dict. If a string, the help will always return that string for any
+        user-provided arguments.
+    """
     def __init__(self, help_func):
         # TODO: generalize to get help on specific aspects?
-        if help_func is None:
-            help_func = "Sorry, no help available."
-
         if isinstance(help_func, str):
             text = str(help_func)
             help_func = lambda args, ctx: text
@@ -56,7 +73,11 @@ class Helper:
         self.command_help_str = COMMAND_HELP_STR.copy()
         self.listed_commands = ['quit', '!quit', 'restart']
 
-    def command_help(self, help_args, context):
+    def _command_help(self, help_args, context):
+        """Handle help for commands.
+
+        Invoked if user input begins with "?!"
+        """
         if help_args == "":
             result = "The following commands can be used:\n"
             result += "\n".join([f"* !{cmd}"
@@ -70,13 +91,17 @@ class Helper:
         return result
 
 
-    def run_command(self, command, context):
+    def _run_command(self, command, context):
+        """Runs a the given command.
+
+        Invoked if user input begins with "!"
+        """
         cmd_split = command.split()
         try:
             key = cmd_split[0]
         except IndexError:
             return ("Please provide a command. "
-                    + self.command_help("", context))
+                    + self._command_help("", context))
 
         args = " ".join(cmd_split[1:])
         try:
@@ -86,10 +111,13 @@ class Helper:
 
         return cmd(args, context)
 
-    def get_help(self, help_args, context):
-        # TODO: add default help (for ?!, etc)
+    def _get_help(self, help_args, context):
+        """Get help from either command help or user-provided help.
+
+        Invoked if user input begins with "?"
+        """
         if help_args != "" and help_args[0] == '!':
-            return self.command_help(help_args[1:], context)
+            return self._command_help(help_args[1:], context)
 
         if self.helper is None:
             return "Sorry, no help available here."
@@ -99,6 +127,6 @@ class Helper:
     def __call__(self, user_input, context=None):
         starter = user_input[0]
         args = user_input[1:]
-        func = {'?': self.get_help,
-                '!': self.run_command}[starter]
+        func = {'?': self._get_help,
+                '!': self._run_command}[starter]
         return func(args, context)

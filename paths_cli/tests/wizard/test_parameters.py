@@ -142,7 +142,7 @@ class TestFromWizardPrerequisite:
         # wizard as a side-effect. The say_create should appear in logs.
         wiz = mock_wizard(["1", "name1"])
         wiz.store = {}
-        obj = self.prereq.create_new(wiz)
+        obj = self.prereq._create_new(wiz)
         assert obj == 11
         assert len(wiz.store) == 1
         assert wiz.store['name1'].val == "11"
@@ -155,7 +155,7 @@ class TestFromWizardPrerequisite:
         wiz = mock_wizard([])
         wiz.store = {'bar': self.Wrapper("11"),
                      'baz': self.Wrapper("22")}
-        obj = self.prereq.get_existing(wiz)
+        obj = self.prereq._get_existing(wiz)
         assert obj == [11, 22]
         assert wiz.console.log_text == ""
 
@@ -167,7 +167,7 @@ class TestFromWizardPrerequisite:
         wiz.store = {'bar': self.Wrapper("11"),
                      'baz': self.Wrapper("22"),
                      'qux': self.Wrapper("33")}
-        obj = self.prereq.select_single_existing(wiz)
+        obj = self.prereq._select_single_existing(wiz)
         assert obj == 11
         assert "Which obj_name would you" in wiz.console.log_text
 

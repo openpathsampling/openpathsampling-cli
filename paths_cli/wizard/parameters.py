@@ -71,12 +71,26 @@ class WizardParameter:
             dct['loader'] = get_category_wizard(category)
             dct['ask'] = get_category_info(category).singular
             dct['store_name'] = get_category_info(category).storage
-            cls = ExistingObjectParameter
+            cls = _ExistingObjectParameter
         else:
             dct['loader'] = loader
         return cls(**dct)
 
     def __call__(self, wizard, context):
+        """Load the parameter.
+
+        Parameters
+        ----------
+        wizard : :class:`.Wizard`
+            wizard for interacting with the user
+        context : dict
+            context dic
+
+        Returns
+        -------
+        Any :
+            the result of converting user string input to a parsed parameter
+        """
         obj = NO_PARAMETER_LOADED
         ask = self.ask.format(**context)
         while obj is NO_PARAMETER_LOADED:
@@ -85,7 +99,7 @@ class WizardParameter:
         return obj
 
 
-class ExistingObjectParameter(WizardParameter):
+class _ExistingObjectParameter(WizardParameter):
     """Special parameter type for parameters created by wizards.
 
     This should only be created as part of the
@@ -111,6 +125,37 @@ class ExistingObjectParameter(WizardParameter):
 
 class FromWizardPrerequisite:
     """Load prerequisites from the wizard.
+
+    WARNING: This should be considered very experimental and may be removed
+    or substantially changed in future versions.
+
+    Parameters
+    ----------
+    name : str
+        the name of this prerequisite
+    create_func : Callable[:class:`.Wizard] -> Any
+        method to create a relevant object, using the given wizard for user
+        interaction. Note that the specific return object can be extracted
+        from the results of this method by using load_func
+    category : str
+        category of object this creates
+    n_required : int
+        number of instances that must be created
+    obj_name : str
+        singular version of object name in order to refer to it in user
+        interactions
+    store_name : str
+        name of the store in which this object would be found if it has
+        already been created for this Wizard
+    say_create : List[str]
+        user interaction statement prior to creating this object. Each
+        element in the list makes a separate statement from the wizard.
+    say_finish : List[str]
+        user interaction statment upon completing this object. Each element
+        in the list makes a separate statment from the wizard.
+    load_func : Callable
+        method to extract specific return object from the create_func.
+        Default is to return the result of create_func.
     """
     def __init__(self, name, create_func, category, n_required, *,
                  obj_name=None, store_name=None, say_create=None,
@@ -133,7 +178,22 @@ class FromWizardPrerequisite:
 
         self.load_func = load_func
 
-    def create_new(self, wizard):
+    def _create_new(self, wizard):
+        """Create a new instance of this prereq.
+
+        Invoked if more objects of this type are needed than have already
+        been created for the wizard.
+
+        Parameters
+        ----------
+        wizard : :class:`.Wizard`
+            the wizard to use for user interaction
+
+        Returns
+        -------
+        Any :
+            single instance of the required class
+        """
         if self.say_create:
             wizard.say(self.say_create)
         obj = self.create_func(wizard)
@@ -141,29 +201,81 @@ class FromWizardPrerequisite:
         result = self.load_func(obj)
         return result
 
-    def get_existing(self, wizard):
+    def _get_existing(self, wizard):
+        """Get existing instances of the desired object.
+
+        This is invoked either when there are the exact right number of
+        objects already created, or to get the initial objects when there
+        aren't enough objects created yet.
+
+        Parameters
+        ----------
+        wizard : :class:`.Wizard`
+            the wizard to use for user interaction
+
+        Returns
+        -------
+        List[Any] :
+            list of existing instances
+        """
         all_objs = list(getattr(wizard, self.store_name).values())
         results = [self.load_func(obj) for obj in all_objs]
         return results
 
-    def select_single_existing(self, wizard):
+    def _select_single_existing(self, wizard):
+        """Ask the user to select an instance from the saved instances.
+
+        This is invoked if there are more instances already created than are
+        required. This is called once for each instance required.
+
+        Parameters
+        ----------
+        wizard : :class:`.Wizard`
+            the wizard to use for user interaction
+
+        Returns
+        -------
+        Any :
+            single instance of the required class
+        """
         obj = wizard.obj_selector(self.store_name, self.obj_name,
                                   self.create_func)
         return self.load_func(obj)
 
     def __call__(self, wizard, context=None):
+        """Obtain the correct number of instances of the desired type.
+
+        This will either take the existing object(s) in the wizard (if the
+        exact correct number have been created in the wizard), create new
+        objects (if there are not enough) or ask the user to select the
+        existing instances (if there are more than enough).
+
+        Parameters
+        ----------
+        wizard : :class:`.Wizard`
+            the wizard to use for user interaction
+        context : dict
+            context dictionary
+
+        Returns
+        -------
+        Dict[str, List[Any]] :
+            mapping ``self.name`` to a list of objects of the correct type.
+            Note that this always maps to a list; receiving code may need to
+            handle that fact.
+        """
         n_existing = len(getattr(wizard, self.store_name))
         if n_existing == self.n_required:
             # early return in this case (return silently)
-            return {self.name: self.get_existing(wizard)}
+            return {self.name: self._get_existing(wizard)}
         elif n_existing > self.n_required:
-            sel = [self.select_single_existing(wizard)
+            sel = [self._select_single_existing(wizard)
                    for _ in range(self.n_required)]
             dct = {self.name: sel}
         else:
-            objs = self.get_existing(wizard)
+            objs = self._get_existing(wizard)
             while len(getattr(wizard, self.store_name)) < self.n_required:
-                objs.append(self.create_new(wizard))
+                objs.append(self._create_new(wizard))
             dct = {self.name: objs}
 
         if self.say_finish:
