@@ -138,7 +138,7 @@ if HAS_MDTRAJ:
         builder=partial(_mdtraj_cv_builder, func_name='compute_angles'),
         prerequisite=TOPOLOGY_CV_PREREQ,
         intro=_MDTRAJ_INTRO.format(user_str="angle made by three atoms"),
-        description=...,
+        description="This CV will calculate the angle between three atoms.",
         summary=_mdtraj_summary,
     )
 
@@ -148,7 +148,8 @@ if HAS_MDTRAJ:
         builder=partial(_mdtraj_cv_builder, func_name='compute_dihedrals'),
         prerequisite=TOPOLOGY_CV_PREREQ,
         intro=_MDTRAJ_INTRO.format(user_str="dihedral made by four atoms"),
-        description=...,
+        description=("This CV will calculate the dihedral angle made by "
+                     "four atoms"),
         summary=_mdtraj_summary,
     )
 

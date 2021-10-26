@@ -65,8 +65,13 @@ class Wizard:
         lines = statement.split("\n")
         wrapped = textwrap.wrap(lines[0], width=width, subsequent_indent=" "*3)
         for line in lines[1:]:
-            wrap_line = textwrap.indent(line, " "*3)
-            wrapped.append(wrap_line)
+            if line == "":
+                wrapped.append("")
+            wrap_line = textwrap.wrap(line, width=width,
+                                      initial_indent=" "*3,
+                                      subsequent_indent=" "*3)
+            # wrap_line = textwrap.indent(line, " "*3)
+            wrapped.extend(wrap_line)
         self.console.print("\n".join(wrapped))
 
     @get_object

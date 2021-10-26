@@ -4,6 +4,7 @@ from paths_cli.wizard.plugin_classes import (
     LoadFromOPS, WizardParameterObjectPlugin, WizardObjectPlugin,
     WrapCategory
 )
+from paths_cli.wizard.helper import EvalHelperFunc, Helper
 from paths_cli.wizard.plugin_registration import get_category_wizard
 from paths_cli.wizard.core import interpret_req
 import paths_cli.compiling.volumes
@@ -22,6 +23,9 @@ def _binary_func_volume(wizard, context, op):
     vol = op(vol1, vol2)
     return vol
 
+_LAMBDA_HELP = ("This is the {minmax} boundary value for this volume. "
+                "Note that periodic CVs will correctly wrap values "
+                "outside the periodic bounds.")
 _LAMBDA_STR = ("What is the {minmax} allowed value for "
                "'{{obj_dict[cv].name}}' in this volume?")
 CV_DEFINED_VOLUME_PLUGIN = WizardParameterObjectPlugin.from_proxies(
@@ -38,12 +42,16 @@ CV_DEFINED_VOLUME_PLUGIN = WizardParameterObjectPlugin.from_proxies(
         ProxyParameter(
             name="lambda_min",
             ask=_LAMBDA_STR.format(minmax="minimum"),
-            helper="foo",
+            helper=Helper(
+                EvalHelperFunc(_LAMBDA_HELP.format(minmax="minimum"))
+            ),
         ),
         ProxyParameter(
             name='lambda_max',
             ask=_LAMBDA_STR.format(minmax="maximum"),
-            helper="foo",
+            helper=Helper(
+                EvalHelperFunc(_LAMBDA_HELP.format(minmax="maximum"))
+            ),
         ),
     ],
     compiler_plugin=paths_cli.compiling.volumes.CV_VOLUME_PLUGIN,
