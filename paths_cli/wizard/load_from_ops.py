@@ -31,18 +31,14 @@ def _get_ops_storage(wizard):
 
 @get_object
 def _get_ops_object(wizard, storage, store_name, obj_name):
-    name = wizard.ask(f"What's the name of the {obj_name} you want to "
-                      "load? (Type '?' to get a list of them)",
-                      helper=named_objs_helper(storage, store_name))
-    if name:
-        try:
-            obj = getattr(storage, store_name)[name]
-        except Exception as e:
-            wizard.exception("Something went wrong when loading "
-                   f"{name}. Maybe check the spelling?", e)
-            return
-        else:
-            return obj
+    # TODO: switch this to using wizard.ask_enumerate_dict, I think
+    store = getattr(storage, store_name)
+    options = {obj.name: obj for obj in store if obj.is_named}
+    result = wizard.ask_enumerate_dict(
+        f"What's the name of the {obj_name} you want to load?",
+        options
+    )
+    return result
 
 def load_from_ops(wizard, store_name, obj_name):
     wizard.say("Okay, we'll load it from an OPS file.")
