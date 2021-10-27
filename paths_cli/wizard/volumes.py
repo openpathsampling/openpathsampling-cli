@@ -21,11 +21,13 @@ def _binary_func_volume(wizard, context, op):
     vol = op(vol1, vol2)
     return vol
 
+
 _LAMBDA_HELP = ("This is the {minmax} boundary value for this volume. "
                 "Note that periodic CVs will correctly wrap values "
                 "outside the periodic bounds.")
 _LAMBDA_STR = ("What is the {minmax} allowed value for "
                "'{{obj_dict[cv].name}}' in this volume?")
+
 CV_DEFINED_VOLUME_PLUGIN = WizardParameterObjectPlugin.from_proxies(
     name="CV-defined volume (allowed values of CV)",
     category="volume",
@@ -77,12 +79,14 @@ NEGATED_VOLUME_PLUGIN = WizardObjectPlugin(
     name='Complement of a volume (not in given volume)',
     category='volume',
     intro="This volume will be everything not in the subvolume.",
-    builder=lambda wizard, context: ~VOLUMES_PLUGIN(wizard, context),
+    builder=lambda wizard, context: ~VOLUMES_PLUGIN(
+        wizard, volume_set_context(wizard, context, None)
+    ),
 )
 
 _FIRST_STATE = ("Now  let's define state states for your system. "
                 "You'll need to define {n_states_string} of them.")
-_ADDITIONAL_STATES = "Okay, let's define another stable state"
+_ADDITIONAL_STATES = "Okay, let's define another stable state."
 _VOL_DESC = ("You can describe this as either a range of values for some "
              "CV, or as some combination of other such volumes "
              "(i.e., intersection or union).")
