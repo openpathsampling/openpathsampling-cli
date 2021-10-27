@@ -9,8 +9,8 @@ from paths_cli import OPSCommandPlugin
 )
 def wizard():  # no-cov
     register_installed_plugins()
-    # breakpoint()
     TWO_STATE_TPS_WIZARD.run_wizard()
+
 
 PLUGIN = OPSCommandPlugin(
     command=wizard,

@@ -13,7 +13,7 @@ def _simple_func(wizard, context=None):
     return 10
 
 class MockPlugin(OPSPlugin):
-    def __init__(self, name='foo', requires_ops=(1,0), requires_cli=(0,3)):
+    def __init__(self, name='foo', requires_ops=(1, 0), requires_cli=(0, 3)):
         super().__init__(requires_ops, requires_cli)
 
     def __call__(self, wizard, context):

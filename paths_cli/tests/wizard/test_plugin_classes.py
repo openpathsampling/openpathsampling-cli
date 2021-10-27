@@ -248,7 +248,6 @@ class TestCategoryHelpFunc:
 
 class TestWrapCategory:
     def setup(self):
-        # TODO: finishing this now
         self.wrapper = WrapCategory("foo", "ask foo", intro="intro_foo")
         self.plugin_no_format = WizardObjectPlugin(
             name="bar",

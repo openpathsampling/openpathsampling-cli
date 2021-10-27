@@ -69,10 +69,10 @@ class Wizard:
         for line in lines[1:]:
             if line == "":
                 wrapped.append("")
+                continue
             wrap_line = textwrap.wrap(line, width=width,
                                       initial_indent=" "*3,
                                       subsequent_indent=" "*3)
-            # wrap_line = textwrap.indent(line, " "*3)
             wrapped.extend(wrap_line)
         self.console.print("\n".join(wrapped))
 

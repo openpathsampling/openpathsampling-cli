@@ -5,13 +5,11 @@ from paths_cli.wizard.plugin_classes import (
     WrapCategory
 )
 from paths_cli.wizard.helper import EvalHelperFunc, Helper
-from paths_cli.wizard.plugin_registration import get_category_wizard
 from paths_cli.wizard.core import interpret_req
 import paths_cli.compiling.volumes
 from functools import partial
 
 def _binary_func_volume(wizard, context, op):
-    as_state = context.get('depth', 0) == 0
     wizard.say("Let's make the first constituent volume:")
     new_context = volume_set_context(wizard, context, selected=None)
     new_context['part'] = 1

@@ -1,7 +1,6 @@
 from paths_cli.wizard.tools import a_an
 from paths_cli.wizard.core import get_missing_object
 from paths_cli.wizard.shooting import shooting
-from paths_cli.wizard.volumes import VOLUMES_PLUGIN as volumes
 from paths_cli.wizard.plugin_registration import get_category_wizard
 
 from functools import partial
