@@ -1,7 +1,7 @@
 import pytest
 from unittest import mock
 from paths_cli.wizard.plugin_classes import *
-from paths_cli.tests.wizard.test_helper import mock_wizard
+from paths_cli.tests.wizard.mock_wizard import mock_wizard
 from paths_cli.wizard.standard_categories import Category
 from paths_cli.wizard.parameters import WizardParameter, ProxyParameter
 
