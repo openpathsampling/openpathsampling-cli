@@ -4,11 +4,16 @@ from paths_cli.wizard.plugin_classes import (
 from paths_cli.utils import get_installed_plugins
 from paths_cli.plugin_management import NamespacePluginLoader
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 class CategoryWizardPluginRegistrationError(Exception):
     pass
 
+
 _CATEGORY_PLUGINS = {}
+
 
 def get_category_wizard(category):
     """Get the wizard category object of the given name.
@@ -65,13 +70,13 @@ def register_plugins(plugins):
             object_plugins.append(plugin)
 
     for plugin in categories:
-        # print("Registering " + str(plugin))
+        logger.debug("Registering " + str(plugin))
         _register_category_plugin(plugin)
 
     for plugin in object_plugins:
-        # print("Registering " + str(plugin))
         category = _CATEGORY_PLUGINS[plugin.category]
-        # print(category)
+        logger.debug("Registering " + str(plugin))
+        logger.debug("Category: " + str(category))
         category.register_plugin(plugin)
 
 def register_installed_plugins():
