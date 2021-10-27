@@ -290,9 +290,12 @@ class TestWrapCategory:
         self.wrapper.register_plugin(self.plugin_no_format)
         assert len(self.wrapper.choices) == 1
         assert self.wrapper.choices['bar'] == self.plugin_no_format
-        # TODO: what is the desired behavior if more that one plugin tries
-        # to register with the same name? override or error? currently
-        # overrides, but that should not be considered API
+
+    def test_register_plugin_duplicate(self):
+        self.wrapper.choices['bar'] = self.plugin_no_format
+        with pytest.raises(WizardObjectPluginRegistrationError,
+                           match="already been registered"):
+            self.wrapper.register_plugin(self.plugin_format)
 
     @pytest.mark.parametrize('input_type', ['method', 'format', 'string'])
     def test_get_ask(self, input_type):
