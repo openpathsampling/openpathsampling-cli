@@ -2,7 +2,6 @@ import pytest
 
 from paths_cli.wizard.helper import *
 from paths_cli.wizard.helper import _LONG_EVAL_HELP
-from paths_cli.tests.wizard.mock_wizard import mock_wizard
 
 def test_raise_quit():
     with pytest.raises(QuitWizard):
@@ -44,7 +43,7 @@ class TestHelper:
         self.helper = Helper(help_func=lambda s, ctx: s)
 
     def test_help_string(self):
-        # if the helper "function" is a string, retuwn that string whether
+        # if the helper "function" is a string, return that string whether
         # or not additional arguments to help are given
         helper = Helper(help_func="a string")
         assert helper("?") == "a string"

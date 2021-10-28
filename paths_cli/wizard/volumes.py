@@ -5,13 +5,11 @@ from paths_cli.wizard.plugin_classes import (
     WrapCategory
 )
 from paths_cli.wizard.helper import EvalHelperFunc, Helper
-from paths_cli.wizard.plugin_registration import get_category_wizard
 from paths_cli.wizard.core import interpret_req
 import paths_cli.compiling.volumes
 from functools import partial
 
 def _binary_func_volume(wizard, context, op):
-    as_state = context.get('depth', 0) == 0
     wizard.say("Let's make the first constituent volume:")
     new_context = volume_set_context(wizard, context, selected=None)
     new_context['part'] = 1
@@ -22,6 +20,7 @@ def _binary_func_volume(wizard, context, op):
     wizard.say("Now we'll combine those two constituent volumes...")
     vol = op(vol1, vol2)
     return vol
+
 
 _LAMBDA_HELP = ("This is the {minmax} boundary value for this volume. "
                 "Note that periodic CVs will correctly wrap values "
@@ -85,15 +84,18 @@ UNION_VOLUME_PLUGIN = WizardObjectPlugin(
 NEGATED_VOLUME_PLUGIN = WizardObjectPlugin(
     name='Complement of a volume (not in given volume)',
     category='volume',
-    intro="This volume will be everything not in the subvolume.",
-    builder=lambda wizard, context: ~VOLUMES_PLUGIN(wizard, context),
+    intro=("This volume will be everything not in the input volume, which "
+           "you will define now."),
+    builder=lambda wizard, context: ~VOLUMES_PLUGIN(
+        wizard, volume_set_context(wizard, context, None)
+    ),
     description=("Create a volume that includes every that is NOT "
                  "in the existing volume."),
 )
 
 _FIRST_STATE = ("Now  let's define state states for your system. "
                 "You'll need to define {n_states_string} of them.")
-_ADDITIONAL_STATES = "Okay, let's define another stable state"
+_ADDITIONAL_STATES = "Okay, let's define another stable state."
 _VOL_DESC = ("You can describe this as either a range of values for some "
              "CV, or as some combination of other such volumes "
              "(i.e., intersection or union).")

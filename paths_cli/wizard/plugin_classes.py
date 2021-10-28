@@ -5,6 +5,11 @@ from paths_cli.wizard.load_from_ops import load_from_ops
 from paths_cli.wizard.parameters import WizardParameter
 from paths_cli.wizard.helper import Helper
 
+
+class WizardObjectPluginRegistrationError(Exception):
+    pass
+
+
 _PLUGIN_DOCSTRING = """
     requires_ops : Tuple[int, int]
         version of OpenPathSampling required for this plugin
@@ -39,7 +44,7 @@ class LoadFromOPS(OPSPlugin):
         can be found
     """ + _PLUGIN_DOCSTRING
     def __init__(self, category, *, obj_name=None, store_name=None,
-                 requires_ops=(1,0), requires_cli=(0,3)):
+                 requires_ops=(1, 0), requires_cli=(0, 3)):
         super().__init__(requires_ops, requires_cli)
         self.category = category
         self.name = "Load existing from OPS file"
@@ -114,7 +119,7 @@ class WizardObjectPlugin(OPSPlugin):
     """ + _WIZARD_KWONLY
     def __init__(self, name, category, builder, *, prerequisite=None,
                  intro=None, description=None, summary=None,
-                 requires_ops=(1,0), requires_cli=(0,3)):
+                 requires_ops=(1, 0), requires_cli=(0, 3)):
         super().__init__(requires_ops, requires_cli)
         self.name = name
         self.category = category
@@ -207,7 +212,7 @@ class WizardParameterObjectPlugin(WizardObjectPlugin):
     @classmethod
     def from_proxies(cls, name, category, parameters, compiler_plugin, *,
                      prerequisite=None, intro=None, description=None,
-                     summary=None, requires_ops=(1,0), requires_cli=(0,3)):
+                     summary=None, requires_ops=(1, 0), requires_cli=(0, 3)):
         """
         Create plugin from proxy parameters and existing compiler plugin.
 
@@ -245,7 +250,6 @@ class WizardParameterObjectPlugin(WizardObjectPlugin):
         context = {'obj_dict': dct}
         for param in self.parameters:
             dct[param.name] = param(wizard, context)
-        # dct.update({p.name: p(wizard) for p in self.parameters})
         result = self.build_func(**dct)
         return result
 
@@ -327,7 +331,7 @@ class WrapCategory(OPSPlugin):
 
     """
     def __init__(self, name, ask, helper=None, *, intro=None,
-                 set_context=None, requires_ops=(1,0), requires_cli=(0,3)):
+                 set_context=None, requires_ops=(1, 0), requires_cli=(0, 3)):
         super().__init__(requires_ops, requires_cli)
         self.name = name
         if isinstance(intro, str):
@@ -361,6 +365,11 @@ class WrapCategory(OPSPlugin):
         plugin : :class:`.WizardObjectPlugin`
             the plugin to register
         """
+        if plugin.name in self.choices:
+            raise WizardObjectPluginRegistrationError(
+                f"A plugin named '{plugin.name}' has already been "
+                f"registered with the category '{self.name}'"
+            )
         self.choices[plugin.name] = plugin
 
     def _get_intro(self, wizard, context):

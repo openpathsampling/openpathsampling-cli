@@ -69,17 +69,16 @@ class Wizard:
         for line in lines[1:]:
             if line == "":
                 wrapped.append("")
+                continue
             wrap_line = textwrap.wrap(line, width=width,
                                       initial_indent=" "*3,
                                       subsequent_indent=" "*3)
-            # wrap_line = textwrap.indent(line, " "*3)
             wrapped.extend(wrap_line)
         self.console.print("\n".join(wrapped))
 
     @get_object
     def ask(self, question, options=None, default=None, helper=None,
             autohelp=False):
-        # TODO: if helper is None, create a default helper
         if helper is None:
             helper = Helper(None)
         if isinstance(helper, str):

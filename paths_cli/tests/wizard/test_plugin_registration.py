@@ -2,7 +2,7 @@ import pytest
 from unittest import mock
 from paths_cli.wizard.plugin_registration import *
 from paths_cli.wizard.plugin_registration import _register_category_plugin
-from paths_cli.tests.wizard.test_helper import mock_wizard
+from paths_cli.tests.wizard.mock_wizard import mock_wizard
 from paths_cli.plugin_management import OPSPlugin
 from paths_cli.wizard.plugin_classes import WrapCategory, WizardObjectPlugin
 
@@ -13,7 +13,7 @@ def _simple_func(wizard, context=None):
     return 10
 
 class MockPlugin(OPSPlugin):
-    def __init__(self, name='foo', requires_ops=(1,0), requires_cli=(0,3)):
+    def __init__(self, name='foo', requires_ops=(1, 0), requires_cli=(0, 3)):
         super().__init__(requires_ops, requires_cli)
 
     def __call__(self, wizard, context):

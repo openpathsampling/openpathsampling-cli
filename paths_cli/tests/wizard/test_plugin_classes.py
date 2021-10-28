@@ -1,7 +1,7 @@
 import pytest
 from unittest import mock
 from paths_cli.wizard.plugin_classes import *
-from paths_cli.tests.wizard.test_helper import mock_wizard
+from paths_cli.tests.wizard.mock_wizard import mock_wizard
 from paths_cli.wizard.standard_categories import Category
 from paths_cli.wizard.parameters import WizardParameter, ProxyParameter
 
@@ -248,7 +248,6 @@ class TestCategoryHelpFunc:
 
 class TestWrapCategory:
     def setup(self):
-        # TODO: finishing this now
         self.wrapper = WrapCategory("foo", "ask foo", intro="intro_foo")
         self.plugin_no_format = WizardObjectPlugin(
             name="bar",
@@ -291,9 +290,12 @@ class TestWrapCategory:
         self.wrapper.register_plugin(self.plugin_no_format)
         assert len(self.wrapper.choices) == 1
         assert self.wrapper.choices['bar'] == self.plugin_no_format
-        # TODO: what is the desired behavior if more that one plugin tries
-        # to register with the same name? override or error? currently
-        # overrides, but that should not be considered API
+
+    def test_register_plugin_duplicate(self):
+        self.wrapper.choices['bar'] = self.plugin_no_format
+        with pytest.raises(WizardObjectPluginRegistrationError,
+                           match="already been registered"):
+            self.wrapper.register_plugin(self.plugin_format)
 
     @pytest.mark.parametrize('input_type', ['method', 'format', 'string'])
     def test_get_ask(self, input_type):

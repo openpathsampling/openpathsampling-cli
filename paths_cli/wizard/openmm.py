@@ -78,6 +78,5 @@ else:
 if __name__ == "__main__":
     from paths_cli.wizard.wizard import Wizard
     wizard = Wizard([])
-    # engine = openmm_builder(wizard)
     engine = OPENMM_PLUGIN(wizard)
     print(engine)

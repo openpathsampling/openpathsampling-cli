@@ -5,7 +5,7 @@ from paths_cli.tests.wizard.mock_wizard import mock_wizard
 
 from paths_cli.wizard.volumes import (
     INTERSECTION_VOLUME_PLUGIN, UNION_VOLUME_PLUGIN, NEGATED_VOLUME_PLUGIN,
-    CV_DEFINED_VOLUME_PLUGIN, VOLUMES_PLUGIN, volume_intro, _VOL_DESC,
+    CV_DEFINED_VOLUME_PLUGIN, volume_intro, _VOL_DESC,
     volume_ask
 )
 

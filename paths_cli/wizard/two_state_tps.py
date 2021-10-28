@@ -16,15 +16,12 @@ def two_state_tps(wizard, fixed_length=False):
         "Let's start with your initial state.",
         _VOL_DESC,
     ]
-    # wizard.say("Now let's define the stable states for your system. "
-    #            "Let's start with your initial state.")
     initial_state = volumes(wizard, context={'intro': intro})
     wizard.register(initial_state, 'initial state', 'states')
     intro = [
         "Next let's define your final state.",
         _VOL_DESC
     ]
-    # wizard.say("Next let's define your final state.")
     final_state = volumes(wizard, context={'intro': intro})
     wizard.register(final_state, 'final state', 'states')
     if fixed_length:

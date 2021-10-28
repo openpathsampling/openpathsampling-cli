@@ -5,7 +5,7 @@ from paths_cli.tests.compiling.utils import mock_compiler
 import yaml
 import numpy as np
 import openpathsampling as paths
-from  openpathsampling.experimental.storage.collective_variables import \
+from openpathsampling.experimental.storage.collective_variables import \
         CoordinateFunctionCV
 from openpathsampling.tests.test_helpers import make_1d_traj
 

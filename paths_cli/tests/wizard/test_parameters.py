@@ -179,7 +179,7 @@ class TestFromWizardPrerequisite:
                   'more': ['1', '2']}[objs]
 
         wrappers = {"name" + i: self.Wrapper(i*2) for i in ['1', '2', '3']}
-        items = [(key, val) for key, val in list(wrappers.items())[:n_objs]]
+        items = list(wrappers.items())[:n_objs]
 
         wiz = mock_wizard(inputs)
         wiz.store = dict(items)
