@@ -1,13 +1,10 @@
 import json
-import yaml
-
-from collections import namedtuple
-
 import logging
 
-from .errors import InputError
 from paths_cli.utils import import_thing
 from paths_cli.plugin_management import OPSPlugin
+from paths_cli.compiling.errors import InputError
+
 
 def listify(obj):
     listified = False
@@ -16,16 +13,20 @@ def listify(obj):
         listified = True
     return obj, listified
 
+
 def unlistify(obj, listified):
     if listified:
         assert len(obj) == 1
         obj = obj[0]
     return obj
 
+
 REQUIRED_PARAMETER = object()
+
 
 class Parameter:
     SCHEMA = "http://openpathsampling.org/schemas/sim-setup/draft01.json"
+
     def __init__(self, name, loader, *, json_type=None, description=None,
                  default=REQUIRED_PARAMETER, aliases=None):
         if isinstance(json_type, str):
@@ -150,6 +151,7 @@ class InstanceCompilerPlugin(OPSPlugin):
     """
     SCHEMA = "http://openpathsampling.org/schemas/sim-setup/draft01.json"
     category = None
+
     def __init__(self, builder, parameters, name=None, aliases=None,
                  requires_ops=(1, 0), requires_cli=(0, 3)):
         super().__init__(requires_ops, requires_cli)
@@ -239,7 +241,7 @@ class InstanceCompilerPlugin(OPSPlugin):
         ops_dct = self.compile_attrs(dct)
         self.logger.debug("Building...")
         self.logger.debug(ops_dct)
-        obj =  self.builder(**ops_dct)
+        obj = self.builder(**ops_dct)
         self.logger.debug(obj)
         return obj
 
@@ -260,7 +262,7 @@ class CategoryCompiler:
         self.logger.debug(f"Looking for '{name}'")
         try:
             return self.named_objs[name]
-        except KeyError as e:
+        except KeyError:
             raise InputError.unknown_name(self.label, name)
 
     def _compile_dict(self, dct):
