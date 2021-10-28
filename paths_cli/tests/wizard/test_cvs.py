@@ -8,7 +8,7 @@ from paths_cli.tests.wizard.mock_wizard import mock_wizard
 
 from paths_cli.wizard.cvs import (
     TOPOLOGY_CV_PREREQ, _get_atom_indices, MDTRAJ_DISTANCE, MDTRAJ_ANGLE,
-    MDTRAJ_DIHEDRAL, COORDINATE_CV, CV_PLUGIN
+    MDTRAJ_DIHEDRAL, COORDINATE_CV
 )
 
 import openpathsampling as paths
