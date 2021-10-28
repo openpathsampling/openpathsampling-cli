@@ -1,17 +1,21 @@
 from paths_cli.parameters import INPUT_FILE
 from paths_cli.wizard.core import get_object
+from paths_cli.wizard.standard_categories import CATEGORIES
+from paths_cli.wizard.helper import Helper
+from functools import partial
 
 from paths_cli.wizard.errors import FILE_LOADING_ERROR_MSG
 LABEL = "Load existing from OPS file"
 
 def named_objs_helper(storage, store_name):
-    def list_items(wizard, user_input):
+    def list_items(user_input, context=None):
         store = getattr(storage, store_name)
         names = [obj for obj in store if obj.is_named]
         outstr = "\n".join(['* ' + obj.name for obj in names])
-        wizard.say(f"Here's what I found:\n\n{outstr}")
+        return f"Here's what I found:\n\n{outstr}"
 
     return list_items
+
 
 @get_object
 def _get_ops_storage(wizard):

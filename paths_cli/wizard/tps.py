@@ -1,9 +1,10 @@
 from paths_cli.wizard.tools import a_an
 from paths_cli.wizard.core import get_missing_object
 from paths_cli.wizard.shooting import shooting
-from paths_cli.wizard.volumes import volumes
+from paths_cli.wizard.plugin_registration import get_category_wizard
 
 from functools import partial
+volumes = get_category_wizard('volume')
 
 def tps_network(wizard):
     raise NotImplementedError("Still need to add other network choices")

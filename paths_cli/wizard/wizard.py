@@ -9,6 +9,7 @@ from paths_cli.wizard.errors import (
     FILE_LOADING_ERROR_MSG, RestartObjectException
 )
 from paths_cli.wizard.joke import name_joke
+from paths_cli.wizard.helper import Helper
 from paths_cli.compiling.tools import custom_eval
 
 import shutil
@@ -47,10 +48,12 @@ class Wizard:
     def _patch(self):  # no-cov
         import openpathsampling as paths
         from openpathsampling.experimental.storage import monkey_patch_all
+        from paths_cli.param_core import StorageLoader
         if not self._patched:
             paths = monkey_patch_all(paths)
             paths.InterfaceSet.simstore = True
             self._patched = True
+            StorageLoader.has_simstore_patch = True
 
     def debug(content):  # no-cov
         # debug does no pretty-printing
@@ -64,16 +67,26 @@ class Wizard:
         lines = statement.split("\n")
         wrapped = textwrap.wrap(lines[0], width=width, subsequent_indent=" "*3)
         for line in lines[1:]:
-            wrap_line = textwrap.indent(line, " "*3)
-            wrapped.append(wrap_line)
+            if line == "":
+                wrapped.append("")
+                continue
+            wrap_line = textwrap.wrap(line, width=width,
+                                      initial_indent=" "*3,
+                                      subsequent_indent=" "*3)
+            wrapped.extend(wrap_line)
         self.console.print("\n".join(wrapped))
 
     @get_object
-    def ask(self, question, options=None, default=None, helper=None):
+    def ask(self, question, options=None, default=None, helper=None,
+            autohelp=False):
+        if helper is None:
+            helper = Helper(None)
+        if isinstance(helper, str):
+            helper = Helper(helper)
         result = self.console.input("🧙 " + question + " ")
         self.console.print()
-        if helper and result.startswith("?"):
-            helper(self, result)
+        if helper and result[0] in ["?", "!"]:
+            self.say(helper(result))
             return
         return result
 
@@ -89,6 +102,29 @@ class Wizard:
     def bad_input(self, content, preface="👺 "):
         # just changes the default preface; maybe print 1st line red?
         self.say(content, preface)
+
+    @get_object
+    def ask_enumerate_dict(self, question, options, helper=None,
+                           autohelp=False):
+        self.say(question)
+        opt_string = "\n".join([f" {(i+1):>3}. {opt}"
+                                for i, opt in enumerate(options)])
+        self.say(opt_string, preface=" "*3)
+        choice = self.ask("Please select an option:", helper=helper)
+
+        # select by string
+        if choice in options:
+            return options[choice]
+
+        # select by number
+        try:
+            num = int(choice) - 1
+            result = list(options.values())[num]
+        except Exception:
+            self.bad_input(f"Sorry, '{choice}' is not a valid option.")
+            result = None
+
+        return result
 
     def ask_enumerate(self, question, options):
         """Ask the user to select from a list of options"""
@@ -111,6 +147,17 @@ class Wizard:
                 self.bad_input(f"Sorry, '{choice}' is not a valid option.")
                 result = None
 
+        return result
+
+    @get_object
+    def ask_load(self, question, loader, helper=None, autohelp=False):
+        as_str = self.ask(question, helper=helper)
+        try:
+            result = loader(as_str)
+        except Exception as e:
+            self.exception(f"Sorry, I couldn't understand the input "
+                           f"'{as_str}'.", e)
+            return
         return result
 
     # this should match the args for wizard.ask
@@ -148,7 +195,10 @@ class Wizard:
         self.say(f"Now let's name your {obj_type}.")
         name = None
         while name is None:
-            name = self.ask("What do you want to call it?")
+            name_help = ("Objects in OpenPathSampling can be named. You'll "
+                         "use these names to refer back to these objects "
+                         "or to load them from a storage file.")
+            name = self.ask("What do you want to call it?", helper=name_help)
             if name in getattr(self, store_name):
                 self.bad_input(f"Sorry, you already have {a_an(obj_type)} "
                                f"named {name}. Please try another name.")
@@ -277,6 +327,3 @@ class Wizard:
 # TWO_STATE_TIS_WIZARD
 # MULTIPLE_STATE_TIS_WIZARD
 # MULTIPLE_INTERFACE_SET_TIS_WIZARD
-
-if __name__ == "__main__":
-    FLEX_LENGTH_TPS_WIZARD.run_wizard()

@@ -45,12 +45,11 @@ def ops_file_fixture():
     return storage
 
 def test_named_objs_helper(ops_file_fixture):
-    wizard = mock_wizard([])
     helper_func = named_objs_helper(ops_file_fixture, 'foo')
-    helper_func(wizard, 'any')
-    assert "what I found" in wizard.console.log_text
-    assert "bar" in wizard.console.log_text
-    assert "baz" in wizard.console.log_text
+    result = helper_func('any')
+    assert "what I found" in result
+    assert "bar" in result
+    assert "baz" in result
 
 @pytest.mark.parametrize('with_failure', [False, True])
 def test_get_ops_storage(tmpdir, with_failure):
