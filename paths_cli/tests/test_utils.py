@@ -7,6 +7,12 @@ class TestOrderedSet:
     def test_len(self):
         assert len(self.set) == 4
 
+    def test_empty(self):
+        ordered = OrderedSet()
+        assert len(ordered) == 0
+        for _ in ordered:
+            raise RuntimeError("This should not happen")
+
     def test_order(self):
         for truth, beauty in zip("abcd", self.set):
             assert truth == beauty
