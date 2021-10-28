@@ -79,7 +79,6 @@ class Wizard:
     @get_object
     def ask(self, question, options=None, default=None, helper=None,
             autohelp=False):
-        # TODO: if helper is None, create a default helper
         if helper is None:
             helper = Helper(None)
         if isinstance(helper, str):

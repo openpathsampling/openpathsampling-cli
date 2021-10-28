@@ -78,7 +78,8 @@ UNION_VOLUME_PLUGIN = WizardObjectPlugin(
 NEGATED_VOLUME_PLUGIN = WizardObjectPlugin(
     name='Complement of a volume (not in given volume)',
     category='volume',
-    intro="This volume will be everything not in the subvolume.",
+    intro=("This volume will be everything not in the input volume, which "
+           "you will define now."),
     builder=lambda wizard, context: ~VOLUMES_PLUGIN(
         wizard, volume_set_context(wizard, context, None)
     ),
