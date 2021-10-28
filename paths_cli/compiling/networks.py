@@ -10,11 +10,12 @@ build_interface_set = InstanceCompilerPlugin(
     parameters=[
         Parameter('cv', compiler_for('cv'), description="the collective "
                   "variable for this interface set"),
-        Parameter('minvals', custom_eval), # TODO fill in JSON types
-        Parameter('maxvals', custom_eval), # TODO fill in JSON types
+        Parameter('minvals', custom_eval),  # TODO fill in JSON types
+        Parameter('maxvals', custom_eval),  # TODO fill in JSON types
     ],
     name='interface-set'
 )
+
 
 def mistis_trans_info(dct):
     dct = dct.copy()
@@ -31,6 +32,7 @@ def mistis_trans_info(dct):
     dct['trans_info'] = trans_info
     return dct
 
+
 def tis_trans_info(dct):
     # remap TIS into MISTIS format
     dct = dct.copy()
@@ -41,6 +43,7 @@ def tis_trans_info(dct):
                            'final_state': final_state,
                            'interfaces': interface_set}]
     return mistis_trans_info(dct)
+
 
 TPS_NETWORK_PLUGIN = NetworkCompilerPlugin(
     builder=Builder('openpathsampling.TPSNetwork'),
@@ -59,6 +62,7 @@ MISTIS_NETWORK_PLUGIN = NetworkCompilerPlugin(
     builder=Builder('openpathsampling.MISTISNetwork'),
     name='mistis'
 )
+
 
 TIS_NETWORK_PLUGIN = NetworkCompilerPlugin(
     builder=Builder('openpathsampling.MISTISNetwork'),

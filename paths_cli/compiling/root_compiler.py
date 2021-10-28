@@ -6,6 +6,7 @@ from paths_cli.compiling.plugins import CategoryPlugin
 import logging
 logger = logging.getLogger(__name__)
 
+
 class CategoryCompilerRegistrationError(Exception):
     pass
 
@@ -22,6 +23,7 @@ _DEFAULT_COMPILE_ORDER = [
 
 COMPILE_ORDER = _DEFAULT_COMPILE_ORDER.copy()
 
+
 def clean_input_key(key):
     # TODO: move this to core
     """
@@ -34,11 +36,13 @@ def clean_input_key(key):
     key = key.replace("-", "_")
     return key
 
+
 ### Managing known compilers and aliases to the known compilers ############
 
 _COMPILERS = {}  # mapping: {canonical_name: CategoryCompiler}
 _ALIASES = {}  # mapping: {alias: canonical_name}
 # NOTE: _ALIASES does *not* include self-mapping of the canonical names
+
 
 def _canonical_name(alias):
     """Take an alias or a compiler name and return the compiler name
@@ -50,6 +54,7 @@ def _canonical_name(alias):
     alias_to_canonical = _ALIASES.copy()
     alias_to_canonical.update({pname: pname for pname in _COMPILERS})
     return alias_to_canonical.get(alias, None)
+
 
 def _get_compiler(category):
     """
@@ -69,6 +74,7 @@ def _get_compiler(category):
         _COMPILERS[category] = CategoryCompiler(None, category)
     return _COMPILERS[canonical_name]
 
+
 def _register_compiler_plugin(plugin):
     DUPLICATE_ERROR = CategoryCompilerRegistrationError(
         f"The category '{plugin.name}' has been reserved by another plugin"
@@ -87,7 +93,7 @@ def _register_compiler_plugin(plugin):
 
 
 ### Handling delayed loading of compilers ##################################
-#
+
 # Many objects need to use compilers to create their input parameters. In
 # order for them to be able to access dynamically-loaded plugins, we delay
 # the loading of the compiler by using a proxy object.
@@ -110,6 +116,7 @@ class _CategoryCompilerProxy:
 
     def __call__(self, dct):
         return self._proxy(dct)
+
 
 def compiler_for(category):
     """Delayed compiler calling.
@@ -142,10 +149,12 @@ def _get_registration_names(plugin):
             found_names.add(name)
     return ordered_names
 
+
 def _register_builder_plugin(plugin):
     compiler = _get_compiler(plugin.category)
     for name in _get_registration_names(plugin):
         compiler.register_builder(plugin, name)
+
 
 def register_plugins(plugins):
     builders = []
@@ -161,6 +170,7 @@ def register_plugins(plugins):
 
     for plugin in builders:
         _register_builder_plugin(plugin)
+
 
 ### Performing the compiling of user input #################################
 
@@ -178,6 +188,7 @@ def _sort_user_categories(user_categories):
         key=lambda x: COMPILE_ORDER.index(user_to_canonical[x])
     )
     return sorted_keys
+
 
 def do_compile(dct):
     """Main function for compiling user input to objects.
