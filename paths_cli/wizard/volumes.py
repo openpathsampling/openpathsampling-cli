@@ -1,4 +1,5 @@
 import operator
+from functools import partial
 from paths_cli.wizard.parameters import ProxyParameter
 from paths_cli.wizard.plugin_classes import (
     LoadFromOPS, WizardParameterObjectPlugin, WizardObjectPlugin,
@@ -7,7 +8,7 @@ from paths_cli.wizard.plugin_classes import (
 from paths_cli.wizard.helper import EvalHelperFunc, Helper
 from paths_cli.wizard.core import interpret_req
 import paths_cli.compiling.volumes
-from functools import partial
+
 
 def _binary_func_volume(wizard, context, op):
     wizard.say("Let's make the first constituent volume:")
@@ -27,6 +28,7 @@ _LAMBDA_HELP = ("This is the {minmax} boundary value for this volume. "
                 "outside the periodic bounds.")
 _LAMBDA_STR = ("What is the {minmax} allowed value for "
                "'{{obj_dict[cv].name}}' in this volume?")
+
 
 CV_DEFINED_VOLUME_PLUGIN = WizardParameterObjectPlugin.from_proxies(
     name="CV-defined volume (allowed values of CV)",
@@ -57,6 +59,7 @@ CV_DEFINED_VOLUME_PLUGIN = WizardParameterObjectPlugin.from_proxies(
     compiler_plugin=paths_cli.compiling.volumes.CV_VOLUME_PLUGIN,
 )
 
+
 INTERSECTION_VOLUME_PLUGIN = WizardObjectPlugin(
     name='Intersection of two volumes (must be in both)',
     category="volume",
@@ -68,6 +71,7 @@ INTERSECTION_VOLUME_PLUGIN = WizardObjectPlugin(
                  "volumes -- that is, all points in this volume are in "
                  "both of the volumes that define it."),
 )
+
 
 UNION_VOLUME_PLUGIN = WizardObjectPlugin(
     name='Union of two volumes (must be in at least one)',
@@ -81,6 +85,7 @@ UNION_VOLUME_PLUGIN = WizardObjectPlugin(
                  "that define this are also in this volume"),
 )
 
+
 NEGATED_VOLUME_PLUGIN = WizardObjectPlugin(
     name='Complement of a volume (not in given volume)',
     category='volume',
@@ -93,12 +98,14 @@ NEGATED_VOLUME_PLUGIN = WizardObjectPlugin(
                  "in the existing volume."),
 )
 
+
 _FIRST_STATE = ("Now  let's define state states for your system. "
                 "You'll need to define {n_states_string} of them.")
 _ADDITIONAL_STATES = "Okay, let's define another stable state."
 _VOL_DESC = ("You can describe this as either a range of values for some "
              "CV, or as some combination of other such volumes "
              "(i.e., intersection or union).")
+
 
 def volume_intro(wizard, context):
     as_state = context.get('depth', 0) == 0
@@ -114,6 +121,7 @@ def volume_intro(wizard, context):
     intro += [_VOL_DESC]
     return intro
 
+
 def volume_set_context(wizard, context, selected):
     depth = context.get('depth', 0) + 1
     new_context = {
@@ -121,10 +129,12 @@ def volume_set_context(wizard, context, selected):
     }
     return new_context
 
+
 def volume_ask(wizard, context):
     as_state = context.get('depth', 0) == 0
     obj = {True: 'state', False: 'volume'}[as_state]
     return f"What describes this {obj}?"
+
 
 VOLUME_FROM_FILE = LoadFromOPS('volume')
 

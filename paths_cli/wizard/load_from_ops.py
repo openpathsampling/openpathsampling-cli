@@ -1,11 +1,9 @@
 from paths_cli.parameters import INPUT_FILE
 from paths_cli.wizard.core import get_object
-from paths_cli.wizard.standard_categories import CATEGORIES
-from paths_cli.wizard.helper import Helper
-from functools import partial
 
 from paths_cli.wizard.errors import FILE_LOADING_ERROR_MSG
 LABEL = "Load existing from OPS file"
+
 
 def named_objs_helper(storage, store_name):
     def list_items(user_input, context=None):
@@ -25,13 +23,13 @@ def _get_ops_storage(wizard):
         storage = INPUT_FILE.get(filename)
     except Exception as e:
         wizard.exception(FILE_LOADING_ERROR_MSG, e)
-        return
+        return None
 
     return storage
 
+
 @get_object
 def _get_ops_object(wizard, storage, store_name, obj_name):
-    # TODO: switch this to using wizard.ask_enumerate_dict, I think
     store = getattr(storage, store_name)
     options = {obj.name: obj for obj in store if obj.is_named}
     result = wizard.ask_enumerate_dict(
@@ -39,6 +37,7 @@ def _get_ops_object(wizard, storage, store_name, obj_name):
         options
     )
     return result
+
 
 def load_from_ops(wizard, store_name, obj_name):
     wizard.say("Okay, we'll load it from an OPS file.")
