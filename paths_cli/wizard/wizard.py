@@ -332,7 +332,7 @@ class Wizard:
 
     @get_object
     def _ask_save(self):
-        do_save_char = self.ask("Before quitting, would you like to "
+        do_save_char = self.ask("Before quitting, would you like to save "
                                 "the objects you've created so far?")
         try:
             do_save = yes_no(do_save_char)
