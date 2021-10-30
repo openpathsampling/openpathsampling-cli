@@ -5,6 +5,7 @@ from .core import Parameter
 from .tools import custom_eval
 from paths_cli.compiling.plugins import VolumeCompilerPlugin, CategoryPlugin
 from paths_cli.compiling.root_compiler import compiler_for
+from paths_cli.compiling.json_type import json_type_ref
 
 # TODO: extra function for volumes should not be necessary as of OPS 2.0
 def cv_volume_build_func(**dct):
@@ -23,7 +24,7 @@ def cv_volume_build_func(**dct):
 CV_VOLUME_PLUGIN = VolumeCompilerPlugin(
     builder=cv_volume_build_func,
     parameters=[
-        Parameter('cv', compiler_for('cv'),
+        Parameter('cv', compiler_for('cv'), json_type=json_type_ref('cv'),
                   description="CV that defines this volume"),
         Parameter('lambda_min', custom_eval,
                   description="Lower bound for this volume"),
@@ -38,7 +39,7 @@ build_cv_volume = CV_VOLUME_PLUGIN
 # jsonschema type for combination volumes
 VOL_ARRAY_TYPE = {
     'type': 'array',
-    'items': {"$ref": "#/definitions/volume_type"}
+    'items': json_type_ref('volume'),
 }
 
 INTERSECTION_VOLUME_PLUGIN = VolumeCompilerPlugin(

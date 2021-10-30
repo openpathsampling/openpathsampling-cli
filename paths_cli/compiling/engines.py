@@ -43,6 +43,7 @@ OPENMM_PLUGIN = EngineCompilerPlugin(
                     remapper=_openmm_options),
     parameters=OPENMM_PARAMETERS,
     name='openmm',
+    description="Use OpenMM for the dynamics.",
 )
 
 ENGINE_COMPILER = CategoryPlugin(EngineCompilerPlugin, aliases=['engines'])
