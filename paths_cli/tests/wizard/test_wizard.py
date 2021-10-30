@@ -74,8 +74,8 @@ class TestWizard:
     def test_ask_help(self):
         console = MockConsole(['?helpme', 'foo'])
         self.wizard.console = console
-        def helper(wizard, result):
-            wizard.say(f"You said: {result[1:]}")
+        def helper(result):
+            return f"You said: {result[1:]}"
 
         result = self.wizard.ask('bar', helper=helper)
         assert result == 'foo'
@@ -97,6 +97,29 @@ class TestWizard:
     def test_bad_input(self):
         self._generic_speak_test('bad_input')
 
+    @pytest.mark.parametrize('user_inp', ['int', 'str', 'help', 'bad'])
+    def test_ask_enumerate_dict(self, user_inp):
+        inputs = {'int': ["1"],
+                  'str': ["bar"],
+                  'help': ["?", "1"],
+                  "bad": ["99", "1"]}[user_inp]
+        console = MockConsole(inputs)
+        self.wizard.console = console
+        selected = self.wizard.ask_enumerate_dict(
+            question="foo",
+            options={"bar": "bar_func", "baz": "baz_func"}
+        )
+        assert selected == "bar_func"
+        assert 'foo' in console.log_text
+        assert '1. bar' in console.log_text
+        assert '2. baz' in console.log_text
+        assert console.input_call_count == len(inputs)
+        if user_inp == 'help':
+            assert "no help available" in console.log_text
+        elif user_inp == "bad":
+            assert "'99'" in console.log_text
+            assert "not a valid option" in console.log_text
+
     @pytest.mark.parametrize('bad_choice', [False, True])
     def test_ask_enumerate(self, bad_choice):
         inputs = {False: '1', True: ['10', '1']}[bad_choice]
@@ -114,6 +137,22 @@ class TestWizard:
         else:
             assert "'10'" not in console.log_text
             assert 'not a valid option' not in console.log_text
+
+    def test_ask_load(self):
+        console = MockConsole(['100'])
+        self.wizard.console = console
+        loaded = self.wizard.ask_load("foo", int)
+        assert loaded == 100
+        assert "foo" in console.log_text
+
+    def test_ask_load_error(self):
+        console = MockConsole(["abc", "100"])
+        self.wizard.console = console
+        loaded = self.wizard.ask_load("foo", int)
+        assert loaded == 100
+        assert "foo" in console.log_text
+        assert "ValueError" in console.log_text
+        assert "base 10" in console.log_text
 
     @pytest.mark.parametrize('inputs, type_, expected', [
         ("2+2", int, 4), ("0.1 * 0.1", float, 0.1*0.1), ("2.4", int, 2)

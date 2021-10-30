@@ -3,7 +3,10 @@ from unittest import mock
 from paths_cli.tests.compiling.utils import mock_compiler
 
 import yaml
+import numpy as np
 import openpathsampling as paths
+from openpathsampling.experimental.storage.collective_variables import \
+        CoordinateFunctionCV
 from openpathsampling.tests.test_helpers import make_1d_traj
 
 from paths_cli.compiling.volumes import *
@@ -13,7 +16,6 @@ class TestBuildCVVolume:
         self.yml = "\n".join(["type: cv-volume", "cv: {func}",
                               "lambda_min: 0", "lambda_max: 1"])
 
-        self.mock_cv = mock.Mock(return_value=0.5)
         self.named_objs_dict = {
             'foo': {'name': 'foo',
                     'type': 'bar',
@@ -40,16 +42,29 @@ class TestBuildCVVolume:
         self.set_periodic(periodic)
         yml = self.yml.format(func=self.func[inline])
         dct = yaml.load(yml, Loader=yaml.FullLoader)
+        period_min, period_max = {'periodic': (-np.pi, np.pi),
+                                  'nonperiodic': (None, None)}[periodic]
+        mock_cv = CoordinateFunctionCV(lambda s: s.xyz[0][0],
+                                       period_min=period_min,
+                                       period_max=period_max).named('foo')
         if inline =='external':
             patch_loc = 'paths_cli.compiling.root_compiler._COMPILERS'
             compilers = {
-                'cv': mock_compiler('cv', named_objs={'foo': self.mock_cv})
+                'cv': mock_compiler('cv', named_objs={'foo': mock_cv})
             }
             with mock.patch.dict(patch_loc, compilers):
                 vol = build_cv_volume(dct)
         elif inline == 'internal':
             vol = build_cv_volume(dct)
-        assert vol.collectivevariable(1) == 0.5
+
+        in_state = make_1d_traj([0.5])[0]
+        assert vol.collectivevariable(in_state) == 0.5
+        assert vol(in_state)
+        out_state = make_1d_traj([2.0])[0]
+        assert vol.collectivevariable(out_state) == 2.0
+        assert not vol(out_state)
+        if_periodic = make_1d_traj([7.0])[0]
+        assert (vol(if_periodic) == (periodic == 'periodic'))
         expected_class = {
             'nonperiodic': paths.CVDefinedVolume,
             'periodic': paths.PeriodicCVDefinedVolume

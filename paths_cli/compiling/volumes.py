@@ -13,6 +13,8 @@ def cv_volume_build_func(**dct):
     builder = paths.CVDefinedVolume
     if cv.period_min is not None or cv.period_max is not None:
         builder = paths.PeriodicCVDefinedVolume
+        dct['period_min'] = cv.period_min
+        dct['period_max'] = cv.period_max
 
     dct['collectivevariable'] = dct.pop('cv')
     # TODO: wrap this with some logging
