@@ -26,6 +26,7 @@ class TestOrderedSet:
     def test_contains(self):
         assert 'a' in self.set
         assert not 'q' in self.set
+        assert 'q' not in self.set
 
     def test_discard(self):
         self.set.discard('a')
