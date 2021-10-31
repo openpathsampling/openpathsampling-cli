@@ -1,5 +1,6 @@
 import numpy as np
-from .errors import InputError
+from paths_cli.compiling.errors import InputError
+
 
 def custom_eval(obj, named_objs=None):
     """Parse user input to allow simple math.
@@ -19,9 +20,11 @@ def custom_eval(obj, named_objs=None):
     }
     return eval(string, namespace)
 
+
 def custom_eval_int(obj, named_objs=None):
     val = custom_eval(obj, named_objs)
     return int(val)
+
 
 def custom_eval_int_strict_pos(obj, named_objs=None):
     val = custom_eval_int(obj, named_objs)
@@ -32,6 +35,7 @@ def custom_eval_int_strict_pos(obj, named_objs=None):
 
 class UnknownAtomsError(RuntimeError):
     pass
+
 
 def mdtraj_parse_atomlist(inp_str, n_atoms, topology=None):
     """
@@ -47,7 +51,7 @@ def mdtraj_parse_atomlist(inp_str, n_atoms, topology=None):
         raise TypeError("Input is not integers")
     if arr.shape != (1, n_atoms):
         # try to clean it up
-        if len(arr.shape) == 1 and arr.shape[0] ==  n_atoms:
+        if len(arr.shape) == 1 and arr.shape[0] == n_atoms:
             arr.shape = (1, n_atoms)
         else:
             raise TypeError(f"Invalid input. Requires {n_atoms} "

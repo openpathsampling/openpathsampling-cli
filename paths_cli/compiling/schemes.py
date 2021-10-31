@@ -26,6 +26,7 @@ SPRING_SHOOTING_PLUGIN = SchemeCompilerPlugin(
     name='spring-shooting',
 )
 
+
 class BuildSchemeStrategy:
     def __init__(self, scheme_class, default_global_strategy):
         self.scheme_class = scheme_class

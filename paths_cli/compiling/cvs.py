@@ -1,10 +1,7 @@
-import os
-import importlib
-
-from .core import Parameter, Builder
-from .tools import custom_eval
-from .topology import build_topology
-from .errors import InputError
+from paths_cli.compiling.core import Parameter, Builder
+from paths_cli.compiling.tools import custom_eval
+from paths_cli.compiling.topology import build_topology
+from paths_cli.compiling.errors import InputError
 from paths_cli.utils import import_thing
 from paths_cli.compiling.plugins import CVCompilerPlugin, CategoryPlugin
 
@@ -20,6 +17,7 @@ class AllowedPackageHandler:
             raise InputError(f"No function called {source} in {self.package}")
         # on ImportError, we leave the error unchanged
         return func
+
 
 def _cv_kwargs_remapper(dct):
     kwargs = dct.pop('kwargs', {})
