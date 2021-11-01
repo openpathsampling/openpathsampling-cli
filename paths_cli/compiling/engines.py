@@ -1,8 +1,9 @@
-from .topology import build_topology
-from .core import Builder
+from paths_cli.compiling.topology import build_topology
+from paths_cli.compiling.core import Builder
 from paths_cli.compiling.core import Parameter
-from .tools import custom_eval_int_strict_pos
+from paths_cli.compiling.tools import custom_eval_int_strict_pos
 from paths_cli.compiling.plugins import EngineCompilerPlugin, CategoryPlugin
+
 
 def load_openmm_xml(filename):
     from paths_cli.compat.openmm import HAS_OPENMM, mm
@@ -13,6 +14,7 @@ def load_openmm_xml(filename):
         obj = mm.XmlSerializer.deserialize(f.read())
 
     return obj
+
 
 def _openmm_options(dct):
     n_steps_per_frame = dct.pop('n_steps_per_frame')

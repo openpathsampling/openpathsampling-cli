@@ -79,7 +79,7 @@ def test_get_ops_object(ops_file_fixture, with_failure):
     assert obj.name == 'bar'
     log = wizard.console.log_text
     assert 'name of the FOOMAGIC' in log
-    fail_msg = 'Something went wrong'
+    fail_msg = 'not a valid option'
     if with_failure:
         assert fail_msg in log
     else:

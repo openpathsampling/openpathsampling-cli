@@ -6,12 +6,15 @@ from paths_cli.compiling.plugins import (
 from paths_cli.compiling.root_compiler import compiler_for
 from paths_cli.compiling.json_type import json_type_ref
 
+
 def _strategy_name(class_name):
     return f"openpathsampling.strategies.{class_name}"
+
 
 def _group_parameter(group_name):
     return Parameter('group', str, default=group_name,
                      description="the group name for these movers")
+
 
 # TODO: maybe this moves into shooting once we have the metadata?
 SP_SELECTOR_PARAMETER = Parameter('selector', shooting_selector_compiler,
@@ -41,6 +44,7 @@ ONE_WAY_SHOOTING_STRATEGY_PLUGIN = StrategyCompilerPlugin(
     name='one-way-shooting',
 )
 build_one_way_shooting_strategy = ONE_WAY_SHOOTING_STRATEGY_PLUGIN
+
 # build_two_way_shooting_strategy = StrategyCompilerPlugin(
 #     builder=Builder(_strategy_name("TwoWayShootingStrategy")),
 #     parameters = [

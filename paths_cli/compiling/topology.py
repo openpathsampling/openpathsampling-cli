@@ -1,6 +1,7 @@
 import os
-from .errors import InputError
+from paths_cli.compiling.errors import InputError
 from paths_cli.compiling.root_compiler import compiler_for
+
 
 def get_topology_from_engine(dct):
     """If given the name of an engine, use that engine's topology"""
@@ -8,6 +9,8 @@ def get_topology_from_engine(dct):
     if dct in engine_compiler.named_objs:
         engine = engine_compiler.named_objs[dct]
         return getattr(engine, 'topology', None)
+    return None
+
 
 def get_topology_from_file(dct):
     """If given the name of a file, use that to create the topology"""
@@ -16,6 +19,7 @@ def get_topology_from_file(dct):
         import openpathsampling as paths
         trj = md.load(dct)
         return paths.engines.MDTrajTopology(trj.topology)
+    return None
 
 
 class MultiStrategyBuilder:
@@ -34,6 +38,7 @@ class MultiStrategyBuilder:
 
         # only get here if we failed
         raise InputError.invalid_input(dct, self.label)
+
 
 build_topology = MultiStrategyBuilder(
     [get_topology_from_file, get_topology_from_engine],

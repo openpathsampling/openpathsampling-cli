@@ -4,17 +4,20 @@ from paths_cli.compiling.core import (
 from paths_cli.compiling.root_compiler import compiler_for
 from paths_cli.compiling.tools import custom_eval
 
+
 build_uniform_selector = InstanceCompilerPlugin(
     builder=Builder('openpathsampling.UniformSelector'),
     parameters=[],
     name='uniform',
 )
 
+
 def _remapping_gaussian_stddev(dct):
     dct['alpha'] = 0.5 / dct.pop('stddev')**2
     dct['collectivevariable'] = dct.pop('cv')
     dct['l_0'] = dct.pop('mean')
     return dct
+
 
 build_gaussian_selector = InstanceCompilerPlugin(
     builder=Builder('openpathsampling.GaussianBiasSelector',
@@ -26,6 +29,7 @@ build_gaussian_selector = InstanceCompilerPlugin(
     ],
     name='gaussian',
 )
+
 
 shooting_selector_compiler = CategoryCompiler(
     type_dispatch={

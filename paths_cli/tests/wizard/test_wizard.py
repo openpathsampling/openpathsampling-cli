@@ -368,3 +368,31 @@ class TestWizard:
         assert len(storage.networks) == len(storage.schemes) == 0
         assert len(storage.engines) == 1
         assert storage.engines[toy_engine.name] == toy_engine
+
+    def test_run_wizard_quit(self):
+        console = MockConsole()
+        self.wizard.console = console
+        self.wizard._patched = True
+        step = mock.Mock(
+            func=mock.Mock(side_effect=QuitWizard()),
+            display_name='Engine',
+            store_name='engines',
+            minimum=1,
+            maximum=1
+        )
+        self.wizard.steps = [step]
+        mock_ask_save = mock.Mock(return_value=False)
+        with mock.patch.object(Wizard, '_ask_save', mock_ask_save):
+            self.wizard.run_wizard()
+        assert "Goodbye!" in self.wizard.console.log_text
+
+    @pytest.mark.parametrize('inputs', ['y', 'n'])
+    def test_ask_save(self, inputs):
+        expected = {'y': True, 'n': False}[inputs]
+        console = MockConsole(['foo', inputs])
+        self.wizard.console = console
+        result = self.wizard._ask_save()
+        assert result is expected
+        assert "Before quitting" in self.wizard.console.log_text
+        assert "Sorry" in self.wizard.console.log_text
+
