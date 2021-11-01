@@ -32,7 +32,6 @@ def pause_style(style):
 
 def get_pause_style():
     """Get the current pause style"""
-    global _PAUSE_STYLE
     return _PAUSE_STYLE
 
 
