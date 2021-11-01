@@ -7,6 +7,7 @@ from paths_cli.commands.compile import register_installed_plugins
 @click.argument("config_file")
 @click.option("--stdout", type=bool, is_flag=True, default=False)
 def main(config_file, stdout):
+    """Generate documentation for installed compiling plugins."""
     register_installed_plugins()
     config = load_config(config_file)
     generator = DocsGenerator(config)
