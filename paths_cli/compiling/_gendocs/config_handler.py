@@ -19,7 +19,7 @@ def load_config(config_file):
         name of YAML or JSON file
     """
     loader = select_loader(config_file)
-    with open(config_file, mode='r') as f:
+    with open(config_file, mode='r', encoding='utf-8') as f:
         dct = loader(f)
 
     result = {category: DocCategoryInfo(**details)

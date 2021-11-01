@@ -49,7 +49,6 @@ class DocsGenerator:
         str :
             RST string for this category
         """
-        # TODO: move type_required to DocCategoryInfo (default True)
         cat_info = self._get_cat_info(category_plugin)
         type_required = cat_info.type_required
         rst = f".. _compiling--{category_plugin.label}:\n\n"
