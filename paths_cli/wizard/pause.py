@@ -6,7 +6,7 @@ PauseStyle = namedtuple("PauseStyle", ['short', 'long', 'section'])
 
 PAUSE_STYLES = {
     'testing': PauseStyle(0.01, 0.03, 0.05),
-    'default': PauseStyle(0.1, 0.5, 0.5),
+    'default': PauseStyle(0.1, 0.5, 0.75),
     'nopause': PauseStyle(0.0, 0.0, 0.0),
 }
 
@@ -59,7 +59,7 @@ def section(wizard):
     """Section break (pause and possible visual cue).
     """
     time.sleep(_PAUSE_STYLE.section)
-    # TODO: have the wizard draw a line?
+    wizard.console.draw_hline()
 
 
 def long(wizard):

@@ -12,6 +12,8 @@ from paths_cli.wizard.joke import name_joke
 from paths_cli.wizard.helper import Helper, QuitWizard
 from paths_cli.compiling.tools import custom_eval
 
+from paths_cli.wizard import pause
+
 import shutil
 
 class Console:  # no-cov
@@ -25,6 +27,9 @@ class Console:  # no-cov
     @property
     def width(self):
         return shutil.get_terminal_size((80, 24)).columns
+
+    def draw_hline(self):
+        self.print('═' * self.width)
 
 class Wizard:
     def __init__(self, steps):
@@ -299,6 +304,7 @@ class Wizard:
             self.say("Okay, let's try that again.")
             return True
         self.register(obj, step.display_name, step.store_name)
+        pause.section(self)
         requires_another, allows_another = self._req_do_another(req)
         if requires_another:
             do_another = True

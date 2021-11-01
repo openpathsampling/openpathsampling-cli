@@ -8,16 +8,21 @@ from paths_cli.wizard.plugin_classes import (
 from paths_cli.wizard.helper import EvalHelperFunc, Helper
 from paths_cli.wizard.core import interpret_req
 import paths_cli.compiling.volumes
+from paths_cli.wizard import pause
 
 
 def _binary_func_volume(wizard, context, op):
-    wizard.say("Let's make the first constituent volume:")
+    wizard.say("Let's make the first constituent volume.")
+    pause.long(wizard)
     new_context = volume_set_context(wizard, context, selected=None)
     new_context['part'] = 1
     vol1 = VOLUMES_PLUGIN(wizard, new_context)
-    wizard.say("Let's make the second constituent volume:")
+    pause.section(wizard)
+    wizard.say("Let's make the second constituent volume.")
+    pause.long(wizard)
     new_context['part'] = 2
     vol2 = VOLUMES_PLUGIN(wizard, new_context)
+    pause.section(wizard)
     wizard.say("Now we'll combine those two constituent volumes...")
     vol = op(vol1, vol2)
     return vol
