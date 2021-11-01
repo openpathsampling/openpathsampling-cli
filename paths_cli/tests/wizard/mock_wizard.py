@@ -37,6 +37,10 @@ class MockConsole:
         self.log.append(content + " " + user_input)
         return user_input
 
+    def draw_hline(self):
+        # we don't even bother for the mock console
+        pass
+
     @property
     def log_text(self):
         return "\n".join(self.log)

@@ -4,6 +4,11 @@ from paths_cli.tests.wizard.mock_wizard import mock_wizard
 
 from paths_cli.wizard.pause import *
 
+@pytest.fixture(autouse=True, scope="module")
+def use_default_pause_style():
+    with pause_style('default'):
+        yield
+
 
 def test_get_pause_style():
     default_style = PAUSE_STYLES['default']

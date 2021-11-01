@@ -5,6 +5,15 @@ import mdtraj as md
 
 from paths_cli.compat.openmm import HAS_OPENMM, mm, unit
 
+from paths_cli.wizard import pause
+
+
+@pytest.fixture(autouse=True, scope='session')
+def pause_style_testing():
+    pause.set_pause_style('testing')
+    yield
+
+
 # TODO: this isn't wizard-specific, and should be moved somwhere more
 # generally useful (like, oh, maybe openpathsampling.tests.fixtures?)
 @pytest.fixture
