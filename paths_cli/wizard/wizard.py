@@ -9,7 +9,7 @@ from paths_cli.wizard.errors import (
     FILE_LOADING_ERROR_MSG, RestartObjectException
 )
 from paths_cli.wizard.joke import name_joke
-from paths_cli.wizard.helper import Helper
+from paths_cli.wizard.helper import Helper, QuitWizard
 from paths_cli.compiling.tools import custom_eval
 
 import shutil
@@ -313,13 +313,33 @@ class Wizard:
         # TODO: next line is only temporary
         self.say("Today I'll help you set up a 2-state TPS simulation.")
         self._patch()  # try to hide the slowness of our first import
-        for step in self.steps:
-            req = step.store_name, step.minimum, step.maximum
-            do_another = True
-            while do_another:
-                do_another = self._do_one(step, req)
-        storage = self.get_storage()
-        self.save_to_file(storage)
+        try:
+            for step in self.steps:
+                req = step.store_name, step.minimum, step.maximum
+                do_another = True
+                while do_another:
+                    do_another = self._do_one(step, req)
+        except QuitWizard:
+            do_save = self._ask_save()
+        else:
+            do_save = True
+
+        if do_save:
+            storage = self.get_storage()
+            self.save_to_file(storage)
+        else:
+            self.say("Goodbye! 👋")
+
+    @get_object
+    def _ask_save(self):
+        do_save_char = self.ask("Before quitting, would you like to save "
+                                "the objects you've created so far?")
+        try:
+            do_save = yes_no(do_save_char)
+        except Exception:
+            self.bad_input("Sorry, I didn't understance that.")
+            return None
+        return do_save
 
 
 # FIXED_LENGTH_TPS_WIZARD

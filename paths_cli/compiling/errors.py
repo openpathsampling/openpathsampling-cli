@@ -9,4 +9,3 @@ class InputError(Exception):
     @classmethod
     def unknown_name(cls, type_name, name):
         return cls(f"Unable to find object named {name} in {type_name}")
-

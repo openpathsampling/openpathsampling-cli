@@ -1,10 +1,11 @@
 import operator
 import functools
 
-from .core import Parameter
-from .tools import custom_eval
+from paths_cli.compiling.core import Parameter
+from paths_cli.compiling.tools import custom_eval
 from paths_cli.compiling.plugins import VolumeCompilerPlugin, CategoryPlugin
 from paths_cli.compiling.root_compiler import compiler_for
+
 
 # TODO: extra function for volumes should not be necessary as of OPS 2.0
 def cv_volume_build_func(**dct):
@@ -19,6 +20,7 @@ def cv_volume_build_func(**dct):
     dct['collectivevariable'] = dct.pop('cv')
     # TODO: wrap this with some logging
     return builder(**dct)
+
 
 CV_VOLUME_PLUGIN = VolumeCompilerPlugin(
     builder=cv_volume_build_func,
@@ -41,6 +43,7 @@ VOL_ARRAY_TYPE = {
     'items': {"$ref": "#/definitions/volume_type"}
 }
 
+
 INTERSECTION_VOLUME_PLUGIN = VolumeCompilerPlugin(
     builder=lambda subvolumes: functools.reduce(operator.__and__,
                                                 subvolumes),
@@ -54,6 +57,7 @@ INTERSECTION_VOLUME_PLUGIN = VolumeCompilerPlugin(
 
 build_intersection_volume = INTERSECTION_VOLUME_PLUGIN
 
+
 UNION_VOLUME_PLUGIN = VolumeCompilerPlugin(
     builder=lambda subvolumes: functools.reduce(operator.__or__,
                                                 subvolumes),
@@ -66,6 +70,7 @@ UNION_VOLUME_PLUGIN = VolumeCompilerPlugin(
 )
 
 build_union_volume = UNION_VOLUME_PLUGIN
+
 
 VOLUME_COMPILER = CategoryPlugin(VolumeCompilerPlugin, aliases=['state',
                                                                 'states'])
