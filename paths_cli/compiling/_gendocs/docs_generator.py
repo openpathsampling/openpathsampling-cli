@@ -4,8 +4,8 @@ from .json_type_handlers import json_type_to_string
 from .config_handler import DocCategoryInfo
 
 PARAMETER_RST = """* **{p.name}**{type_str} - {p.description}{required}\n"""
-
 # TODO: add templates here instead of adding up strings in the code
+
 
 class DocsGenerator:
     """This generates the RST to describe options for compile input files.
@@ -19,6 +19,7 @@ class DocsGenerator:
 
     parameter_template = PARAMETER_RST
     _ANCHOR_SEP = "--"
+
     def __init__(self, config):
         self.config = config
 
@@ -37,6 +38,19 @@ class DocsGenerator:
         return cat_info
 
     def generate_category_rst(self, category_plugin, type_required=True):
+        """Generate the RST for a given category plugin.
+
+        Parameters
+        ----------
+        category_plugin : :class:`.CategoryPlugin`
+            the plugin for which we should generate the RST page
+
+        Returns
+        -------
+        str :
+            RST string for this category
+        """
+        # TODO: move type_required to DocCategoryInfo (default True)
         cat_info = self._get_cat_info(category_plugin)
         rst = f".. _compiling--{category_plugin.label}:\n\n"
         rst += f"{cat_info.header}\n{'=' * len(str(cat_info.header))}\n\n"
@@ -51,6 +65,23 @@ class DocsGenerator:
 
     def generate_plugin_rst(self, plugin, category_name,
                             type_required=True):
+        """Generate the RST for a given object plugin.
+
+        Parameters
+        ----------
+        plugin : class:`.InstanceCompilerPlugin`
+            the object plugin for to generate the RST for
+        category_name : str
+            the name of the category for this object
+        type_required : bool
+            whether the ``type`` parameter is required in the dict input for
+            compiling this type of object (usually category-dependent)
+
+        Returns
+        -------
+        str :
+            RST string for this object plugin
+        """
         rst_anchor = f".. _{category_name}{self._ANCHOR_SEP}{plugin.name}:"
         rst = f"{rst_anchor}\n\n{plugin.name}\n{'-' * len(plugin.name)}\n\n"
         if plugin.description:
@@ -82,12 +113,27 @@ class DocsGenerator:
         rst += "\n\n"
         return rst
 
-    def _get_filename(self, cat_info):
+    @staticmethod
+    def _get_filename(cat_info):
         fname = str(cat_info.header).lower()
         fname = fname.translate(str.maketrans(' ', '_'))
         return f"{fname}.rst"
 
     def generate(self, category_plugins, stdout=False):
+        """Generate RST output for the given plugins.
+
+        This is the main method used to generate the entire set of
+        documentation.
+
+        Parameters
+        ----------
+        category_plugin : List[:class:`.CategoryPlugin`]
+            list of category plugins document
+        stdout : bool
+            if False (default) a separate output file is generated for each
+            category plugin. If True, all text is output to stdout
+            (particularly useful for debugging/dry runs).
+        """
         for plugin in category_plugins:
             rst = self.generate_category_rst(plugin)
             if stdout:
