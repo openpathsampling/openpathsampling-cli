@@ -1,8 +1,9 @@
 from collections import namedtuple
 from paths_cli.commands.compile import select_loader
 
-DocCategoryInfo = namedtuple('DocCategoryInfo', ['header', 'description'],
-                             defaults=[None])
+DocCategoryInfo = namedtuple('DocCategoryInfo', ['header', 'description',
+                                                 'type_required'],
+                             defaults=[None, True])
 
 
 def load_config(config_file):

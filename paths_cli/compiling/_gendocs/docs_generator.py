@@ -4,7 +4,6 @@ from .json_type_handlers import json_type_to_string
 from .config_handler import DocCategoryInfo
 
 PARAMETER_RST = """* **{p.name}**{type_str} - {p.description}{required}\n"""
-# TODO: add templates here instead of adding up strings in the code
 
 
 class DocsGenerator:
@@ -37,7 +36,7 @@ class DocsGenerator:
             cat_info = DocCategoryInfo(category_plugin.label)
         return cat_info
 
-    def generate_category_rst(self, category_plugin, type_required=True):
+    def generate_category_rst(self, category_plugin):
         """Generate the RST for a given category plugin.
 
         Parameters
@@ -52,6 +51,7 @@ class DocsGenerator:
         """
         # TODO: move type_required to DocCategoryInfo (default True)
         cat_info = self._get_cat_info(category_plugin)
+        type_required = cat_info.type_required
         rst = f".. _compiling--{category_plugin.label}:\n\n"
         rst += f"{cat_info.header}\n{'=' * len(str(cat_info.header))}\n\n"
         if cat_info.description:
