@@ -4,6 +4,7 @@ from paths_cli.wizard.steps import (
     SINGLE_ENGINE_STEP, CVS_STEP, WizardStep
 )
 from paths_cli.wizard.wizard import Wizard
+from paths_cli.wizard import pause
 
 volumes = get_category_wizard('volume')
 from paths_cli.wizard.volumes import _FIRST_STATE, _VOL_DESC
@@ -18,6 +19,7 @@ def two_state_tps(wizard, fixed_length=False):
     ]
     initial_state = volumes(wizard, context={'intro': intro})
     wizard.register(initial_state, 'initial state', 'states')
+    pause.section(wizard)
     intro = [
         "Next let's define your final state.",
         _VOL_DESC

@@ -9,12 +9,12 @@ from paths_cli.wizard.volumes import (
     volume_ask
 )
 
-
 import openpathsampling as paths
 from openpathsampling.experimental.storage.collective_variables import \
         CoordinateFunctionCV
 
 from openpathsampling.tests.test_helpers import make_1d_traj
+
 
 def _wrap(x, period_min, period_max):
     # used in testing periodic CVs
