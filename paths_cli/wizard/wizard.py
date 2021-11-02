@@ -85,6 +85,11 @@ class Wizard:
             helper = Helper(helper)
         result = self.console.input("🧙 " + question + " ")
         self.console.print()
+        if result == "":
+            if not autohelp:
+                return
+            result = "?"  # autohelp in this case
+
         if helper and result[0] in ["?", "!"]:
             self.say(helper(result))
             return

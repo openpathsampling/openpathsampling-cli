@@ -81,6 +81,20 @@ class TestWizard:
         assert result == 'foo'
         assert 'You said: helpme' in console.log_text
 
+    @pytest.mark.parametrize('autohelp', [True, False])
+    def test_ask_empty(self, autohelp):
+        # if the use response in an empty string, we should repeat the
+        # question (possible giving autohelp). This fixes a regression where
+        # an empty string would cause an uncaught exception.
+        console = MockConsole(['', 'foo'])
+        self.wizard.console = console
+        result = self.wizard.ask("question",
+                                 helper=lambda x: "say_help",
+                                 autohelp=autohelp)
+        assert result == "foo"
+        if autohelp:
+            assert "say_help" in self.wizard.console.log_text
+
     def _generic_speak_test(self, func_name):
         console = MockConsole()
         self.wizard.console = console
