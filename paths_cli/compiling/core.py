@@ -144,6 +144,8 @@ class InstanceCompilerPlugin(OPSPlugin):
         Name used in the text input for this object.
     aliases : List[str]
         Other names that can be used.
+    description : str
+        String description used in the documentation
     requires_ops : Tuple[int, int]
         version of OpenPathSampling required for this functionality
     requires_cli : Tuple[int, int]
@@ -151,11 +153,13 @@ class InstanceCompilerPlugin(OPSPlugin):
     """
     SCHEMA = "http://openpathsampling.org/schemas/sim-setup/draft01.json"
     category = None
-
-    def __init__(self, builder, parameters, name=None, aliases=None,
-                 requires_ops=(1, 0), requires_cli=(0, 3)):
+    
+    def __init__(self, builder, parameters, name=None, *, aliases=None,
+                 description=None, requires_ops=(1, 0),
+                 requires_cli=(0, 3)):
         super().__init__(requires_ops, requires_cli)
         self.aliases = aliases
+        self.description = description
         self.attribute_table = {p.name: p.loader for p in parameters
                                 if p.required}
         self.optional_attributes = {p.name: p.loader for p in parameters

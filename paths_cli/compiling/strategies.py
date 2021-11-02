@@ -4,6 +4,7 @@ from paths_cli.compiling.plugins import (
     StrategyCompilerPlugin, CategoryPlugin
 )
 from paths_cli.compiling.root_compiler import compiler_for
+from paths_cli.compiling.json_type import json_type_ref
 
 
 def _strategy_name(class_name):
@@ -18,9 +19,11 @@ def _group_parameter(group_name):
 # TODO: maybe this moves into shooting once we have the metadata?
 SP_SELECTOR_PARAMETER = Parameter('selector', shooting_selector_compiler,
                                   default=None)
-ENGINE_PARAMETER = Parameter('engine', compiler_for('engine'),
-                             description="the engine for moves of this "
-                             "type")
+
+ENGINE_PARAMETER = Parameter(
+    'engine', compiler_for('engine'), json_type=json_type_ref('engine'),
+    description="the engine for moves of this type"
+)
 
 SHOOTING_GROUP_PARAMETER = _group_parameter('shooting')
 REPEX_GROUP_PARAMETER = _group_parameter('repex')
@@ -60,7 +63,7 @@ build_nearest_neighbor_repex_strategy = StrategyCompilerPlugin(
         REPEX_GROUP_PARAMETER,
         REPLACE_TRUE_PARAMETER
     ],
-    name='nearest-neighbor=repex',
+    name='nearest-neighbor-repex',
 )
 
 build_all_set_repex_strategy = StrategyCompilerPlugin(
