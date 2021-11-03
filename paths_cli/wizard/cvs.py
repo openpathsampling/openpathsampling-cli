@@ -1,13 +1,13 @@
+from functools import partial
+from collections import namedtuple
+import numpy as np
+
 from paths_cli.compiling.tools import mdtraj_parse_atomlist
 from paths_cli.wizard.plugin_classes import (
     LoadFromOPS, WizardObjectPlugin, WrapCategory
 )
 from paths_cli.wizard.core import get_object
 import paths_cli.wizard.engines
-
-from functools import partial
-from collections import namedtuple
-import numpy as np
 
 from paths_cli.wizard.parameters import (
     FromWizardPrerequisite
@@ -27,6 +27,10 @@ _ATOM_INDICES_HELP_STR = (
     "You should specify atom indices enclosed in double brackets, e.g. "
     "[{list_range_natoms}]"
 )
+_MDTrajParams = namedtuple("_MDTrajParams", ['period', 'n_atoms',
+                                             'kwarg_name', 'cv_user_str'])
+_MDTRAJ_INTRO = "We'll make a CV that measures the {user_str}."
+
 
 # TODO: implement so the following can be the help string:
 # _ATOM_INDICES_HELP_STR = (
@@ -56,6 +60,25 @@ TOPOLOGY_CV_PREREQ = FromWizardPrerequisite(
 
 @get_object
 def _get_atom_indices(wizard, topology, n_atoms, cv_user_str):
+    """Parameter loader for atom_indices parameters in MDTraj.
+
+    Parameters
+    ----------
+    wizard : :class:`.Wizard`
+        wizard for user interaction
+    topology :
+        topology (reserved for future use)
+    n_atoms : int
+        number of atoms to define this CV (i.e., 2 for a distance; 3 for an
+        angle; 4 for a dihedral)
+    cv_user_str : str
+        user-facing name for the CV being created
+
+    Returns
+    -------
+    :class`np.ndarray` :
+        array of indices for the MDTraj function
+    """
     helper = Helper(_ATOM_INDICES_HELP_STR.format(
         list_range_natoms=list(range(n_atoms))
     ))
@@ -67,14 +90,14 @@ def _get_atom_indices(wizard, topology, n_atoms, cv_user_str):
     except Exception as e:
         wizard.exception(f"Sorry, I didn't understand '{atoms_str}'.", e)
         helper("?")
-        return
+        return None
 
     return arr
 
-_MDTrajParams = namedtuple("_MDTrajParams", ['period', 'n_atoms',
-                                             'kwarg_name', 'cv_user_str'])
 
 def _mdtraj_cv_builder(wizard, prereqs, func_name):
+    """General function to handle building MDTraj CVs.
+    """
     from openpathsampling.experimental.storage.collective_variables import \
             MDTrajFunctionCV
     dct = TOPOLOGY_CV_PREREQ(wizard)
@@ -108,9 +131,9 @@ def _mdtraj_cv_builder(wizard, prereqs, func_name):
     return MDTrajFunctionCV(func, topology, period_min=period_min,
                             period_max=period_max, **kwargs)
 
-_MDTRAJ_INTRO = "We'll make a CV that measures the {user_str}."
 
 def _mdtraj_summary(wizard, context, result):
+    """Standard summary of MDTraj CVs: function, atom, topology"""
     cv = result
     func = cv.func
     topology = cv.topology
@@ -120,6 +143,7 @@ def _mdtraj_summary(wizard, context, result):
                f"     Atoms: {atoms_str}\n"
                f"  Topology: {repr(topology.mdtraj)}")
     return [summary]
+
 
 if HAS_MDTRAJ:
     MDTRAJ_DISTANCE = WizardObjectPlugin(
@@ -152,10 +176,24 @@ if HAS_MDTRAJ:
                      "four atoms"),
         summary=_mdtraj_summary,
     )
-
     # TODO: add RMSD -- need to figure out how to select a frame
 
+
 def coordinate(wizard, prereqs=None):
+    """Builder for coordinate CV.
+
+    Parameters
+    ----------
+    wizard : :class:`.Wizard`
+        wizard for user interaction
+    prereqs :
+        prerequisites (unused in this method)
+
+    Return
+    ------
+    CoordinateFunctionCV :
+        the OpenPathSampling CV for this selecting this coordinate
+    """
     # TODO: atom_index should be from wizard.ask_custom_eval
     from openpathsampling.experimental.storage.collective_variables import \
             CoordinateFunctionCV
@@ -174,11 +212,12 @@ def coordinate(wizard, prereqs=None):
                          f"atom {atom_index}?")
         try:
             coord = {'x': 0, 'y': 1, 'z': 2}[xyz]
-        except KeyError as e:
+        except KeyError:
             wizard.bad_input("Please select one of 'x', 'y', or 'z'")
 
     cv = CoordinateFunctionCV(lambda snap: snap.xyz[atom_index][coord])
     return cv
+
 
 COORDINATE_CV = WizardObjectPlugin(
     name="Coordinate",
@@ -201,6 +240,7 @@ CV_PLUGIN = WrapCategory(
             "several common CVs, such as distances and dihedrals.  But "
             "you can also create your own and load it from a file.")
 )
+
 
 if __name__ == "__main__":  # no-cov
     from paths_cli.wizard.run_module import run_category
