@@ -1,21 +1,17 @@
-from paths_cli.wizard.errors import FILE_LOADING_ERROR_MSG, not_installed
-from paths_cli.wizard.core import get_object
-
-# should be able to simplify this try block when we drop OpenMM < 7.6
-from paths_cli.compat.openmm import mm, HAS_OPENMM
-
-OPENMM_SERIALIZATION_URL=(
-    "http://docs.openmm.org/latest/api-python/generated/"
-    "openmm.openmm.XmlSerializer.html"
-)
+from paths_cli.compat.openmm import HAS_OPENMM
 
 from paths_cli.wizard.parameters import ProxyParameter
 from paths_cli.wizard.plugin_classes import WizardParameterObjectPlugin
 
 from paths_cli.compiling.engines import OPENMM_PLUGIN as OPENMM_COMPILING
 
-_where_is_xml = "Where is the XML file for your OpenMM {obj_type}?"
-_xml_help = (
+OPENMM_SERIALIZATION_URL = (
+    "http://docs.openmm.org/latest/api-python/generated/"
+    "openmm.openmm.XmlSerializer.html"
+)
+
+_WHERE_IS_XML = "Where is the XML file for your OpenMM {obj_type}?"
+_XML_HELP = (
     "You can write OpenMM objects like systems and integrators to XML "
     "files using the XMLSerializer class. Learn more here:\n"
     + OPENMM_SERIALIZATION_URL
@@ -43,13 +39,13 @@ if HAS_OPENMM:
             ),
             ProxyParameter(
                 name='integrator',
-                ask=_where_is_xml.format(obj_type='integrator'),
-                helper=_xml_help,
+                ask=_WHERE_IS_XML.format(obj_type='integrator'),
+                helper=_XML_HELP,
             ),
             ProxyParameter(
                 name='system',
-                ask=_where_is_xml.format(obj_type="system"),
-                helper=_xml_help,
+                ask=_WHERE_IS_XML.format(obj_type="system"),
+                helper=_XML_HELP,
             ),
             ProxyParameter(
                 name='n_steps_per_frame',

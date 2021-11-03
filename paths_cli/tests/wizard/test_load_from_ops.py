@@ -6,7 +6,7 @@ import openpathsampling as paths
 from paths_cli.tests.wizard.mock_wizard import mock_wizard
 
 from paths_cli.wizard.load_from_ops import (
-    named_objs_helper, _get_ops_storage, _get_ops_object, load_from_ops
+    _get_ops_storage, _get_ops_object, load_from_ops
 )
 
 # for some reason I couldn't get these to work with MagicMock
@@ -44,12 +44,6 @@ def ops_file_fixture():
     storage = FakeStorage(foo)
     return storage
 
-def test_named_objs_helper(ops_file_fixture):
-    helper_func = named_objs_helper(ops_file_fixture, 'foo')
-    result = helper_func('any')
-    assert "what I found" in result
-    assert "bar" in result
-    assert "baz" in result
 
 @pytest.mark.parametrize('with_failure', [False, True])
 def test_get_ops_storage(tmpdir, with_failure):

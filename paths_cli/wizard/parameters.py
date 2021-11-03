@@ -1,8 +1,5 @@
-from paths_cli.compiling.tools import custom_eval
-import importlib
 from collections import namedtuple
 
-from paths_cli.wizard.helper import Helper
 from paths_cli.compiling.root_compiler import _CategoryCompilerProxy
 from paths_cli.wizard.standard_categories import get_category_info
 
@@ -15,6 +12,7 @@ ProxyParameter = namedtuple(
     ['name', 'ask', 'helper', 'default', 'autohelp', 'summarize'],
     defaults=[None, NO_DEFAULT, False, None]
 )
+
 
 class WizardParameter:
     """Load a single parameter from the wizard.
@@ -47,7 +45,7 @@ class WizardParameter:
         self.default = default
         self.autohelp = autohelp
         if summarize is None:
-            summarize = lambda obj: str(obj)
+            summarize = str
         self.summarize = summarize
 
     @classmethod
@@ -66,15 +64,17 @@ class WizardParameter:
         loader = loader_dict[proxy.name]
         if isinstance(loader, _CategoryCompilerProxy):
             # TODO: can this import now be moved to top of file?
-            from paths_cli.wizard.plugin_registration import get_category_wizard
+            from paths_cli.wizard.plugin_registration import \
+                    get_category_wizard
             category = loader.category
             dct['loader'] = get_category_wizard(category)
             dct['ask'] = get_category_info(category).singular
             dct['store_name'] = get_category_info(category).storage
-            cls = _ExistingObjectParameter
+            cls_ = _ExistingObjectParameter
         else:
+            cls_ = cls
             dct['loader'] = loader
-        return cls(**dct)
+        return cls_(**dct)
 
     def __call__(self, wizard, context):
         """Load the parameter.
@@ -268,7 +268,8 @@ class FromWizardPrerequisite:
         if n_existing == self.n_required:
             # early return in this case (return silently)
             return {self.name: self._get_existing(wizard)}
-        elif n_existing > self.n_required:
+
+        if n_existing > self.n_required:
             sel = [self._select_single_existing(wizard)
                    for _ in range(self.n_required)]
             dct = {self.name: sel}

@@ -1,24 +1,31 @@
+import sys
 from .errors import RestartObjectException
 
 
 class QuitWizard(BaseException):
-    pass
+    """Exception raised when user expresses desire to quit the wizard"""
 
 
 # the following command functions take cmd and ctx -- future commands might
 # use the full command text or the context internally.
 
 def raise_quit(cmd, ctx):
+    """Command function to quit the wizard (with option to save).
+    """
     raise QuitWizard()
 
 
 def raise_restart(cmd, ctx):
+    """Command function to restart the current object.
+    """
     raise RestartObjectException()
 
 
 def force_exit(cmd, ctx):
+    """Command function to force immediate exit.
+    """
     print("Exiting...")
-    exit()
+    sys.exit()
 
 
 HELPER_COMMANDS = {
