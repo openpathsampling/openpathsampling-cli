@@ -2,18 +2,19 @@ from functools import partial
 
 from paths_cli.wizard.core import get_missing_object
 from paths_cli.wizard.plugin_registration import get_category_wizard
-from paths_cli.compiling.tools import custom_eval
+
 
 engines = get_category_wizard('engine')
 
-import numpy as np
-
 
 def uniform_selector(wizard):
+    """Create a uniform selector (using the wizard)"""
     import openpathsampling as paths
     return paths.UniformSelector()
 
+
 def gaussian_selector(wizard):
+    """Create a Gaussian biased selector (using the wizard)"""
     import openpathsampling as paths
     cv_name = wizard.ask_enumerate("Which CV do you want the Gaussian to "
                                    "be based on?",
@@ -44,6 +45,7 @@ def gaussian_selector(wizard):
 
     # return allowed
 
+
 SHOOTING_SELECTORS = {
     'Uniform random': uniform_selector,
     'Gaussian bias': gaussian_selector,
@@ -59,6 +61,7 @@ def _get_selector(wizard, selectors=None):
     selector = selectors[sel](wizard)
     return selector
 
+
 def one_way_shooting(wizard, selectors=None, engine=None):
     from openpathsampling import strategies
     if engine is None:
@@ -72,6 +75,7 @@ def one_way_shooting(wizard, selectors=None, engine=None):
 
 # def two_way_shooting(wizard, selectors=None, modifiers=None):
     # pass
+
 
 def spring_shooting(wizard, engine=None):
     import openpathsampling as paths
@@ -109,10 +113,10 @@ def shooting(wizard, shooting_types=None, engine=None):
     # allowed_modifiers = get_allowed_modifiers(engine)
     # TWO_WAY = 'Two-way shooting'
     # if len(allowed_modifiers) == 0 and TWO_WAY in shooting_types:
-        # del shooting_types[TWO_WAY]
+    #     del shooting_types[TWO_WAY]
     # else:
-        # shooting_types[TWO_WAY] = partial(two_way_shooting,
-                                          # allowed_modifiers=allowed_modifiers)
+    #     shooting_types[TWO_WAY] = partial(two_way_shooting,
+    #                                       allowed_modifiers=allowed_modifiers)
 
     shooting_type = None
     if len(shooting_types) == 1:
@@ -126,4 +130,3 @@ def shooting(wizard, shooting_types=None, engine=None):
 
     shooting_strategy = shooting_type(wizard)
     return shooting_strategy
-

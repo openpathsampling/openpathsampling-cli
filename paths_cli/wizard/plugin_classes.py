@@ -7,7 +7,8 @@ from paths_cli.wizard.helper import Helper
 
 
 class WizardObjectPluginRegistrationError(Exception):
-    pass
+    """Error during wizard object plugin registration.
+    """
 
 
 _PLUGIN_DOCSTRING = """
@@ -29,6 +30,7 @@ _WIZARD_KWONLY = """
         method to create the summary string describing the object that is
         created
 """ + _PLUGIN_DOCSTRING
+
 
 class LoadFromOPS(OPSPlugin):
     """Wizard plugin type to load from an existing OPS file.
@@ -61,6 +63,7 @@ class LoadFromOPS(OPSPlugin):
 
     def __call__(self, wizard, context=None):
         return load_from_ops(wizard, self.store_name, self.obj_name)
+
 
 def get_text_from_context(name, instance, default, wizard, context, *args,
                           **kwargs):
@@ -130,6 +133,7 @@ class WizardObjectPlugin(OPSPlugin):
         self._summary = summary  # func to summarize
 
     def default_summarize(self, wizard, context, result):
+        """Default summary function"""
         return [f"Here's what we'll make:\n  {str(result)}"]
 
     def get_summary(self, wizard, context, result):
@@ -354,8 +358,7 @@ class WrapCategory(OPSPlugin):
         """If user has provided a funtion to create context, use it."""
         if self._user_set_context:
             return self._user_set_context(wizard, context, selected)
-        else:
-            return context
+        return context
 
     def register_plugin(self, plugin):
         """Register a :class:`.WizardObjectPlugin` with this category.

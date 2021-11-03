@@ -1,8 +1,5 @@
 from collections import namedtuple
-from functools import partial
-
 from paths_cli.wizard.plugin_registration import get_category_wizard
-from paths_cli.wizard.tps import tps_scheme
 
 volumes = get_category_wizard('volume')
 
@@ -26,5 +23,3 @@ MULTIPLE_STATES_STEP = WizardStep(func=get_category_wizard('volume'),
                                   store_name="states",
                                   minimum=2,
                                   maximum=float('inf'))
-
-

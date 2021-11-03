@@ -1,15 +1,15 @@
+import logging
 from paths_cli.wizard.plugin_classes import (
     LoadFromOPS, WizardObjectPlugin, WrapCategory
 )
 from paths_cli.utils import get_installed_plugins
 from paths_cli.plugin_management import NamespacePluginLoader
 
-import logging
 logger = logging.getLogger(__name__)
 
 
 class CategoryWizardPluginRegistrationError(Exception):
-    pass
+    """Error with wizard category plugin registration fails"""
 
 
 _CATEGORY_PLUGINS = {}
@@ -70,14 +70,15 @@ def register_plugins(plugins):
             object_plugins.append(plugin)
 
     for plugin in categories:
-        logger.debug("Registering " + str(plugin))
+        logger.debug("Registering %s", str(plugin))
         _register_category_plugin(plugin)
 
     for plugin in object_plugins:
         category = _CATEGORY_PLUGINS[plugin.category]
-        logger.debug("Registering " + str(plugin))
-        logger.debug("Category: " + str(category))
+        logger.debug("Registering %s", str(plugin))
+        logger.debug("Category: %s", str(category))
         category.register_plugin(plugin)
+
 
 def register_installed_plugins():
     """Register all Wizard plugins found in standard locations.

@@ -5,9 +5,10 @@ from paths_cli.wizard.steps import (
 )
 from paths_cli.wizard.wizard import Wizard
 from paths_cli.wizard import pause
+from paths_cli.wizard.volumes import _FIRST_STATE, _VOL_DESC
 
 volumes = get_category_wizard('volume')
-from paths_cli.wizard.volumes import _FIRST_STATE, _VOL_DESC
+
 
 def two_state_tps(wizard, fixed_length=False):
     import openpathsampling as paths
