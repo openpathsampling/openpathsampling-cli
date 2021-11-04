@@ -36,7 +36,7 @@ def not_installed(wizard, package, obj_type):
     if retry == 'q':
         # TODO: maybe raise QuitWizard instead?
         exit()
-    raise ImpossibleError()
+    raise ImpossibleError()  # -no-cov-
 
 
 FILE_LOADING_ERROR_MSG = ("Sorry, something went wrong when loading that "
