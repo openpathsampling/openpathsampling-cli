@@ -12,7 +12,7 @@ def _strategy_name(class_name):
 
 
 def _group_parameter(group_name):
-    return Parameter('group', str, default=group_name,
+    return Parameter('group', str, json_type="string", default=group_name,
                      description="the group name for these movers")
 
 
@@ -29,8 +29,16 @@ SHOOTING_GROUP_PARAMETER = _group_parameter('shooting')
 REPEX_GROUP_PARAMETER = _group_parameter('repex')
 MINUS_GROUP_PARAMETER = _group_parameter('minus')
 
-REPLACE_TRUE_PARAMETER = Parameter('replace', bool, default=True)
-REPLACE_FALSE_PARAMETER = Parameter('replace', bool, default=False)
+REPLACE_TRUE_PARAMETER = Parameter(
+    'replace', bool, json_type="bool", default=True,
+    description=("whether this should replace existing objects (default "
+                 "True)")
+)
+REPLACE_FALSE_PARAMETER = Parameter(
+    'replace', bool, json_type="bool", default=False,
+    description=("whether this should replace existing objects (default "
+                 "False)")
+)
 
 
 ONE_WAY_SHOOTING_STRATEGY_PLUGIN = StrategyCompilerPlugin(

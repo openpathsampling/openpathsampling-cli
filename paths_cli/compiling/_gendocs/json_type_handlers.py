@@ -133,7 +133,11 @@ JSON_TYPE_HANDLERS = [
     CategoryHandler("engine"),
     CategoryHandler("cv"),
     CategoryHandler("volume"),
+    CategoryHandler("network"),
+    CategoryHandler("strategy"),
+    CategoryHandler("scheme"),
     EvalHandler("EvalInt"),
+    EvalHandler("EvalIntStrictPos"),
     EvalHandler("EvalFloat"),
 ]
 

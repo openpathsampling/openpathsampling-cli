@@ -1,17 +1,32 @@
 from paths_cli.compiling.core import (
     Builder, Parameter
 )
-from paths_cli.compiling.tools import custom_eval
+from paths_cli.compiling.tools import (
+    custom_eval, custom_eval_int_strict_pos
+)
 from paths_cli.compiling.strategies import SP_SELECTOR_PARAMETER
 from paths_cli.compiling.plugins import SchemeCompilerPlugin, CategoryPlugin
 from paths_cli.compiling.root_compiler import compiler_for
+from paths_cli.compiling.json_type import (
+    json_type_ref, json_type_list, json_type_eval
+)
 
 
-NETWORK_PARAMETER = Parameter('network', compiler_for('network'))
+NETWORK_PARAMETER = Parameter(
+    'network',
+    compiler_for('network'),
+    json_type=json_type_ref('network'),
+    description="network to use with this scheme"
+)
 
-ENGINE_PARAMETER = Parameter('engine', compiler_for('engine'))  # reuse?
+ENGINE_PARAMETER = Parameter(
+    'engine', compiler_for('engine'),
+    json_type=json_type_ref('engine'),
+    description="engine to use with this scheme",
+)  # reuse?
 
 STRATEGIES_PARAMETER = Parameter('strategies', compiler_for('strategy'),
+                                 json_type=json_type_ref('strategy'),
                                  default=None)
 
 
@@ -19,8 +34,14 @@ SPRING_SHOOTING_PLUGIN = SchemeCompilerPlugin(
     builder=Builder('openpathsampling.SpringShootingMoveScheme'),
     parameters=[
         NETWORK_PARAMETER,
-        Parameter('k_spring', custom_eval),
-        Parameter('delta_max', custom_eval),
+        Parameter('k_spring', custom_eval,
+                  json_type=json_type_eval("Float"),
+                  description="spring constant for the spring shooting move"),
+        Parameter('delta_max', custom_eval_int_strict_pos,
+                  json_type=json_type_eval("IntStrictPos"),
+                  description=("maximum shift in shooting point (number of "
+                               "frames)"),
+                  ),
         ENGINE_PARAMETER
     ],
     name='spring-shooting',

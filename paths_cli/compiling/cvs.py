@@ -4,6 +4,7 @@ from paths_cli.compiling.topology import build_topology
 from paths_cli.compiling.errors import InputError
 from paths_cli.utils import import_thing
 from paths_cli.compiling.plugins import CVCompilerPlugin, CategoryPlugin
+from paths_cli.compiling.json_type import json_type_eval
 
 
 class AllowedPackageHandler:
@@ -40,13 +41,16 @@ MDTRAJ_CV_PLUGIN = CVCompilerPlugin(
                   json_type='object', default=None,
                   description="keyword arguments for ``func``"),
         Parameter('period_min', custom_eval, default=None,
+                  json_type=json_type_eval('Float'),
                   description=("minimum value for a periodic function, "
                                "None if not periodic")),
         Parameter('period_max', custom_eval, default=None,
+                  json_type=json_type_eval('Float'),
                   description=("maximum value for a periodic function, "
                                "None if not periodic")),
 
     ],
+    description="Use an MDTraj analysis function to calculate a CV.",
     name="mdtraj"
 )
 

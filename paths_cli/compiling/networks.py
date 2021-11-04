@@ -4,14 +4,24 @@ from paths_cli.compiling.core import (
 from paths_cli.compiling.tools import custom_eval
 from paths_cli.compiling.plugins import NetworkCompilerPlugin, CategoryPlugin
 from paths_cli.compiling.root_compiler import compiler_for
+from paths_cli.compiling.json_type import (
+    json_type_ref, json_type_list, json_type_eval
+)
 
 build_interface_set = InstanceCompilerPlugin(
     builder=Builder('openpathsampling.VolumeInterfaceSet'),
     parameters=[
-        Parameter('cv', compiler_for('cv'), description="the collective "
-                  "variable for this interface set"),
-        Parameter('minvals', custom_eval),  # TODO fill in JSON types
-        Parameter('maxvals', custom_eval),  # TODO fill in JSON types
+        Parameter('cv', compiler_for('cv'), json_type=json_type_ref('cv'),
+                  description=("the collective variable for this interface "
+                               "set")),
+        Parameter('minvals', custom_eval,
+                  json_type=json_type_list(json_type_eval("Float")),
+                  description=("minimum value(s) for interfaces in this"
+                               "interface set")),
+        Parameter('maxvals', custom_eval,
+                  json_type=json_type_list(json_type_eval("Float")),
+                  description=("maximum value(s) for interfaces in this"
+                               "interface set")),
     ],
     name='interface-set'
 )
@@ -49,8 +59,10 @@ TPS_NETWORK_PLUGIN = NetworkCompilerPlugin(
     builder=Builder('openpathsampling.TPSNetwork'),
     parameters=[
         Parameter('initial_states', compiler_for('volume'),
+                  json_type=json_type_list(json_type_ref('volume')),
                   description="initial states for this transition"),
         Parameter('final_states', compiler_for('volume'),
+                  json_type=json_type_list(json_type_ref('volume')),
                   description="final states for this transition")
     ],
     name='tps'
