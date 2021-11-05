@@ -69,24 +69,22 @@ TPS_NETWORK_PLUGIN = NetworkCompilerPlugin(
 )
 
 
-MISTIS_NETWORK_PLUGIN = NetworkCompilerPlugin(
-    parameters=[Parameter('trans_info', mistis_trans_info)],
-    builder=Builder('openpathsampling.MISTISNetwork'),
-    name='mistis'
-)
+# MISTIS_NETWORK_PLUGIN = NetworkCompilerPlugin(
+#     parameters=[Parameter('trans_info', mistis_trans_info)],
+#     builder=Builder('openpathsampling.MISTISNetwork'),
+#     name='mistis'
+# )
 
 
-TIS_NETWORK_PLUGIN = NetworkCompilerPlugin(
-    builder=Builder('openpathsampling.MISTISNetwork'),
-    parameters=[Parameter('trans_info', tis_trans_info)],
-    name='tis'
-)
+# TIS_NETWORK_PLUGIN = NetworkCompilerPlugin(
+#     builder=Builder('openpathsampling.MISTISNetwork'),
+#     parameters=[Parameter('trans_info', tis_trans_info)],
+#     name='tis'
+# )
 
 # old names not yet replaced in testing  THESE ARE WHY WE'RE DOUBLING! GET
 # RID OF THEM! (also, use an is-check)
 build_tps_network = TPS_NETWORK_PLUGIN
-build_mistis_network = MISTIS_NETWORK_PLUGIN
-build_tis_network = TIS_NETWORK_PLUGIN
 
 
 NETWORK_COMPILER = CategoryPlugin(NetworkCompilerPlugin, aliases=['networks'])

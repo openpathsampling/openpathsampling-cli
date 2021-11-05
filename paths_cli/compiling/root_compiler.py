@@ -70,8 +70,8 @@ def _get_compiler(category):
     canonical_name = _canonical_name(category)
     # create a new compiler if none exists
     if canonical_name is None:
-        canonical_name = category
-        _COMPILERS[category] = CategoryCompiler(None, category)
+        canonical_name = clean_input_key(category)
+        _COMPILERS[canonical_name] = CategoryCompiler(None, category)
     return _COMPILERS[canonical_name]
 
 

@@ -1,10 +1,12 @@
 from paths_cli.compiling.core import Builder, Parameter
-from paths_cli.compiling.shooting import shooting_selector_compiler
+# from paths_cli.compiling.shooting import shooting_selector_compiler
 from paths_cli.compiling.plugins import (
     StrategyCompilerPlugin, CategoryPlugin
 )
 from paths_cli.compiling.root_compiler import compiler_for
 from paths_cli.compiling.json_type import json_type_ref
+
+shooting_selector_compiler = compiler_for('shooting-point-selector')
 
 
 def _strategy_name(class_name):

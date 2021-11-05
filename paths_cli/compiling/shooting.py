@@ -3,9 +3,10 @@ from paths_cli.compiling.core import (
 )
 from paths_cli.compiling.root_compiler import compiler_for
 from paths_cli.compiling.tools import custom_eval
+from paths_cli.compiling.plugins import ShootingPointSelectorPlugin
 
 
-build_uniform_selector = InstanceCompilerPlugin(
+build_uniform_selector = ShootingPointSelectorPlugin(
     builder=Builder('openpathsampling.UniformSelector'),
     parameters=[],
     name='uniform',
@@ -19,7 +20,7 @@ def _remapping_gaussian_stddev(dct):
     return dct
 
 
-build_gaussian_selector = InstanceCompilerPlugin(
+build_gaussian_selector = ShootingPointSelectorPlugin(
     builder=Builder('openpathsampling.GaussianBiasSelector',
                     remapper=_remapping_gaussian_stddev),
     parameters=[
@@ -31,10 +32,10 @@ build_gaussian_selector = InstanceCompilerPlugin(
 )
 
 
-shooting_selector_compiler = CategoryCompiler(
-    type_dispatch={
-        'uniform': build_uniform_selector,
-        'gaussian': build_gaussian_selector,
-    },
-    label='shooting-selectors'
-)
+# shooting_selector_compiler = CategoryCompiler(
+#     type_dispatch={
+#         'uniform': build_uniform_selector,
+#         'gaussian': build_gaussian_selector,
+#     },
+#     label='shooting-point-selectors'
+# )

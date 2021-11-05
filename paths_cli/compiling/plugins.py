@@ -45,3 +45,11 @@ class SchemeCompilerPlugin(InstanceCompilerPlugin):
 
 class StrategyCompilerPlugin(InstanceCompilerPlugin):
     category = 'strategy'
+
+
+class ShootingPointSelectorPlugin(InstanceCompilerPlugin):
+    category = 'shooting-point-selector'
+
+
+class InterfaceSetPlugin(InstanceCompilerPlugin):
+    category = 'interface-set'
