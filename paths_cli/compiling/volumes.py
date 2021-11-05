@@ -2,7 +2,7 @@ import operator
 import functools
 
 from paths_cli.compiling.core import Parameter
-from paths_cli.compiling.tools import custom_eval
+from paths_cli.compiling.tools import custom_eval_float
 from paths_cli.compiling.plugins import VolumeCompilerPlugin, CategoryPlugin
 from paths_cli.compiling.root_compiler import compiler_for
 from paths_cli.compiling.json_type import (
@@ -30,10 +30,10 @@ CV_VOLUME_PLUGIN = VolumeCompilerPlugin(
     parameters=[
         Parameter('cv', compiler_for('cv'), json_type=json_type_ref('cv'),
                   description="CV that defines this volume"),
-        Parameter('lambda_min', custom_eval,
+        Parameter('lambda_min', custom_eval_float,
                   json_type=json_type_eval("Float"),
                   description="Lower bound for this volume"),
-        Parameter('lambda_max', custom_eval,
+        Parameter('lambda_max', custom_eval_float,
                   json_type=json_type_eval("Float"),
                   description="Upper bound for this volume")
     ],
