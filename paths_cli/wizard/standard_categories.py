@@ -23,6 +23,7 @@ _CATEGORY_LIST = [
 
 CATEGORIES = {cat.name: cat for cat in _CATEGORY_LIST}
 
+
 def get_category_info(category):
     """Obtain info for a stanard (or registered) category.
 

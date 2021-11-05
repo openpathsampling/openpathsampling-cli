@@ -1,6 +1,4 @@
-import paths_cli.wizard.openmm as openmm
 from paths_cli.wizard.plugin_classes import LoadFromOPS, WrapCategory
-from functools import partial
 
 _ENGINE_HELP = "An engine describes how you'll do the actual dynamics."
 ENGINE_PLUGIN = WrapCategory(
@@ -17,4 +15,3 @@ ENGINE_FROM_FILE = LoadFromOPS('engine')
 if __name__ == "__main__":  # no-cov
     from paths_cli.wizard.run_module import run_category
     run_category('engine')
-
