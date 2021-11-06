@@ -1,12 +1,10 @@
 from paths_cli.compiling.core import Builder, Parameter
-# from paths_cli.compiling.shooting import shooting_selector_compiler
 from paths_cli.compiling.plugins import (
     StrategyCompilerPlugin, CategoryPlugin
 )
 from paths_cli.compiling.root_compiler import compiler_for
 from paths_cli.compiling.json_type import json_type_ref
-
-shooting_selector_compiler = compiler_for('shooting-point-selector')
+from paths_cli.compiling.shooting import SP_SELECTOR_PARAMETER
 
 
 def _strategy_name(class_name):
@@ -19,8 +17,6 @@ def _group_parameter(group_name):
 
 
 # TODO: maybe this moves into shooting once we have the metadata?
-SP_SELECTOR_PARAMETER = Parameter('selector', shooting_selector_compiler,
-                                  default=None)
 
 ENGINE_PARAMETER = Parameter(
     'engine', compiler_for('engine'), json_type=json_type_ref('engine'),

@@ -146,6 +146,8 @@ JSON_TYPE_HANDLERS = [
     CategoryHandler("network"),
     CategoryHandler("strategy"),
     CategoryHandler("scheme"),
+    CategoryHandler("shooting-point-selector"),
+    CategoryHandler("interface-set"),
     EvalHandler("EvalInt"),
     EvalHandler("EvalIntStrictPos"),
     EvalHandler("EvalFloat"),

@@ -45,6 +45,9 @@ SPRING_SHOOTING_PLUGIN = SchemeCompilerPlugin(
         ENGINE_PARAMETER
     ],
     name='spring-shooting',
+    description=("Move scheme for TPS with the spring-shooting algorithm. "
+                 "Under most circumstances, the network provided here "
+                 "should be a 2-state TPS network."),
 )
 
 
@@ -78,6 +81,8 @@ ONE_WAY_SHOOTING_SCHEME_PLUGIN = SchemeCompilerPlugin(
         STRATEGIES_PARAMETER,
     ],
     name='one-way-shooting',
+    description=("One-way-shooting move scheme. This can be extended with "
+                 "additional user-defined move strategies."),
 )
 
 MOVESCHEME_PLUGIN = SchemeCompilerPlugin(
@@ -87,7 +92,11 @@ MOVESCHEME_PLUGIN = SchemeCompilerPlugin(
         NETWORK_PARAMETER,
         STRATEGIES_PARAMETER,
     ],
-    name='scheme'
+    name='scheme',
+    description=("Generic move scheme. Add strategies to this to make it "
+                 "useful. This defaults to a scheme that first chooses a "
+                 "move type, and then chooses the specific move within "
+                 "that type (i.e., ``OrganizeByMoveGroupStrategy``)"),
 )
 
 SCHEME_COMPILER = CategoryPlugin(SchemeCompilerPlugin, aliases=['schemes'])
