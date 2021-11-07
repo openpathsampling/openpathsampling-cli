@@ -18,7 +18,7 @@ _DEFAULT_COMPILE_ORDER = [
     'volume',
     'state',
     'network',
-    'movescheme',
+    'scheme',
 ]
 
 COMPILE_ORDER = _DEFAULT_COMPILE_ORDER.copy()
