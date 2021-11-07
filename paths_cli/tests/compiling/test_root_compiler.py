@@ -149,6 +149,16 @@ def test_get_compiler_nonexisting(foo_compiler):
         assert 'foo' in _COMPILERS
 
 
+def test_get_compiler_none():
+    # if trying to get the None compiler, the same None compiler should
+    # always be returned
+    with patch.dict(COMPILER_LOC, {}):
+        compiler1 = _get_compiler(None)
+        assert compiler1.label is None
+        compiler2 = _get_compiler(None)
+        assert compiler1 is compiler2
+
+
 def test_get_compiler_nonstandard_name_multiple():
     # regression test based on real issue -- there was an error where
     # non-canonical names (e.g., names that involved hyphens instead of
