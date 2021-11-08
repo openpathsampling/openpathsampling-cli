@@ -55,10 +55,3 @@ build_gaussian_selector = ShootingPointSelectorPlugin(
 )
 
 
-# shooting_selector_compiler = CategoryCompiler(
-#     type_dispatch={
-#         'uniform': build_uniform_selector,
-#         'gaussian': build_gaussian_selector,
-#     },
-#     label='shooting-point-selectors'
-# )

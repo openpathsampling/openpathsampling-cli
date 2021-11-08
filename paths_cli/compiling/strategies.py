@@ -71,8 +71,8 @@ build_nearest_neighbor_repex_strategy = StrategyCompilerPlugin(
         REPLACE_TRUE_PARAMETER
     ],
     name='nearest-neighbor-repex',
-    description=("Use replica exchange only between neearest-neighbor "
-                 "interfaces in this move scheme"),
+    description=("Use replica exchange only between nearest-neighbor "
+                 "interfaces in this move scheme."),
 )
 
 build_all_set_repex_strategy = StrategyCompilerPlugin(
