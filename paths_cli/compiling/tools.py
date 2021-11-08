@@ -33,6 +33,11 @@ def custom_eval_int_strict_pos(obj, named_objs=None):
     return val
 
 
+def custom_eval_float(obj, named_objs=None):
+    val = custom_eval(obj, named_objs)
+    return float(val)
+
+
 class UnknownAtomsError(RuntimeError):
     pass
 

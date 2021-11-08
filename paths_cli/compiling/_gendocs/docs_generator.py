@@ -104,7 +104,7 @@ class DocsGenerator:
             default="",
             description="name this object in order to reuse it",
         )
-        rst += self.format_parameter(name_param, type_str=" (*string*)")
+        rst += self.format_parameter(name_param, type_str=" (string)")
         for param in plugin.parameters:
             type_str = f" ({json_type_to_string(param.json_type)})"
             rst += self.format_parameter(param, type_str)

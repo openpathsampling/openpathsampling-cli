@@ -20,21 +20,25 @@ from paths_cli.compiling.plugins import CategoryPlugin
 def foo_compiler():
     return CategoryCompiler(None, 'foo')
 
+
 @pytest.fixture
 def foo_compiler_plugin():
     return CategoryPlugin(Mock(category='foo', __name__='foo'), ['bar'])
 
+
 @pytest.fixture
 def foo_baz_builder_plugin():
-    builder = InstanceCompilerPlugin(lambda: "FOO" , [], name='baz',
+    builder = InstanceCompilerPlugin(lambda: "FOO", [], name='baz',
                                      aliases=['qux'])
     builder.category = 'foo'
     return builder
+
 
 ### CONSTANTS ##############################################################
 
 COMPILER_LOC = "paths_cli.compiling.root_compiler._COMPILERS"
 BASE = "paths_cli.compiling.root_compiler."
+
 
 ### TESTS ##################################################################
 
@@ -43,6 +47,7 @@ BASE = "paths_cli.compiling.root_compiler."
 def test_clean_input_key(input_string):
     assert clean_input_key(input_string) == "foo_bar"
 
+
 @pytest.mark.parametrize('input_name', ['canonical', 'alias'])
 def test_canonical_name(input_name):
     compilers = {'canonical': "FOO"}
@@ -50,6 +55,7 @@ def test_canonical_name(input_name):
     with patch.dict(COMPILER_LOC, compilers) as compilers_, \
             patch.dict(BASE + "_ALIASES", aliases) as aliases_:
         assert _canonical_name(input_name) == "canonical"
+
 
 class TestCategoryCompilerProxy:
     def setup(self):
@@ -86,6 +92,7 @@ class TestCategoryCompilerProxy:
         with patch.dict(COMPILER_LOC, {'foo': foo_compiler}):
             assert proxy(user_input) == "bazbaz"
 
+
 def test_compiler_for_nonexisting():
     # if nothing is ever registered with the compiler, then compiler_for
     # should error
@@ -97,6 +104,7 @@ def test_compiler_for_nonexisting():
         with pytest.raises(RuntimeError, match="No CategoryCompiler"):
             proxy._proxy
 
+
 def test_compiler_for_existing(foo_compiler):
     # if a compiler already exists when compiler_for is called, then
     # compiler_for should get that as its proxy
@@ -104,12 +112,14 @@ def test_compiler_for_existing(foo_compiler):
         proxy = compiler_for('foo')
         assert proxy._proxy is foo_compiler
 
+
 def test_compiler_for_unregistered(foo_compiler):
     # if a compiler is registered after compiler_for is called, then
     # compiler_for should use that as its proxy
     proxy = compiler_for('foo')
     with patch.dict(COMPILER_LOC, {'foo': foo_compiler}):
         assert proxy._proxy is foo_compiler
+
 
 def test_compiler_for_registered_alias(foo_compiler):
     # if compiler_for is registered as an alias, compiler_for should still
@@ -121,11 +131,13 @@ def test_compiler_for_registered_alias(foo_compiler):
         proxy  = compiler_for('bar')
         assert proxy._proxy is foo_compiler
 
+
 def test_get_compiler_existing(foo_compiler):
     # if a compiler has been registered, then _get_compiler should return the
     # registered compiler
     with patch.dict(COMPILER_LOC, {'foo': foo_compiler}):
         assert _get_compiler('foo') is foo_compiler
+
 
 def test_get_compiler_nonexisting(foo_compiler):
     # if a compiler has not been registered, then _get_compiler should create
@@ -135,6 +147,28 @@ def test_get_compiler_nonexisting(foo_compiler):
         assert compiler is not foo_compiler  # overkill
         assert compiler.label == 'foo'
         assert 'foo' in _COMPILERS
+
+
+def test_get_compiler_none():
+    # if trying to get the None compiler, the same None compiler should
+    # always be returned
+    with patch.dict(COMPILER_LOC, {}):
+        compiler1 = _get_compiler(None)
+        assert compiler1.label is None
+        compiler2 = _get_compiler(None)
+        assert compiler1 is compiler2
+
+
+def test_get_compiler_nonstandard_name_multiple():
+    # regression test based on real issue -- there was an error where
+    # non-canonical names (e.g., names that involved hyphens instead of
+    # underscores) would overwrite the previously created compiler instead
+    # of getting the identical object
+    with patch.dict(COMPILER_LOC, {}):
+        c1 = _get_compiler('non-canonical-name')
+        c2 = _get_compiler('non-canonical-name')
+        assert c1 is c2
+
 
 @pytest.mark.parametrize('canonical,aliases,expected', [
     ('foo', ['bar', 'baz'], ['foo', 'bar', 'baz']),
@@ -149,6 +183,7 @@ def test_get_registration_names(canonical, aliases, expected):
     type(plugin).name = PropertyMock(return_value=canonical)
     assert _get_registration_names(plugin) == expected
 
+
 def test_register_compiler_plugin(foo_compiler_plugin):
     # _register_compiler_plugin should register compilers that don't exist
     compilers = {}
@@ -161,6 +196,7 @@ def test_register_compiler_plugin(foo_compiler_plugin):
         assert 'bar' in _ALIASES
 
     assert 'foo' not in _COMPILERS
+
 
 @pytest.mark.parametrize('duplicate_of', ['canonical', 'alias'])
 @pytest.mark.parametrize('duplicate_from', ['canonical', 'alias'])
@@ -184,6 +220,7 @@ def test_register_compiler_plugin_duplicate(duplicate_of, duplicate_from):
         with pytest.raises(CategoryCompilerRegistrationError):
             _register_compiler_plugin(plugin)
 
+
 @pytest.mark.parametrize('compiler_exists', [True, False])
 def test_register_builder_plugin(compiler_exists, foo_baz_builder_plugin,
                                  foo_compiler):
@@ -203,6 +240,7 @@ def test_register_builder_plugin(compiler_exists, foo_baz_builder_plugin,
         assert type_dispatch['baz'] is foo_baz_builder_plugin
         assert type_dispatch['qux'] is foo_baz_builder_plugin
 
+
 def test_register_plugins_unit(foo_compiler_plugin, foo_baz_builder_plugin):
     # register_plugins should correctly sort builder and compiler plugins,
     # and call the correct registration functions
@@ -211,6 +249,7 @@ def test_register_plugins_unit(foo_compiler_plugin, foo_baz_builder_plugin):
         register_plugins([foo_baz_builder_plugin, foo_compiler_plugin])
         assert builder.called_once_with(foo_baz_builder_plugin)
         assert compiler.called_once_with(foo_compiler_plugin)
+
 
 def test_register_plugins_integration(foo_compiler_plugin,
                                       foo_baz_builder_plugin):
@@ -224,6 +263,7 @@ def test_register_plugins_integration(foo_compiler_plugin,
         assert 'foo' in _COMPILERS
         type_dispatch = _COMPILERS['foo'].type_dispatch
         assert type_dispatch['baz'] is foo_baz_builder_plugin
+
 
 def test_sort_user_categories():
     # sorted user categories should match the expected compile order
@@ -244,6 +284,7 @@ def test_sort_user_categories():
         paths_cli.compiling.root_compiler.COMPILE_ORDER = COMPILE_ORDER
         # check that we unset properly (test the test)
         assert paths_cli.compiling.root_compiler.COMPILE_ORDER[0] == 'engine'
+
 
 def test_do_compile():
     # compiler should correctly compile a basic input dict

@@ -53,6 +53,12 @@ handle_listof = JsonTypeHandler(
 )
 
 
+handle_none = JsonTypeHandler(
+    is_my_type=lambda obj: obj is None,
+    handler=lambda json_type: "type information missing",
+)
+
+
 class RefTypeHandler(JsonTypeHandler):
     """Handle JSON types of the form {"$ref": "#/definitions/..."}
 
@@ -122,6 +128,9 @@ class EvalHandler(RefTypeHandler):
         to the anchor given by ``link_to``
     """
     def __init__(self, type_name, link_to=None):
+        if link_to is None:
+            link_to = type_name
+
         super().__init__(
             type_name=type_name, def_string=type_name, link_to=link_to
         )
@@ -129,11 +138,18 @@ class EvalHandler(RefTypeHandler):
 
 JSON_TYPE_HANDLERS = [
     handle_object,
+    handle_none,
     handle_listof,
     CategoryHandler("engine"),
     CategoryHandler("cv"),
     CategoryHandler("volume"),
+    CategoryHandler("network"),
+    CategoryHandler("strategy"),
+    CategoryHandler("scheme"),
+    CategoryHandler("shooting-point-selector"),
+    CategoryHandler("interface-set"),
     EvalHandler("EvalInt"),
+    EvalHandler("EvalIntStrictPos"),
     EvalHandler("EvalFloat"),
 ]
 

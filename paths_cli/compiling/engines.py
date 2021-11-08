@@ -3,6 +3,7 @@ from paths_cli.compiling.core import Builder
 from paths_cli.compiling.core import Parameter
 from paths_cli.compiling.tools import custom_eval_int_strict_pos
 from paths_cli.compiling.plugins import EngineCompilerPlugin, CategoryPlugin
+from paths_cli.compiling.json_type import json_type_eval
 
 
 def load_openmm_xml(filename):
@@ -34,8 +35,10 @@ OPENMM_PARAMETERS = [
     Parameter('integrator', load_openmm_xml, json_type='string',
               description="XML file with the OpenMM integrator"),
     Parameter('n_steps_per_frame', custom_eval_int_strict_pos,
+              json_type=json_type_eval('IntStrictPos'),
               description="number of MD steps per saved frame"),
     Parameter("n_frames_max", custom_eval_int_strict_pos,
+              json_type=json_type_eval('IntStrictPos'),
               description=("maximum number of frames before aborting "
                            "trajectory")),
 ]
