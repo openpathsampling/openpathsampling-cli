@@ -59,7 +59,8 @@ class TestPrecompute(object):
                 self.previously_seen = set([])
 
             def __call__(self, snap):
-                if snap in self.previously_seen:
+                if snap in self.previously_seen:  # -no-cov-
+                    # this is only covered if an error occurs
                     raise AssertionError("Second CV eval for " + str(snap))
                 self.previously_seen.update({snap})
                 return snap.xyz[0][0]

@@ -25,7 +25,7 @@ class FakeStore:
             return self._objects[key]
         elif isinstance(key, str):
             return self._named_objects[key]
-        else:
+        else:  # -nocov-
             raise TypeError("Huh?")
 
     def __iter__(self):
