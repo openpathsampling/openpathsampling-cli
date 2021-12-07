@@ -10,7 +10,7 @@ class TestOrderedSet:
     def test_empty(self):
         ordered = OrderedSet()
         assert len(ordered) == 0
-        for _ in ordered:
+        for _ in ordered:  # -no-cov-
             raise RuntimeError("This should not happen")
 
     def test_order(self):

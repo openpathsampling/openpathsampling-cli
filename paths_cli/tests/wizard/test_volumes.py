@@ -54,7 +54,7 @@ def test_volume_intro(as_state, has_state):
         assert "You'll need to define" in intro
     elif not as_state:
         assert intro == _VOL_DESC
-    else:
+    else:  # -no-cov-
         raise RuntimeError("WTF?")
 
 def _binary_volume_test(volume_setup, func):
