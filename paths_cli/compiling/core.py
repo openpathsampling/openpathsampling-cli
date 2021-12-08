@@ -153,7 +153,7 @@ class InstanceCompilerPlugin(OPSPlugin):
     """
     SCHEMA = "http://openpathsampling.org/schemas/sim-setup/draft01.json"
     category = None
-    
+
     def __init__(self, builder, parameters, name=None, *, aliases=None,
                  description=None, requires_ops=(1, 0),
                  requires_cli=(0, 3)):
