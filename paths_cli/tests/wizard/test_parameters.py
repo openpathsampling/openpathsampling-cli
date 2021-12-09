@@ -15,16 +15,12 @@ class TestWizardParameter:
     def _reverse(string):
         return "".join(reversed(string))
 
-    @staticmethod
-    def _summarize(string):
-        return f"Here's a summary: we made {string}"
-
     def setup(self):
         self.parameter = WizardParameter(
             name='foo',
             ask="How should I {do_what}?",
             loader=self._reverse,
-            summarize=self._summarize,
+            summarize=lambda string: f"Should be unused. Input: {string}",
         )
         self.wizard = mock_wizard(["bar"])
         self.compiler_plugin = compiling.InstanceCompilerPlugin(
