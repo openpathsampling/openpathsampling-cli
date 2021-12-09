@@ -16,15 +16,6 @@ from openpathsampling.experimental.storage.collective_variables import \
 from openpathsampling.tests.test_helpers import make_1d_traj
 
 
-def _wrap(x, period_min, period_max):
-    # used in testing periodic CVs
-    while x >= period_max:
-        x -= period_max - period_min
-    while x < period_min:
-        x += period_max - period-min
-    return x
-
-
 @pytest.fixture
 def volume_setup():
     cv = CoordinateFunctionCV(lambda snap: snap.xyz[0][0]).named('x')
@@ -120,8 +111,7 @@ def test_cv_defined_volume(periodic):
         min_ = 0.0
         max_ = 1.0
         cv = CoordinateFunctionCV(
-            lambda snap: _wrap(snap.xyz[0][0], period_min=min_,
-                               period_max=max_),
+            lambda snap: snap.xyz[0][0],
             period_min=min_, period_max=max_
         ).named('x')
         inputs = ['x', '0.75', '1.25']
