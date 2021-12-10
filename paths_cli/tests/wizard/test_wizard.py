@@ -309,6 +309,7 @@ class TestWizard:
         assert len(storage.networks) == len(storage.schemes) == 0
         assert len(storage.engines) == 1
         assert storage.engines[toy_engine.name] == toy_engine
+        assert storage.engines[0] == toy_engine
         assert "Everything has been stored" in self.wizard.console.log_text
 
     @pytest.mark.parametrize('req,count,expected', [
@@ -382,6 +383,7 @@ class TestWizard:
         assert len(storage.networks) == len(storage.schemes) == 0
         assert len(storage.engines) == 1
         assert storage.engines[toy_engine.name] == toy_engine
+        assert storage.engines[0] == toy_engine
 
     def test_run_wizard_quit(self):
         console = MockConsole()

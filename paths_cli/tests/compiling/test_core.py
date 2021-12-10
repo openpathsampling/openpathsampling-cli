@@ -332,7 +332,7 @@ class TestCategoryCompiler:
             assert obj == 'bar'
         elif input_type == 'dict':
             assert obj.data == 'qux'
-        else:
+        else:  # -no-cov-
             raise RuntimeError("Error in test setup")
 
     @pytest.mark.parametrize('input_type', ['str', 'dict'])

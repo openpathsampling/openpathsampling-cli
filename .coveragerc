@@ -1,6 +1,5 @@
 [report]
 omit =
-    */paths_cli/tests/*
     */paths_cli/_installed_version.py
     */paths_cli/version.py
 exclude_lines =

@@ -103,7 +103,7 @@ class ParamInstanceTest(object):
 
     def create_file(self, getter):
         filename = self._filename(getter)
-        if getter == "named":
+        if getter == "name":
             self.other_scheme = self.other_scheme.named("other")
             self.other_engine = self.other_engine.named("other")
 

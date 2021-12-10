@@ -20,13 +20,15 @@ class FakeStore:
         self._objects = objects
         self._named_objects = {obj.name: obj for obj in objects}
 
-    def __getitem__(self, key):
-        if isinstance(key, int):
-            return self._objects[key]
-        elif isinstance(key, str):
-            return self._named_objects[key]
-        else:
-            raise TypeError("Huh?")
+    # leaving this commented out... it doesn't seem to be used currently,
+    # but if it is needed in the future, this should be the implementation
+    # def __getitem__(self, key):
+    #     if isinstance(key, int):
+    #         return self._objects[key]
+    #     elif isinstance(key, str):
+    #         return self._named_objects[key]
+    #     else:  # -no-cov-
+    #         raise TypeError("Huh?")
 
     def __iter__(self):
         return iter(self._objects)

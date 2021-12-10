@@ -159,7 +159,7 @@ def test_md_main(md_fixture, inp):
             nsteps, ensembles = 5, None
         elif inp == 'ensemble':
             nsteps, ensembles = None, [ens]
-        else:
+        else:  # -no-cov-
             raise RuntimeError("pytest went crazy")
 
         traj, foo = md_main(

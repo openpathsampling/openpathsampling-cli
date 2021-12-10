@@ -1,6 +1,8 @@
 import pytest
 from unittest import mock
 from paths_cli.tests.compiling.utils import mock_compiler
+from paths_cli.compiling.plugins import CVCompilerPlugin
+from paths_cli.compiling.core import Parameter
 
 import yaml
 import numpy as np
@@ -23,20 +25,20 @@ class TestBuildCVVolume:
         }
 
         self.func = {
-            'inline': "\n  ".join(["name: foo", "type: mdtraj"]),
+            'inline': "\n  " + "\n  ".join([
+                "name: foo",
+                "type: fake_type",
+                "input_data: bar",
+            ]),
             'external': 'foo'
         }
-
-    def create_inputs(self, inline, periodic):
-        yml = "\n".join(["type: cv-volume", "cv: {func}",
-                         "lambda_min: 0", "lambda_max: 1"])
 
     def set_periodic(self, periodic):
         if periodic == 'periodic':
             self.named_objs_dict['foo']['period_max'] = 'np.pi'
             self.named_objs_dict['foo']['period_min'] = '-np.pi'
 
-    @pytest.mark.parametrize('inline', ['external', 'external'])
+    @pytest.mark.parametrize('inline', ['external', 'inline'])
     @pytest.mark.parametrize('periodic', ['periodic', 'nonperiodic'])
     def test_build_cv_volume(self, inline, periodic):
         self.set_periodic(periodic)
@@ -47,14 +49,29 @@ class TestBuildCVVolume:
         mock_cv = CoordinateFunctionCV(lambda s: s.xyz[0][0],
                                        period_min=period_min,
                                        period_max=period_max).named('foo')
+
+        patch_loc = 'paths_cli.compiling.root_compiler._COMPILERS'
+
         if inline =='external':
-            patch_loc = 'paths_cli.compiling.root_compiler._COMPILERS'
             compilers = {
                 'cv': mock_compiler('cv', named_objs={'foo': mock_cv})
             }
-            with mock.patch.dict(patch_loc, compilers):
-                vol = build_cv_volume(dct)
-        elif inline == 'internal':
+        elif inline == 'inline':
+            fake_plugin = CVCompilerPlugin(
+                name="fake_type",
+                parameters=[Parameter('input_data', str)],
+                builder=lambda input_data: mock_cv
+            )
+            compilers = {
+                'cv': mock_compiler(
+                    'cv',
+                    type_dispatch={'fake_type': fake_plugin}
+                )
+            }
+        else:  # -no-cov-
+            raise RuntimeError("Should never get here")
+
+        with mock.patch.dict(patch_loc, compilers):
             vol = build_cv_volume(dct)
 
         in_state = make_1d_traj([0.5])[0]

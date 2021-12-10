@@ -30,7 +30,9 @@ class MockConsole:
         self.input_call_count += 1
         try:
             user_input = next(self._input_iter)
-        except StopIteration as e:
+        except StopIteration as e:  # -no-cov-
+            # this only occurs on a test error and provides diagnostic
+            # information
             print(self.log_text)
             raise e
 
