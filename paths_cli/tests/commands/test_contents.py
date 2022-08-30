@@ -16,7 +16,6 @@ def test_contents(tps_fixture):
         for obj in tps_fixture:
             storage.save(obj)
         storage.tags['initial_conditions'] = init_conds
-        storage.close()
         results = runner.invoke(contents, ['setup.nc'])
         expected = [
             "CVs: 1 item", "* x",
