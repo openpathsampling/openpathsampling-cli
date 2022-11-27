@@ -39,7 +39,7 @@ def contents(input_file, table):
     storage = INPUT_FILE.get(input_file)
     try:
         print(storage.filename)
-    except AttributeError:
+    except AttributeError:  # no-cov  (temporary fix)
         # TODO: this should be removed once SimStore has a `filename`
         # attribute
         print(storage)
