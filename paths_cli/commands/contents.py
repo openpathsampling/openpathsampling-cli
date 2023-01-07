@@ -37,7 +37,12 @@ def contents(input_file, table):
     command (i.e., to identify exactly how a state or engine is named.)
     """
     storage = INPUT_FILE.get(input_file)
-    print(storage)
+    try:
+        print(storage.filename)
+    except AttributeError:  # no-cov  (temporary fix)
+        # TODO: this should be removed once SimStore has a `filename`
+        # attribute
+        print(storage)
     if table is None:
         report_all_tables(storage)
     else:

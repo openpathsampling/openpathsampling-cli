@@ -22,7 +22,7 @@ def test_contents(tps_fixture):
         results = runner.invoke(contents, ['setup.nc'])
         cwd = os.getcwd()
         expected = [
-            f"Storage @ '{cwd}/setup.nc'",
+            f"{cwd}/setup.nc",
             "CVs: 1 item", "* x",
             "Volumes: 8 items", "* A", "* B", "* plus 6 unnamed items",
             "Engines: 2 items", "* flat", "* plus 1 unnamed item",
@@ -56,17 +56,17 @@ def test_contents_table(tps_fixture, table):
         cwd = os.getcwd()
         expected = {
             'volumes': [
-                f"Storage @ '{cwd}/setup.nc'",
+                f"{cwd}/setup.nc",
                 "volumes: 8 items", "* A", "* B", "* plus 6 unnamed items",
                 ""
             ],
             'trajectories': [
-                f"Storage @ '{cwd}/setup.nc'",
+                f"{cwd}/setup.nc",
                 "trajectories: 1 unnamed item",
                 ""
             ],
             'tags': [
-                f"Storage @ '{cwd}/setup.nc'",
+                f"{cwd}/setup.nc",
                 "tags: 1 item",
                 "* initial_conditions",
                 ""
