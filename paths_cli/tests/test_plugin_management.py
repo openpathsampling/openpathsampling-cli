@@ -17,7 +17,7 @@ def test_ops_plugin():
     assert plugin.requires_lib == (1, 2)
 
 class PluginLoaderTest(object):
-    def setup(self):
+    def setup_method(self):
         self.expected_section = {'pathsampling': "Simulation",
                                  'contents': "Miscellaneous"}
 
@@ -51,8 +51,8 @@ class PluginLoaderTest(object):
 
 
 class TestFilePluginLoader(PluginLoaderTest):
-    def setup(self):
-        super().setup()
+    def setup_method(self):
+        super().setup_method()
         # use our own commands dir as a file-based plugin
         cmds_init = pathlib.Path(paths_cli.commands.__file__).resolve()
         self.commands_dir = cmds_init.parent
@@ -64,8 +64,8 @@ class TestFilePluginLoader(PluginLoaderTest):
 
 
 class TestNamespacePluginLoader(PluginLoaderTest):
-    def setup(self):
-        super().setup()
+    def setup_method(self):
+        super().setup_method()
         self.namespace = "paths_cli.commands"
         self.loader = NamespacePluginLoader(self.namespace, OPSCommandPlugin)
         self.plugin_type = 'namespace'

@@ -58,7 +58,7 @@ def test_canonical_name(input_name):
 
 
 class TestCategoryCompilerProxy:
-    def setup(self):
+    def setup_method(self):
         self.compiler = CategoryCompiler(None, "foo")
         self.compiler.named_objs['bar'] = 'baz'
         self.proxy = _CategoryCompilerProxy('foo')

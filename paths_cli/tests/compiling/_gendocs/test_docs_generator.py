@@ -9,7 +9,7 @@ from paths_cli.compiling import Parameter, InstanceCompilerPlugin
 from paths_cli.compiling.core import CategoryCompiler
 
 class TestDocsGenerator:
-    def setup(self):
+    def setup_method(self):
         self.required_parameter = Parameter(
             name="req_param",
             loader=None,

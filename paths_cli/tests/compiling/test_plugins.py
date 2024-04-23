@@ -3,7 +3,7 @@ from paths_cli.compiling.plugins import *
 from unittest.mock import Mock
 
 class TestCompilerPlugin:
-    def setup(self):
+    def setup_method(self):
         self.plugin_class = Mock(category='foo')
         self.plugin = CategoryPlugin(self.plugin_class)
         self.aliased_plugin = CategoryPlugin(self.plugin_class,

@@ -16,7 +16,7 @@ def test_force_exit():
         force_exit("foo", None)
 
 class TestEvalHelperFunc:
-    def setup(self):
+    def setup_method(self):
         self.param_helper = {
             'str': "help_string",
             'method': lambda help_args, context: f"help_{help_args}"
@@ -39,7 +39,7 @@ class TestEvalHelperFunc:
         assert help_func("eval") == _LONG_EVAL_HELP
 
 class TestHelper:
-    def setup(self):
+    def setup_method(self):
         self.helper = Helper(help_func=lambda s, ctx: s)
 
     def test_help_string(self):
