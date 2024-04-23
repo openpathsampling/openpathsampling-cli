@@ -1,4 +1,4 @@
-[![Tests](https://github.com/openpathsampling/openpathsampling-cli/workflows/Tests/badge.svg)](https://github.com/openpathsampling/openpathsampling-cli/actions?query=workflow%3ATests)
+[![Tests](https://github.com/openpathsampling/openpathsampling-cli/actions/workflows/test-suite.yml/badge.svg)](https://github.com/openpathsampling/openpathsampling-cli/actions/workflows/test-suite.yml)
 [![Documentation Status](https://readthedocs.org/projects/openpathsampling-cli/badge/?version=latest)](https://openpathsampling-cli.readthedocs.io/en/latest/?badge=latest)
 [![Coverage Status](https://codecov.io/gh/openpathsampling/openpathsampling-cli/branch/master/graph/badge.svg)](https://codecov.io/gh/openpathsampling/openpathsampling-cli)
 [![Maintainability](https://api.codeclimate.com/v1/badges/0d1ee29e1a05cfcdc01a/maintainability)](https://codeclimate.com/github/openpathsampling/openpathsampling-cli/maintainability)
