@@ -25,7 +25,7 @@ def mock_named_object_factory(dct):
 
 
 class TestParameter:
-    def setup(self):
+    def setup_method(self):
         self.loader = Mock(
             return_value='foo',
             json_type='string',
@@ -131,7 +131,7 @@ class TestInstanceCompilerPlugin:
     def _builder(req_param, opt_default=10, opt_override=100):
         return f"{req_param}, {opt_default}, {opt_override}"
 
-    def setup(self):
+    def setup_method(self):
         identity = lambda x: x
         self.parameters = [
             Parameter('req_param', identity, json_type="string"),
@@ -227,7 +227,7 @@ class TestInstanceCompilerPlugin:
 
 
 class TestCategoryCompiler:
-    def setup(self):
+    def setup_method(self):
         self.compiler = CategoryCompiler(
             {'foo': mock_named_object_factory},
             'foo_compiler'

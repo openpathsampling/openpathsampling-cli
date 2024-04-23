@@ -12,7 +12,7 @@ from openpathsampling.engines import openmm as ops_openmm
 import mdtraj as md
 
 class TestOpenMMEngineBuilder(object):
-    def setup(self):
+    def setup_method(self):
         self.cwd = os.getcwd()
         self.yml = "\n".join([
             "type: openmm", "name: engine", "system: system.xml",
@@ -20,7 +20,7 @@ class TestOpenMMEngineBuilder(object):
             "n_steps_per_frame: 10", "n_frames_max: 10000"
         ])
 
-    def teardown(self):
+    def teardown_method(self):
         os.chdir(self.cwd)
 
     def _create_files(self, tmpdir):

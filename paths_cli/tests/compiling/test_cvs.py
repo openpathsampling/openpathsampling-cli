@@ -15,7 +15,7 @@ from paths_cli.compat.openmm import HAS_OPENMM
 
 
 class TestMDTrajFunctionCV:
-    def setup(self):
+    def setup_method(self):
         self.ad_pdb = data_filename("ala_small_traj.pdb")
         self.yml = "\n".join([
             "name: phi", "type: mdtraj", "topology: " + self.ad_pdb,

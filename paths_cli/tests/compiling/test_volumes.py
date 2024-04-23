@@ -14,7 +14,7 @@ from openpathsampling.tests.test_helpers import make_1d_traj
 from paths_cli.compiling.volumes import *
 
 class TestBuildCVVolume:
-    def setup(self):
+    def setup_method(self):
         self.yml = "\n".join(["type: cv-volume", "cv: {func}",
                               "lambda_min: 0", "lambda_max: 1"])
 
@@ -90,7 +90,7 @@ class TestBuildCVVolume:
 
 
 class TestBuildCombinationVolume:
-    def setup(self):
+    def setup_method(self):
         from  openpathsampling.experimental.storage.collective_variables \
                 import CollectiveVariable
         self.cv = CollectiveVariable(lambda s: s.xyz[0][0]).named('foo')

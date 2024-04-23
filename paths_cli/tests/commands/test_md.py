@@ -12,7 +12,7 @@ from openpathsampling.tests.test_helpers import \
         make_1d_traj, CalvinistDynamics
 
 class TestProgressReporter(object):
-    def setup(self):
+    def setup_method(self):
         self.progress = ProgressReporter(timestep=None, update_freq=5)
 
     @pytest.mark.parametrize('timestep', [None, 0.1])
@@ -38,7 +38,7 @@ class TestProgressReporter(object):
             assert out == ""
 
 class TestEnsembleSatisfiedContinueConditions(object):
-    def setup(self):
+    def setup_method(self):
         cv = paths.CoordinateFunctionCV('x', lambda x: x.xyz[0][0])
         vol_A = paths.CVDefinedVolume(cv, float("-inf"), 0.0)
         vol_B = paths.CVDefinedVolume(cv, 1.0, float("inf"))

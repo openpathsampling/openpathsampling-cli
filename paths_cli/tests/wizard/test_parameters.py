@@ -15,7 +15,7 @@ class TestWizardParameter:
     def _reverse(string):
         return "".join(reversed(string))
 
-    def setup(self):
+    def setup_method(self):
         self.parameter = WizardParameter(
             name='foo',
             ask="How should I {do_what}?",
@@ -79,7 +79,7 @@ class TestWizardParameter:
 
 
 class TestFromWizardPrerequisite:
-    def setup(self):
+    def setup_method(self):
         # For this model, user input should be a string that represents an
         # integer. The self._create method repeats the input string, e.g.,
         # "1" => "11", and wraps the result in self.Wrapper. This is the

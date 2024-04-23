@@ -57,7 +57,7 @@ class MockStorage:
 
 
 class TestWizard:
-    def setup(self):
+    def setup_method(self):
         self.wizard = Wizard([])
 
     def test_initialization(self):

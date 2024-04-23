@@ -11,7 +11,7 @@ from openpathsampling.tests.test_helpers import make_1d_traj
 from paths_cli.file_copying import *
 
 class Test_PRECOMPUTE_CVS(object):
-    def setup(self):
+    def setup_method(self):
         self.tmpdir = tempfile.mkdtemp()
         self.storage_filename = os.path.join(self.tmpdir, "test.nc")
         self.storage = paths.Storage(self.storage_filename, mode='w')
@@ -21,7 +21,7 @@ class Test_PRECOMPUTE_CVS(object):
         self.cv_y = paths.CoordinateFunctionCV("y", lambda s: s.xyz[0][1])
         self.storage.save([self.cv_x, self.cv_y])
 
-    def teardown(self):
+    def teardown_method(self):
         self.storage.close()
 
         for filename in os.listdir(self.tmpdir):
@@ -53,7 +53,7 @@ def test_make_blocks(blocksize):
 
 
 class TestPrecompute(object):
-    def setup(self):
+    def setup_method(self):
         class RunOnceFunction(object):
             def __init__(self):
                 self.previously_seen = set([])

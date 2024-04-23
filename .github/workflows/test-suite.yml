@@ -24,12 +24,12 @@ jobs:
     strategy:
       matrix:
         CONDA_PY:
-          - 3.9
-          - 3.8
-          - 3.7
+          - "3.11"
+          - "3.10"
+          - "3.9"
         INTEGRATIONS: [""]
         include:
-          - CONDA_PY: 3.9
+          - CONDA_PY: "3.11"
             INTEGRATIONS: 'all-optionals'
 
     steps:
@@ -70,6 +70,8 @@ jobs:
         run: |
           python -c "import paths_cli"
           py.test -vv --cov --cov-report xml:cov.xml
-      - uses: codecov/codecov-action@v2
+      - uses: codecov/codecov-action@v4
         with:
           files: ./cov.xml
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

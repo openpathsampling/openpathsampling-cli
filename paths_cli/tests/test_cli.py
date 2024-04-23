@@ -7,7 +7,7 @@ from .null_command import NullCommandContext
 
 
 class TestOpenPathSamplingCLI(object):
-    def setup(self):
+    def setup_method(self):
         def make_mock(name, helpless=False, return_val=None):
             if return_val is None:
                 return_val = name

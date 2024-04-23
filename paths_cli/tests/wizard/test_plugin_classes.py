@@ -80,7 +80,7 @@ def test_get_text_from_context(context, instance, default, expected):
 
 
 class TestWizardObjectPlugin:
-    def setup(self):
+    def setup_method(self):
         self.plugin = WizardObjectPlugin(
             name="foo",
             category="foo_category",
@@ -133,7 +133,7 @@ class TestWizardParameterObjectPlugin:
             self.foo = foo
             self.bar = bar
 
-    def setup(self):
+    def setup_method(self):
         self.parameters = [
             WizardParameter(name="foo",
                             ask="Gimme a foo!",
@@ -191,7 +191,7 @@ class TestWizardParameterObjectPlugin:
 
 
 class TestCategoryHelpFunc:
-    def setup(self):
+    def setup_method(self):
         self.category = WrapCategory("foo", "ask foo")
         self.plugin = WizardObjectPlugin(
             name="bar",
@@ -247,7 +247,7 @@ class TestCategoryHelpFunc:
 
 
 class TestWrapCategory:
-    def setup(self):
+    def setup_method(self):
         self.wrapper = WrapCategory("foo", "ask foo", intro="intro_foo")
         self.plugin_no_format = WizardObjectPlugin(
             name="bar",

@@ -1,7 +1,7 @@
 from paths_cli.utils import *
 
 class TestOrderedSet:
-    def setup(self):
+    def setup_method(self):
         self.set = OrderedSet(['a', 'b', 'a', 'c', 'd', 'c', 'd'])
 
     def test_len(self):
