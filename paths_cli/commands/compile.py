@@ -68,10 +68,18 @@ def register_installed_plugins():
 
 @click.command(
     'compile',
+    short_help="compile a description of OPS objects into a database",
 )
 @click.argument('input_file')
 @OUTPUT_FILE.clicked(required=True)
 def compile_(input_file, output_file):
+    """Compile JSON or YAML description of OPS objects into a database.
+
+    INPUT_FILE is a JSON or YAML file that describes OPS simulation
+    objects (e.g., MD engines, state volumes, etc.). The output will be an
+    OPS database containing those objects, which can be used as the input to
+    many other CLI subcommands.
+    """
     loader = select_loader(input_file)
     with open(input_file, mode='r') as f:
         dct = loader(f)
@@ -87,7 +95,7 @@ def compile_(input_file, output_file):
 
 PLUGIN = OPSCommandPlugin(
     command=compile_,
-    section="Debug",
+    section="Miscellaneous",
     requires_ops=(1, 0),
     requires_cli=(0, 3)
 )
