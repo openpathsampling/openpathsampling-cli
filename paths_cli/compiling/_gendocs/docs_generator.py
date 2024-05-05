@@ -54,7 +54,7 @@ class DocsGenerator:
         rst = f".. _compiling--{category_plugin.label}:\n\n"
         rst += f"{cat_info.header}\n{'=' * len(str(cat_info.header))}\n\n"
         if cat_info.description:
-            rst += cat_info.description + "\n\n"
+            rst += cat_info.description + "The following types are available:\n\n"
         rst += ".. contents:: :local:\n\n"
         for obj in category_plugin.type_dispatch.values():
             rst += self.generate_plugin_rst(

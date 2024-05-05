@@ -95,7 +95,7 @@ def compile_(input_file, output_file):
 
 PLUGIN = OPSCommandPlugin(
     command=compile_,
-    section="Miscellaneous",
+    section="Simulation Setup",
     requires_ops=(1, 0),
     requires_cli=(0, 3)
 )

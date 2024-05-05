@@ -61,7 +61,8 @@ class OpenPathSamplingCLI(click.MultiCommand):
         return self._get_command.get(name)
 
     def format_commands(self, ctx, formatter):
-        sec_order = ['Simulation', 'Analysis', 'Miscellaneous', 'Workflow']
+        sec_order = ["Simulation Setup", 'Simulation', 'Analysis',
+                     'Miscellaneous', 'Workflow']
         for sec in sec_order:
             cmds = self._sections.get(sec, [])
             rows = []
