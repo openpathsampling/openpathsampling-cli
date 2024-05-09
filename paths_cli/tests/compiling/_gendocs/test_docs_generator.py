@@ -50,7 +50,7 @@ class TestDocsGenerator:
             ".. _compiling--category:",
             "Header\n======\n",
             ".. contents:: :local:",
-            "\ncategory_desc\n",
+            "\ncategory_descThe following types are available:\n",
         ]
 
     @pytest.mark.parametrize('param_type', ['req', 'opt'])
