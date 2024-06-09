@@ -94,6 +94,12 @@ def main(log):
         logging.config.fileConfig(log, disable_existing_loggers=False)
     # TODO: if log not given, check for logging.conf in .openpathsampling/
 
+    silence_warnings = ['pymbar.mbar_solvers', 'pymbar.timeseries']
+    for lname in silence_warnings:
+        logger = logging.getLogger(lname)
+        logger.setLevel(logging.CRITICAL)
+
+
     logger = logging.getLogger(__name__)
     logger.debug("About to run command")  # TODO: maybe log invocation?
 
