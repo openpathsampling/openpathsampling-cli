@@ -94,6 +94,7 @@ def main(log):
         logging.config.fileConfig(log, disable_existing_loggers=False)
     # TODO: if log not given, check for logging.conf in .openpathsampling/
 
+    # TODO: remove when openmmtools doesn't trigger these warnings
     silence_warnings = ['pymbar.mbar_solvers', 'pymbar.timeseries']
     for lname in silence_warnings:
         logger = logging.getLogger(lname)
