@@ -247,8 +247,8 @@ def test_register_plugins_unit(foo_compiler_plugin, foo_baz_builder_plugin):
     with patch(BASE + "_register_builder_plugin", Mock()) as builder, \
             patch(BASE + "_register_compiler_plugin", Mock()) as compiler:
         register_plugins([foo_baz_builder_plugin, foo_compiler_plugin])
-        assert builder.called_once_with(foo_baz_builder_plugin)
-        assert compiler.called_once_with(foo_compiler_plugin)
+        builder.assert_called_once_with(foo_baz_builder_plugin)
+        compiler.assert_called_once_with(foo_compiler_plugin)
 
 
 def test_register_plugins_integration(foo_compiler_plugin,

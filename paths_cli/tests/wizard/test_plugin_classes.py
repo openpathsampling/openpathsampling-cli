@@ -38,7 +38,7 @@ class TestLoadOPS:
         with mock.patch(patch_loc, mock_load):
             result = loader(wiz)
 
-        assert mock_load.called_once_with(wiz, "foos", "foo")
+        mock_load.assert_called_once_with(wiz, "foos", "foo")
         assert result == "some_object"
 
 
