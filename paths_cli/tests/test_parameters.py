@@ -38,8 +38,8 @@ def undo_monkey_patch(stored_functions):
     import importlib
     importlib.reload(paths.netcdfplus)
     importlib.reload(paths.collectivevariable)
+    importlib.reload(paths.collectivevariables)
     importlib.reload(paths)
-
 
 
 class ParameterTest(object):
@@ -62,7 +62,7 @@ class TestArgument(ParameterTest):
 # testing
 
 class ParamInstanceTest(object):
-    def setup(self):
+    def setup_method(self):
         pes = paths.engines.toy.Gaussian(1, [1.0, 1.0], [0.0, 0.0])
         integ = paths.engines.toy.LangevinBAOABIntegrator(0.01, 0.1, 2.5)
         topology = paths.engines.toy.Topology(n_spatial=2, n_atoms=1,
@@ -103,7 +103,7 @@ class ParamInstanceTest(object):
 
     def create_file(self, getter):
         filename = self._filename(getter)
-        if getter == "named":
+        if getter == "name":
             self.other_scheme = self.other_scheme.named("other")
             self.other_engine = self.other_engine.named("other")
 
@@ -129,7 +129,7 @@ class ParamInstanceTest(object):
         assert obj.__uuid__ == self.obj.__uuid__
         assert obj == self.obj
 
-    def teardown(self):
+    def teardown_method(self):
         for temp_f in os.listdir(self.tempdir):
             os.remove(os.path.join(self.tempdir, temp_f))
         os.rmdir(self.tempdir)
@@ -137,8 +137,8 @@ class ParamInstanceTest(object):
 
 class TestENGINE(ParamInstanceTest):
     PARAMETER = ENGINE
-    def setup(self):
-        super(TestENGINE, self).setup()
+    def setup_method(self):
+        super(TestENGINE, self).setup_method()
         self.get_arg = {'name': 'engine', 'number': 0, 'only': None,
                         'only-named': None}
         self.obj = self.engine
@@ -162,8 +162,8 @@ class TestENGINE(ParamInstanceTest):
 
 class TestSCHEME(ParamInstanceTest):
     PARAMETER = SCHEME
-    def setup(self):
-        super(TestSCHEME, self).setup()
+    def setup_method(self):
+        super(TestSCHEME, self).setup_method()
         self.get_arg = {'name': 'scheme', 'number': 0, 'only': None,
                         'only-named': None, 'bad-name': 'foo'}
         self.obj = self.scheme
@@ -183,8 +183,8 @@ class TestSCHEME(ParamInstanceTest):
 
 class TestINIT_CONDS(ParamInstanceTest):
     PARAMETER = INIT_CONDS
-    def setup(self):
-        super(TestINIT_CONDS, self).setup()
+    def setup_method(self):
+        super(TestINIT_CONDS, self).setup_method()
         self.traj = make_1d_traj([-0.1, 1.0, 4.4, 7.7, 10.01])
         ensemble = self.scheme.network.sampling_ensembles[0]
         self.sample_set = paths.SampleSet([
@@ -300,8 +300,8 @@ class TestINIT_CONDS(ParamInstanceTest):
 
 class TestINIT_SNAP(ParamInstanceTest):
     PARAMETER = INIT_SNAP
-    def setup(self):
-        super(TestINIT_SNAP, self).setup()
+    def setup_method(self):
+        super(TestINIT_SNAP, self).setup_method()
         traj = make_1d_traj([1.0, 2.0])
         self.other_snap = traj[0]
         self.init_snap = traj[1]
@@ -360,8 +360,8 @@ class MultiParamInstanceTest(ParamInstanceTest):
 
 class TestCVS(MultiParamInstanceTest):
     PARAMETER = CVS
-    def setup(self):
-        super(TestCVS, self).setup()
+    def setup_method(self):
+        super(TestCVS, self).setup_method()
         self.get_arg = {'name': ["x"], 'number': [0]}
         self.obj = self.cv
 
@@ -372,8 +372,8 @@ class TestCVS(MultiParamInstanceTest):
 
 class TestSTATES(MultiParamInstanceTest):
     PARAMETER = STATES
-    def setup(self):
-        super(TestSTATES, self).setup()
+    def setup_method(self):
+        super(TestSTATES, self).setup_method()
         self.get_arg = {'name': ["A"], 'number': [0]}
         self.obj = self.state_A
 
@@ -411,32 +411,32 @@ class TestMULTI_VOLUME(TestSTATES, MULTITest):
 
 class TestMULTI_ENGINE(MULTITest):
     PARAMETER = MULTI_ENGINE
-    def setup(self):
-        super(TestMULTI_ENGINE, self).setup()
+    def setup_method(self):
+        super(TestMULTI_ENGINE, self).setup_method()
         self.get_arg = {'name': ["engine"], 'number': [0]}
         self.obj = self.engine
 
 
 class TestMulti_NETWORK(MULTITest):
     PARAMETER = MULTI_NETWORK
-    def setup(self):
-        super(TestMulti_NETWORK, self).setup()
+    def setup_method(self):
+        super(TestMulti_NETWORK, self).setup_method()
         self.get_arg = {'name': ['network'], 'number': [0]}
         self.obj = self.network
 
 
 class TestMULTI_SCHEME(MULTITest):
     PARAMETER = MULTI_SCHEME
-    def setup(self):
-        super(TestMULTI_SCHEME, self).setup()
+    def setup_method(self):
+        super(TestMULTI_SCHEME, self).setup_method()
         self.get_arg = {'name': ['scheme'], 'number': [0]}
         self.obj = self.scheme
 
 
 class TestMULTI_TAG(MULTITest):
     PARAMETER = MULTI_TAG
-    def setup(self):
-        super(TestMULTI_TAG, self).setup()
+    def setup_method(self):
+        super(TestMULTI_TAG, self).setup_method()
         self.obj = make_1d_traj([1.0, 2.0, 3.0])
         self.get_arg = {'name': ['traj']}
 

@@ -25,7 +25,7 @@ import pkg_resources
 import packaging.version
 
 project = 'OpenPathSampling CLI'
-copyright = '2019-2020, David W.H. Swenson'
+copyright = '2019-2022, David W.H. Swenson and contributors'
 author = 'David W.H. Swenson'
 
 # The full version, including alpha/beta/rc tags

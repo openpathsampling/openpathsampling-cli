@@ -60,6 +60,7 @@ wrappers around well-tested OPS code.
    plugins
    parameters
    workflows
+   wizard
    full_cli
    api/index
 

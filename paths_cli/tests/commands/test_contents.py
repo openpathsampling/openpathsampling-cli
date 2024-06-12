@@ -7,6 +7,7 @@ from click.testing import CliRunner
 import openpathsampling as paths
 
 from paths_cli.commands.contents import *
+from .utils import assert_click_success
 
 def test_contents(tps_fixture):
     # we just do a full integration test of this one
@@ -21,7 +22,7 @@ def test_contents(tps_fixture):
         results = runner.invoke(contents, ['setup.nc'])
         cwd = os.getcwd()
         expected = [
-            f"Storage @ '{cwd}/setup.nc'",
+            f"{cwd}/setup.nc",
             "CVs: 1 item", "* x",
             "Volumes: 8 items", "* A", "* B", "* plus 6 unnamed items",
             "Engines: 2 items", "* flat", "* plus 1 unnamed item",
@@ -36,7 +37,7 @@ def test_contents(tps_fixture):
             "Trajectories: 1 unnamed item",
             f"Snapshots: {2*len(init_conds[0])} unnamed items", ""
         ]
-        assert results.exit_code == 0
+        assert_click_success(results)
         assert results.output.split('\n') == expected
         for truth, beauty in zip(expected, results.output.split('\n')):
             assert truth == beauty
@@ -55,24 +56,24 @@ def test_contents_table(tps_fixture, table):
         cwd = os.getcwd()
         expected = {
             'volumes': [
-                f"Storage @ '{cwd}/setup.nc'",
+                f"{cwd}/setup.nc",
                 "volumes: 8 items", "* A", "* B", "* plus 6 unnamed items",
                 ""
             ],
             'trajectories': [
-                f"Storage @ '{cwd}/setup.nc'",
+                f"{cwd}/setup.nc",
                 "trajectories: 1 unnamed item",
                 ""
             ],
             'tags': [
-                f"Storage @ '{cwd}/setup.nc'",
+                f"{cwd}/setup.nc",
                 "tags: 1 item",
                 "* initial_conditions",
                 ""
             ],
         }[table]
         assert results.output.split("\n") == expected
-        assert results.exit_code == 0
+        assert_click_success(results)
 
 def test_contents_table_error():
     runner = CliRunner()

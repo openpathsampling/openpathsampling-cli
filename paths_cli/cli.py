@@ -13,7 +13,9 @@ import click
 # import click_completion
 # click_completion.init()
 
-from .plugin_management import FilePluginLoader, NamespacePluginLoader
+from .plugin_management import (FilePluginLoader, NamespacePluginLoader,
+                                OPSCommandPlugin)
+from .utils import get_installed_plugins
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
@@ -25,20 +27,10 @@ class OpenPathSamplingCLI(click.MultiCommand):
     def __init__(self, *args, **kwargs):
         # the logic here is all about loading the plugins
         commands = str(pathlib.Path(__file__).parent.resolve() / 'commands')
-        def app_dir_plugins(posix):
-            return str(pathlib.Path(
-                click.get_app_dir("OpenPathSampling", force_posix=posix)
-            ).resolve() / 'cli-plugins')
-
-        self.plugin_loaders = [
-            FilePluginLoader(commands),
-            FilePluginLoader(app_dir_plugins(posix=False)),
-            FilePluginLoader(app_dir_plugins(posix=True)),
-            NamespacePluginLoader('paths_cli_plugins')
-        ]
-
-        plugins = sum([loader() for loader in self.plugin_loaders], [])
-
+        plugins = get_installed_plugins(
+            default_loader=FilePluginLoader(commands, OPSCommandPlugin),
+            plugin_types=OPSCommandPlugin
+        )
         self._get_command = {}
         self._sections = collections.defaultdict(list)
         self.plugins = []
@@ -69,7 +61,8 @@ class OpenPathSamplingCLI(click.MultiCommand):
         return self._get_command.get(name)
 
     def format_commands(self, ctx, formatter):
-        sec_order = ['Simulation', 'Analysis', 'Miscellaneous', 'Workflow']
+        sec_order = ["Simulation Setup", 'Simulation', 'Analysis',
+                     'Miscellaneous', 'Workflow']
         for sec in sec_order:
             cmds = self._sections.get(sec, [])
             rows = []
@@ -101,6 +94,13 @@ def main(log):
     if log:
         logging.config.fileConfig(log, disable_existing_loggers=False)
     # TODO: if log not given, check for logging.conf in .openpathsampling/
+
+    # TODO: remove when openmmtools doesn't trigger these warnings
+    silence_warnings = ['pymbar.mbar_solvers', 'pymbar.timeseries']
+    for lname in silence_warnings:
+        logger = logging.getLogger(lname)
+        logger.setLevel(logging.CRITICAL)
+
 
     logger = logging.getLogger(__name__)
     logger.debug("About to run command")  # TODO: maybe log invocation?
