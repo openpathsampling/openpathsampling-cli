@@ -13,14 +13,14 @@ from paths_cli import OPSCommandPlugin
 @click.option(
     '--top',
     help=(
-        "Topology information (typically PDB). Only for required "
+        "Topology file (typically PDB). Only for required "
         "formats."
     ),
     default=None,
 )
 @APPEND_FILE.clicked(required=True)
 @MULTI_TAG.clicked()
-def load_trajectory(traj_file, top, append, tag):
+def load_trajectory(traj_file, top, append_file, tag):
     """Load a trajectory from a file.
 
     This uses MDTraj under the hood, and can load any file format that
@@ -31,7 +31,7 @@ def load_trajectory(traj_file, top, append, tag):
     import mdtraj as md
     from openpathsampling.engines.openmm.tools import ops_load_trajectory
     traj = ops_load_trajectory(traj_file, top=top)
-    storage = append.get()
+    storage = APPEND_FILE.get(append_file)
     storage.save(traj)
     for tag_name in tag:
         storage.tags[tag_name] = traj
