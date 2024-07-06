@@ -87,6 +87,15 @@ MULTI_SCHEME = OPSStorageLoadNames(
     store='schemes'
 )
 
+MULTI_INIT_SNAP = OPSStorageLoadMultiple(
+    param=Option('-f', '--init-frame',
+                 help="identifier for potential initial snapshots"),
+    store='snapshots',
+    value_strategies=[GetByName('tags'), GetByNumber('snapshots')],
+    none_strategies=[GetOnlySnapshot(),
+                     GetPredefinedName('tags', 'initial_snapshot')]
+)
+
 INPUT_FILE = StorageLoader(
     param=Argument('input_file',
                    type=click.Path(exists=True, readable=True)),
