@@ -1,5 +1,6 @@
 from paths_cli.compiling.core import (
-    InstanceCompilerPlugin, Builder, Parameter
+    InstanceCompilerPlugin, Builder, Parameter,
+    listify, unlistify
 )
 from paths_cli.compiling.tools import custom_eval
 from paths_cli.compiling.plugins import (
@@ -38,53 +39,76 @@ FINAL_STATE_PARAM = Parameter(
     description="final state for this transition",
 )
 
+def mistis_trans_info_param_builder(dcts):
+    default = 'volume-interface-set'  # TODO: make this flexible?
+    trans_info = []
+    volume_compiler = compiler_for("volume")
+    interface_set_compiler = compiler_for('interface_set')
+    for dct in dcts:
+        dct['type'] = dct.get('type', default)
+        initial_state = volume_compiler(dct.pop('initial_state'))
+        final_state = volume_compiler(dct.pop('final_state'))
+        interface_set = interface_set_compiler(dct)
+        trans_info.append((initial_state, interface_set, final_state))
 
-build_interface_set = InterfaceSetPlugin(
+    return trans_info
+
+
+MISTIS_INTERFACE_SETS_PARAM = Parameter(
+    'interface_sets', mistis_trans_info_param_builder,
+    json_type=json_type_list(json_type_ref('interface-set')),
+    description='interface sets for MISTIS'
+)
+
+# this is reused in the simple single TIS setup
+VOLUME_INTERFACE_SET_PARAMS = [
+    Parameter('cv', compiler_for('cv'), json_type=json_type_ref('cv'),
+              description=("the collective variable for this interface "
+                           "set")),
+    Parameter('minvals', custom_eval,
+              json_type=json_type_list(json_type_eval("Float")),
+              description=("minimum value(s) for interfaces in this"
+                           "interface set")),
+    Parameter('maxvals', custom_eval,
+              json_type=json_type_list(json_type_eval("Float")),
+              description=("maximum value(s) for interfaces in this"
+                           "interface set")),
+]
+
+
+VOLUME_INTERFACE_SET_PLUGIN = InterfaceSetPlugin(
     builder=Builder('openpathsampling.VolumeInterfaceSet'),
-    parameters=[
-        Parameter('cv', compiler_for('cv'), json_type=json_type_ref('cv'),
-                  description=("the collective variable for this interface "
-                               "set")),
-        Parameter('minvals', custom_eval,
-                  json_type=json_type_list(json_type_eval("Float")),
-                  description=("minimum value(s) for interfaces in this"
-                               "interface set")),
-        Parameter('maxvals', custom_eval,
-                  json_type=json_type_list(json_type_eval("Float")),
-                  description=("maximum value(s) for interfaces in this"
-                               "interface set")),
-    ],
-    name='interface-set',
+    parameters=VOLUME_INTERFACE_SET_PARAMS,
+    name='volume-interface-set',
     description="Interface set used in transition interface sampling.",
 )
 
 
 def mistis_trans_info(dct):
     dct = dct.copy()
-    transitions = dct.pop('transitions')
-    volume_compiler = compiler_for('volume')
-    trans_info = [
-        (
-            volume_compiler(trans['initial_state']),
-            build_interface_set(trans['interfaces']),
-            volume_compiler(trans['final_state'])
-        )
-        for trans in transitions
-    ]
-    dct['trans_info'] = trans_info
+    dct['trans_info'] = dct.pop('interface_sets')
     return dct
+    # interface_sets = dct.pop('interface_sets')
+    # volume_compiler = compiler_for('volume')
+    # interface_set_compiler = compiler_for('interface_set')
+
+    # trans_info = []
+    # for iset in interface_sets:
+    #     initial_state = volume_compiler(iset.pop("initial_state"))
+    #     final_state = volume_compiler(iset.pop("final_state"))
+    #     iset['type'] = iset.get('type', 'volume-interface-set')
+    #     interface_set = interface_set_compiler(iset)
+    #     trans_info.append((initial_state, interface_set, final_state))
+
+    # dct['trans_info'] = trans_info
+    # return dct
 
 
 def tis_trans_info(dct):
     # remap TIS into MISTIS format
     dct = dct.copy()
-    initial_state = dct.pop('initial_state')
-    final_state = dct.pop('final_state')
-    interface_set = dct.pop('interfaces')
-    dct['transitions'] = [{'initial_state': initial_state,
-                           'final_state': final_state,
-                           'interfaces': interface_set}]
-    return mistis_trans_info(dct)
+    remapped = {'interface_sets': [dct]}
+    return mistis_trans_info(remapped)
 
 
 TPS_NETWORK_PLUGIN = NetworkCompilerPlugin(
@@ -96,18 +120,27 @@ TPS_NETWORK_PLUGIN = NetworkCompilerPlugin(
 )
 
 
-# MISTIS_NETWORK_PLUGIN = NetworkCompilerPlugin(
-#     parameters=[Parameter('trans_info', mistis_trans_info)],
-#     builder=Builder('openpathsampling.MISTISNetwork'),
-#     name='mistis'
-# )
+MISTIS_NETWORK_PLUGIN = NetworkCompilerPlugin(
+    parameters=[MISTIS_INTERFACE_SETS_PARAM],
+    builder=Builder('openpathsampling.MISTISNetwork',
+                    remapper=mistis_trans_info),
+    name='mistis'
+)
 
+def single_tis_builder(initial_state, final_state, cv, minvals, maxvals):
+    import openpathsampling as paths
+    interface_set = paths.VolumeInterfaceSet(cv, minvals, maxvals)
+    return paths.MISTISNetwork([
+        (initial_state, interface_set, final_state)
+    ])
 
-# TIS_NETWORK_PLUGIN = NetworkCompilerPlugin(
-#     builder=Builder('openpathsampling.MISTISNetwork'),
-#     parameters=[Parameter('trans_info', tis_trans_info)],
-#     name='tis'
-# )
+TIS_NETWORK_PLUGIN = NetworkCompilerPlugin(
+    builder=single_tis_builder,
+    parameters=([INITIAL_STATE_PARAM, FINAL_STATE_PARAM]
+                + VOLUME_INTERFACE_SET_PARAMS),
+    name='tis'
+)
+
 
 # old names not yet replaced in testing  THESE ARE WHY WE'RE DOUBLING! GET
 # RID OF THEM! (also, use an is-check)
