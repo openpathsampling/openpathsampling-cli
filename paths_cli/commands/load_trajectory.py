@@ -28,9 +28,12 @@ def load_trajectory(traj_file, top, append_file, tag):
     Trajectories loaded this way will work with engines compatible with
     that input (e.g., GROMACS).
     """
-    import mdtraj as md
     from openpathsampling.engines.openmm.tools import ops_load_trajectory
-    traj = ops_load_trajectory(traj_file, top=top)
+    if top:
+        traj = ops_load_trajectory(traj_file, top=top)
+    else:
+        traj = ops_load_trajectory(traj_file)
+
     storage = APPEND_FILE.get(append_file)
     storage.save(traj)
     for tag_name in tag:
