@@ -27,62 +27,6 @@ def unidirectional_tis_compiler(cv_and_states):
         ),
     }
 
-# def check_unidirectional_tis(results, state_A, state_B, cv):
-#     assert len(results) == 1
-#     trans_info = results['trans_info']
-#     assert len(trans_info) == 1
-#     assert len(trans_info[0]) == 3
-#     trans = trans_info[0]
-#     assert isinstance(trans, tuple)
-#     assert trans[0] == state_A
-#     assert trans[2] == state_B
-#     assert isinstance(trans[1], paths.VolumeInterfaceSet)
-#     ifaces = trans[1]
-#     assert ifaces.cv == cv
-#     assert ifaces.minvals == float("-inf")
-#     np.testing.assert_allclose(ifaces.maxvals,
-#                                [0, np.pi / 10.0, np.pi / 5.0])
-
-
-# def test_mistis_trans_info(cv_and_states, mistis_dict,
-#                            unidirectional_tis_compiler):
-#     cv, state_A, state_B = cv_and_states
-#     patch_base = 'paths_cli.compiling.networks'
-#     with mock.patch.dict(_COMPILERS_LOC, unidirectional_tis_compiler):
-#         results = mistis_trans_info(mistis_dict)
-
-#     check_unidirectional_tis(results, state_A, state_B, cv)
-#     paths.InterfaceSet._reset()
-
-
-# def test_tis_trans_info(cv_and_states):
-#     cv, state_A, state_B = cv_and_states
-#     dct = {
-#         'initial_state': "A",
-#         'final_state': "B",
-#         'cv': 'cv',
-#         'minvals': 'float("-inf")',
-#         'maxvals': 'np.array([0, 0.1, 0.2]) * np.pi',
-#     }
-
-#     compiler = {
-#         'cv': mock_compiler('cv', named_objs={'cv': cv}),
-#         'volume': mock_compiler('volume', named_objs={
-#             "A": state_A, "B": state_B
-#         }),
-#         'interface_set': mock_compiler(
-#             'interface_set',
-#             type_dispatch={
-#                 'volume-interface-set': VOLUME_INTERFACE_SET_PLUGIN
-#             }
-#         ),
-#     }
-#     with mock.patch.dict(_COMPILERS_LOC, compiler):
-#         results = tis_trans_info(dct)
-
-#     check_unidirectional_tis(results, state_A, state_B, cv)
-#     paths.InterfaceSet._reset()
-
 
 def test_build_tps_network(cv_and_states):
     _, state_A, state_B = cv_and_states

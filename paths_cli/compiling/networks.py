@@ -88,27 +88,6 @@ def mistis_trans_info(dct):
     dct = dct.copy()
     dct['trans_info'] = dct.pop('interface_sets')
     return dct
-    # interface_sets = dct.pop('interface_sets')
-    # volume_compiler = compiler_for('volume')
-    # interface_set_compiler = compiler_for('interface_set')
-
-    # trans_info = []
-    # for iset in interface_sets:
-    #     initial_state = volume_compiler(iset.pop("initial_state"))
-    #     final_state = volume_compiler(iset.pop("final_state"))
-    #     iset['type'] = iset.get('type', 'volume-interface-set')
-    #     interface_set = interface_set_compiler(iset)
-    #     trans_info.append((initial_state, interface_set, final_state))
-
-    # dct['trans_info'] = trans_info
-    # return dct
-
-
-def tis_trans_info(dct):
-    # remap TIS into MISTIS format
-    dct = dct.copy()
-    remapped = {'interface_sets': [dct]}
-    return mistis_trans_info(remapped)
 
 
 TPS_NETWORK_PLUGIN = NetworkCompilerPlugin(
