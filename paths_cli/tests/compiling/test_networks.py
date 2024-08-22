@@ -12,6 +12,7 @@ _COMPILERS_LOC = 'paths_cli.compiling.root_compiler._COMPILERS'
 
 @pytest.fixture
 def unidirectional_tis_compiler(cv_and_states):
+    paths.InterfaceSet._reset()
     cv, state_A, state_B = cv_and_states
     return {
         'cv': mock_compiler('cv', named_objs={'cv': cv}),
