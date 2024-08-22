@@ -45,6 +45,7 @@ def mistis_trans_info_param_builder(dcts):
     volume_compiler = compiler_for("volume")
     interface_set_compiler = compiler_for('interface_set')
     for dct in dcts:
+        dct = dct.copy()
         dct['type'] = dct.get('type', default)
         initial_state = volume_compiler(dct.pop('initial_state'))
         final_state = volume_compiler(dct.pop('final_state'))

@@ -47,22 +47,32 @@ def test_build_tps_network(cv_and_states):
 def test_build_mistis_network(cv_and_states, unidirectional_tis_compiler):
     cv, state_A, state_B = cv_and_states
     mistis_dict = {
-        'interface_sets': [{
-            'initial_state': "A",
-            'final_state': "B",
-            'cv': 'cv',
-            'minvals': 'float("-inf")',
-            'maxvals': "np.array([0, 0.1, 0.2]) * np.pi"
-        }]
+        'interface_sets': [
+            {
+                'initial_state': "A",
+                'final_state': "B",
+                'cv': 'cv',
+                'minvals': 'float("-inf")',
+                'maxvals': "np.array([0, 0.1, 0.2]) * np.pi"
+            },
+            {
+                'initial_state': "B",
+                'final_state': "A",
+                'cv': 'cv',
+                'minvals': "np.array([1.0, 0.9, 0.8])",
+                'maxvals': "float('inf')",
+            }
+        ]
     }
 
     with mock.patch.dict(_COMPILERS_LOC, unidirectional_tis_compiler):
         network = MISTIS_NETWORK_PLUGIN(mistis_dict)
 
     assert isinstance(network, paths.MISTISNetwork)
-    assert len(network.sampling_transitions) == 1
-    assert len(network.transitions) == 1
-    assert list(network.transitions) == [(state_A, state_B)]
+    assert len(network.sampling_transitions) == 2
+    assert len(network.transitions) == 2
+    assert list(network.transitions) == [(state_A, state_B),
+                                         (state_B, state_A)]
 
 def test_build_tis_network(cv_and_states, unidirectional_tis_compiler):
     cv, state_A, state_B = cv_and_states
