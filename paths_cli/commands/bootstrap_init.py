@@ -1,7 +1,7 @@
 import click
 from paths_cli import OPSCommandPlugin
 from paths_cli.parameters import (
-    INIT_SNAP, MULTI_NETWORK, OUTPUT_FILE, INPUT_FILE, ENGINE
+    INIT_SNAP, SCHEME, ENGINE, OUTPUT_FILE, INPUT_FILE
 )
 from paths_cli.param_core import OPSStorageLoadSingle, Option
 
@@ -21,11 +21,11 @@ FINAL_STATE = OPSStorageLoadSingle(
 @INIT_STATE.clicked(required=True)
 @FINAL_STATE.clicked(required=True)
 @INIT_SNAP.clicked()
-@MULTI_NETWORK.clicked()
+@SCHEME.clicked()
 @ENGINE.clicked()
 @OUTPUT_FILE.clicked()
 @INPUT_FILE.clicked()
-def bootstrap_init(init_state, final_state, network, engine, init_snap,
+def bootstrap_init(initial_state, final_state, scheme, engine, init_frame,
                    output_file, input_file):
     """Use ``FullBootstrapping`` to create initial conditions for TIS.
 
@@ -37,12 +37,14 @@ def bootstrap_init(init_state, final_state, network, engine, init_snap,
     Note that intermediate sampling in this is not saved to disk.
     """
     storage = INPUT_FILE.get(input_file)
-    network = MULTI_NETWORK.get(storage, network)
-    init_state = INIT_STATE.get(storage, init_state)
-    final_state = FINAL_STATE.get(storage, final_stage)
+    scheme = SCHEME.get(storage, scheme)
+    network = scheme.network
+    engine = ENGINE.get(storage, engine)
+    init_state = INIT_STATE.get(storage, initial_state)
+    final_state = FINAL_STATE.get(storage, final_state)
     transition = network.transitions[(init_state, final_state)]
     bootstrap_init_main(
-        init_frame=INIT_SNAP.get(storage, init_snap),
+        init_frame=INIT_SNAP.get(storage, init_frame),
         network=network,
         engine=engine,
         transition=transition,
@@ -52,8 +54,9 @@ def bootstrap_init(init_state, final_state, network, engine, init_snap,
 
 def bootstrap_init_main(init_frame, network, engine, transition,
                         output_storage):
+    import openpathsampling as paths
     all_states = set(network.initial_states) | set(network.final_states)
-    allowed_states = {transition.initial_state, transition.final_state}
+    allowed_states = {transition.stateA, transition.stateB}
     forbidden_states = list(all_states - allowed_states)
     try:
         extra_ensembles = network.ms_outers
@@ -62,7 +65,7 @@ def bootstrap_init_main(init_frame, network, engine, transition,
 
     bootstrapper = paths.FullBootstrapping(
         transition=transition,
-        snaphot=init_frame,
+        snapshot=init_frame,
         engine=engine,
         forbidden_states=forbidden_states,
         extra_ensembles=extra_ensembles,
