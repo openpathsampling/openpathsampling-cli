@@ -1,6 +1,5 @@
 from paths_cli.compiling.core import (
-    InstanceCompilerPlugin, Builder, Parameter,
-    listify, unlistify
+    InstanceCompilerPlugin, Builder, Parameter
 )
 from paths_cli.compiling.tools import custom_eval
 from paths_cli.compiling.plugins import (
