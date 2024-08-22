@@ -52,3 +52,6 @@ PLUGIN = OPSCommandPlugin(
     requires_ops=(1, 6),
     requires_cli=(0, 4),
 )
+
+if __name__ == "__main__":  # -no-cov-
+    load_trajectory()
