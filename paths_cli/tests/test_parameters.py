@@ -277,7 +277,6 @@ class TestINIT_CONDS(ParamInstanceTest):
 
         st = paths.Storage(filename, mode='r')
         obj = INIT_CONDS.get(st, None)
-        # TODO: fix this for all being trajectories
         expected = [
             [self.traj],
             [s.trajectory for s in self.sample_set],
