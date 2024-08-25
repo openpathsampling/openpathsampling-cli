@@ -243,8 +243,8 @@ class TestINIT_CONDS(ParamInstanceTest):
         storage = paths.Storage(filename, mode='r')
         get_type, getter_style = self._parse_getter(getter)
         expected = {
-            'sset': self.sample_set,
-            'traj': self.traj
+            'sset': [s.trajectory for s in self.sample_set],
+            'traj': [self.traj]
         }[get_type]
         get_arg = {
             'name': 'traj',
@@ -277,7 +277,14 @@ class TestINIT_CONDS(ParamInstanceTest):
 
         st = paths.Storage(filename, mode='r')
         obj = INIT_CONDS.get(st, None)
-        assert obj == stored_things[num_in_file - 1]
+        # TODO: fix this for all being trajectories
+        expected = [
+            [self.traj],
+            [s.trajectory for s in self.sample_set],
+            [s.trajectory for s in self.other_sample_set],
+            [s.trajectory for s in self.other_sample_set],
+        ]
+        assert obj == expected[num_in_file - 1]
 
     def test_get_multiple(self):
         filename = self.create_file('number-traj')
