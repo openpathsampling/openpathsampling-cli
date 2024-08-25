@@ -99,4 +99,11 @@ MOVESCHEME_PLUGIN = SchemeCompilerPlugin(
                  "that type (i.e., ``OrganizeByMoveGroupStrategy``)"),
 )
 
+DEFAULT_TIS_SCHEME_PLUGIN = SchemeCompilerPlugin(
+    builder=Builder('openpathsampling.DefaultScheme'),
+    parameters=[NETWORK_PARAMETER, ENGINE_PARAMETER],
+    name='default-tis',
+    description="",
+)
+
 SCHEME_COMPILER = CategoryPlugin(SchemeCompilerPlugin, aliases=['schemes'])
