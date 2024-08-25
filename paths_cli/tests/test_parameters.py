@@ -214,8 +214,12 @@ class TestINIT_CONDS(ParamInstanceTest):
         get_type, getter_style = self._parse_getter(getter)
         main, other = {
             'traj': (self.traj, self.other_traj),
-            'sset': (self.sample_set, self.other_sample_set)
+            'sset': (self.sample_set, self.other_sample_set),
+            'samp': (self.sample_set[0], self.other_sample_set[0]),
         }[get_type]
+        if get_type == 'samp':
+            storage.save(main)
+            storage.save(other)
         if get_type == 'sset':
             storage.save(self.sample_set)
             storage.save(self.other_sample_set)
@@ -231,12 +235,14 @@ class TestINIT_CONDS(ParamInstanceTest):
 
         if other_tag:
             storage.tags[other_tag] = other
+
         storage.close()
         return filename
 
     @pytest.mark.parametrize("getter", [
         'name-traj', 'number-traj', 'tag-final-traj', 'tag-initial-traj',
-        'name-sset', 'number-sset', 'tag-final-sset', 'tag-initial-sset'
+        'name-sset', 'number-sset', 'tag-final-sset', 'tag-initial-sset',
+        'name-samp', 'number-samp',
     ])
     def test_get(self, getter):
         filename = self.create_file(getter)
@@ -244,7 +250,8 @@ class TestINIT_CONDS(ParamInstanceTest):
         get_type, getter_style = self._parse_getter(getter)
         expected = {
             'sset': [s.trajectory for s in self.sample_set],
-            'traj': [self.traj]
+            'traj': [self.traj],
+            'samp': [self.sample_set[0].trajectory],
         }[get_type]
         get_arg = {
             'name': 'traj',
@@ -302,6 +309,18 @@ class TestINIT_CONDS(ParamInstanceTest):
         storage = paths.Storage(filename, 'r')
         with pytest.raises(RuntimeError):
             self.PARAMETER.get(storage, None)
+
+    def test_get_bad_name(self):
+        filename = self._filename("bad_tag")
+        storage = paths.Storage(filename, 'w')
+        storage.save(self.traj)
+        storage.save(self.other_traj)
+        storage.tags['bad_tag'] = "foo"
+        storage.close()
+
+        storage = paths.Storage(filename, 'r')
+        with pytest.raises(RuntimeError, match="initial conditions type"):
+            self.PARAMETER.get(storage, "bad_tag")
 
 
 class TestINIT_SNAP(ParamInstanceTest):

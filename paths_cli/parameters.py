@@ -27,8 +27,6 @@ class InitCondsLoader(OPSStorageLoadMultiple):
             yield obj.trajectory
         elif isinstance(obj, paths.Trajectory):
             yield obj
-        elif isinstance(obj, paths.BaseSnapshot):
-            yield paths.Trajectory([obj])
         elif isinstance(obj, list):
             for o in obj:
                 yield from self._extract_trajectories(o)
