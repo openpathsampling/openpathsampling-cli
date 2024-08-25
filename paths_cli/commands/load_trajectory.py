@@ -40,12 +40,6 @@ def load_trajectory(traj_file, top, append_file, tag):
         storage.tags[tag_name] = traj
 
 
-    # tests:
-    # * check that we load PDB
-    # * check that if we load PDB with top as well works
-    # * check that we can load trr / xtc files (only with top)
-    # * maybe check for error if top doesn't match traj file? (atom numbers)
-
 PLUGIN = OPSCommandPlugin(
     command=load_trajectory,
     section="Miscellaneous",
