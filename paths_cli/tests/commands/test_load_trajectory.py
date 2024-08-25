@@ -29,6 +29,8 @@ def run_load_trajectory(args):
 def test_load_trajectory_pdb(with_top, with_tag):
     # test that we can load a PDB file with or without topology; also tests
     # that the taging works correctly
+    pytest.importorskip("openmm")
+    pytest.importorskip("mdtraj")
     pdb_path = data_filename("ala_small_traj.pdb")
     out_file = "setup.nc"
     args = [
@@ -49,6 +51,8 @@ def test_load_trajectory_pdb(with_top, with_tag):
             assert tagged == traj
 
 def test_load_trajectory_trr():
+    pytest.importorskip("openmm")
+    pytest.importorskip("mdtraj")
     trr = data_filename("gromacs_engine/project_trr/0000000.trr")
     gro = data_filename("gromacs_engine/conf.gro")
     out_file = "setup.nc"
@@ -62,6 +66,8 @@ def test_load_trajectory_trr():
         assert len(traj) == 4
 
 def test_load_trajectory_bad_topology():
+    pytest.importorskip("openmm")
+    pytest.importorskip("mdtraj")
     trr = data_filename("gromacs_engine/project_trr/0000000.trr")
     pdb = data_filename("tip4p_water.pdb")
     out_file = "setup.nc"
