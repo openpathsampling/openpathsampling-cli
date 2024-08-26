@@ -11,7 +11,7 @@ from paths_cli.commands.pathsampling import *
 def print_test(output_storage, scheme, init_conds, n_steps):
     print(isinstance(output_storage, paths.Storage))
     print(scheme.__uuid__)
-    print(init_conds.__uuid__)
+    print([traj.__uuid__ for traj in init_conds])
     print(n_steps)
 
 @patch('paths_cli.commands.pathsampling.pathsampling_main', print_test)
@@ -26,7 +26,8 @@ def test_pathsampling(tps_fixture):
 
         results = runner.invoke(pathsampling, ['setup.nc', '-o', 'foo.nc',
                                                '-n', '1000'])
-        expected_output = (f"True\n{scheme.__uuid__}\n{init_conds.__uuid__}"
+        initcondsid = [samp.trajectory.__uuid__ for samp in init_conds]
+        expected_output = (f"True\n{scheme.__uuid__}\n{initcondsid}"
                            "\n1000\n")
 
         assert results.output == expected_output

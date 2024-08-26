@@ -18,7 +18,29 @@ SCHEME = OPSStorageLoadSingle(
     store='schemes',
 )
 
-INIT_CONDS = OPSStorageLoadMultiple(
+class InitCondsLoader(OPSStorageLoadMultiple):
+    def _extract_trajectories(self, obj):
+        import openpathsampling as paths
+        if isinstance(obj, paths.SampleSet):
+            yield from (s.trajectory for s in obj)
+        elif isinstance(obj, paths.Sample):
+            yield obj.trajectory
+        elif isinstance(obj, paths.Trajectory):
+            yield obj
+        elif isinstance(obj, list):
+            for o in obj:
+                yield from self._extract_trajectories(o)
+        else:
+            raise RuntimeError("Unknown initial conditions type: "
+                               f"{obj} (type: {type(obj)}")
+
+    def get(self, storage, names):
+        results = super().get(storage, names)
+        final_results = list(self._extract_trajectories(results))
+        return final_results
+
+
+INIT_CONDS = InitCondsLoader(
     param=Option('-t', '--init-conds', multiple=True,
                  help=("identifier for initial conditions "
                        + "(sample set or trajectory)" + HELP_MULTIPLE)),

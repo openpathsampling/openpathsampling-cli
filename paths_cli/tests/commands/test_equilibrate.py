@@ -11,7 +11,7 @@ import openpathsampling as paths
 def print_test(output_storage, scheme, init_conds, multiplier, extra_steps):
     print(isinstance(output_storage, paths.Storage))
     print(scheme.__uuid__)
-    print(init_conds.__uuid__)
+    print([o.__uuid__ for o in init_conds])
     print(multiplier, extra_steps)
 
 
@@ -31,8 +31,10 @@ def test_equilibrate(tps_fixture):
             ["setup.nc", "-o", "foo.nc"]
         )
         out_str = "True\n{schemeid}\n{condsid}\n1 0\n"
-        expected_output = out_str.format(schemeid=scheme.__uuid__,
-                                         condsid=init_conds.__uuid__)
+        expected_output = out_str.format(
+            schemeid=scheme.__uuid__,
+            condsid=[o.trajectory.__uuid__ for o in init_conds],
+        )
         assert results.exit_code == 0
         assert results.output == expected_output
 
