@@ -1,9 +1,69 @@
 import pytest
 from click.testing import CliRunner
 from unittest.mock import patch
+import numpy as np
 
 from paths_cli.commands.bootstrap_init import *
 import openpathsampling as paths
+from openpathsampling.engines import toy
+from openpathsampling.tests.test_helpers import make_1d_traj
+
+@pytest.fixture
+def toy_2_state_engine():
+    pes = (
+        toy.OuterWalls([1.0, 1.0], [0.0, 0.0]) +
+        toy.Gaussian(-1.0, [12.0, 12.0], [-0.5, 0.0]) +
+        toy.Gaussian(-1.0, [12.0, 12.0], [0.5, 0.0])
+    )
+    topology=toy.Topology(
+        n_spatial = 2,
+        masses =[1.0, 1.0],
+        pes = pes
+    )
+    integ = toy.LangevinBAOABIntegrator(dt=0.02, temperature=0.1, gamma=2.5)
+    options = {
+        'integ': integ,
+        'n_frames_max': 5000,
+        'n_steps_per_frame': 1
+    }
+
+    engine = toy.Engine(
+        options=options,
+        topology=topology
+    )
+    return engine
+
+@pytest.fixture
+def toy_2_state_cv():
+    return paths.FunctionCV("x", lambda s: s.xyz[0][0])
+
+@pytest.fixture
+def toy_2_state_volumes(toy_2_state_cv):
+    state_A = paths.CVDefinedVolume(
+        toy_2_state_cv,
+        float("-inf"),
+        -0.3,
+    ).named("A")
+    state_B = paths.CVDefinedVolume(
+        toy_2_state_cv,
+        0.3,
+        float("inf"),
+    ).named("B")
+    return state_A, state_B
+
+@pytest.fixture
+def toy_2_state_tis(toy_2_state_cv, toy_2_state_volumes):
+    state_A, state_B = toy_2_state_volumes
+    interfaces = paths.VolumeInterfaceSet(
+        toy_2_state_cv,
+        float("-inf"),
+        [-0.3, -0.2, -0.1],
+    )
+    tis = paths.MISTISNetwork(
+        [(state_A, interfaces, state_B)],
+    )
+    return tis
+
 
 def print_test(init_frame, network, engine, transition, output_storage):
     print(init_frame.__uuid__)
@@ -54,12 +114,19 @@ def test_bootstrap_init(tis_fixture):
         assert results.output == expected_output
 
 
-def test_bootstrap_init_main(tis_fixture, tmp_path):
-    scheme, network, engine, init_conds = tis_fixture
-    init_frame = init_conds[0][0]
+def test_bootstrap_init_main(toy_2_state_tis, toy_2_state_engine, tmp_path):
+    network = toy_2_state_tis
+    engine = toy_2_state_engine
+    scheme = paths.DefaultScheme(network, engine)
+    init_frame = toy.Snapshot(
+        coordinates=np.array([[-0.5, -0.5]]),
+        velocities=np.array([[0.0,0.0]]),
+        engine=engine
+    )
     assert len(network.transitions) == 1
     transition = list(network.transitions.values())[0]
     output_storage = paths.Storage(tmp_path / "output.nc", mode='w')
     init_conds, bootstrapper = bootstrap_init_main(init_frame, network,
                                                    engine, transition,
                                                    output_storage)
+    init_conds.sanity_check()
