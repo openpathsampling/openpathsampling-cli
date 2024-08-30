@@ -3,7 +3,8 @@ import click
 
 from paths_cli import OPSCommandPlugin
 from paths_cli.parameters import (
-    INPUT_FILE, OUTPUT_FILE, INIT_CONDS, SCHEME, N_STEPS_MC
+    INPUT_FILE, OUTPUT_FILE, INIT_CONDS, SCHEME, N_STEPS_MC,
+    SIMULATION_CV_MODE,
 )
 
 
@@ -16,9 +17,12 @@ from paths_cli.parameters import (
 @SCHEME.clicked(required=False)
 @INIT_CONDS.clicked(required=False)
 @N_STEPS_MC
-def pathsampling(input_file, output_file, scheme, init_conds, nsteps):
+@SIMULATION_CV_MODE.clicked()
+def pathsampling(input_file, output_file, scheme, init_conds, nsteps,
+                 cv_mode):
     """General path sampling, using setup in INPUT_FILE"""
     storage = INPUT_FILE.get(input_file)
+    SIMULATION_CV_MODE(storage, cv_mode)
     pathsampling_main(output_storage=OUTPUT_FILE.get(output_file),
                       scheme=SCHEME.get(storage, scheme),
                       init_conds=INIT_CONDS.get(storage, init_conds),

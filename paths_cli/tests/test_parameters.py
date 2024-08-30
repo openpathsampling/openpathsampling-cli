@@ -511,3 +511,49 @@ def test_APPEND_FILE(ext):
     os.remove(filename)
     os.rmdir(tempdir)
     undo_monkey_patch(stored_functions)
+
+
+class TestCVMode:
+    def test_bad_option(self):
+        with pytest.raises(ValueError, match="Invalid options"):
+            CVMode(["production", "foo"], "production")
+
+    def test_bad_default(self):
+        with pytest.raises(ValueError, match="not in options"):
+            CVMode(["production", "no-caching"], "analysis")
+
+    def test_call(self, tmp_path):
+        cv_mode = CVMode(["production", "no-caching"], "no-caching")
+        from openpathsampling.experimental.storage.collective_variables \
+            import CollectiveVariable
+        from openpathsampling.experimental.storage import (
+            Storage,  monkey_patch_all
+        )
+        cv = CollectiveVariable(lambda s: s.xyz[0][0]).named('x')
+        filename = str(tmp_path / "foo.db")
+        stored_functions = pre_monkey_patch()
+        monkey_patch_all(paths)
+        st = Storage(filename, mode='w')
+        assert cv.mode == "analysis"
+        st.save(cv)
+        st.close()
+        del cv
+
+        storage = Storage(filename, mode='r')
+        cv = storage.cvs['x']
+        assert cv.mode == "analysis"
+        cv_mode(storage, "no-caching")
+        assert cv.mode == "no-caching"
+        undo_monkey_patch(stored_functions)
+
+    def test_call_non_simstore(self, tmp_path):
+        cv_mode = CVMode(["production", "no-caching"], "no-caching")
+        filename = str(tmp_path / "foo.nc")
+        cv = paths.FunctionCV("x", lambda x: x.xyz[0][0])
+        st = paths.Storage(filename, mode='w')
+        st.save(cv)
+        st.close()
+
+        storage = paths.Storage(filename, mode='r')
+        with pytest.warns(UserWarning, match="Not a SimStore"):
+            cv_mode(storage, "production")
