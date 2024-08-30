@@ -58,3 +58,11 @@ def tis_network(cv_and_states):
                                           [0.0, 0.1, 0.2])
     network = paths.MISTISNetwork([(state_A, interfaces, state_B)])
     return network
+
+@pytest.fixture
+def tis_fixture(flat_engine, tis_network, transition_traj):
+    paths.InterfaceSet._reset()
+    scheme = paths.DefaultScheme(network=tis_network,
+                                 engine=flat_engine)
+    init_conds = scheme.initial_conditions_from_trajectories(transition_traj)
+    return (scheme, tis_network, flat_engine, init_conds)
