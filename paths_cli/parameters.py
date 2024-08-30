@@ -1,4 +1,5 @@
 import click
+import warnings
 from paths_cli.param_core import (
     Option, Argument, OPSStorageLoadSingle, OPSStorageLoadMultiple,
     OPSStorageLoadNames, StorageLoader, GetByName, GetByNumber, GetOnly,
@@ -133,3 +134,41 @@ N_STEPS_MC = click.option('-n', '--nsteps', type=int,
                           help="number of Monte Carlo trials to run")
 
 MULTI_CV = CVS
+
+
+class CVMode:
+    """Class for generating CVMode parameters.
+    """
+    def __init__(self, options, default):
+        allowed = {"production", "analysis", "no-caching"}
+        if extras := set(options) - allowed:
+            raise ValueError(f"Invalid options: {extras}")
+        if default not in options:
+            raise ValueError(f"Default '{default}' not in options {options}")
+
+        self.default = default
+        self.param = Option(
+            "--cv-mode",
+            type=click.Choice(options),
+            help=(
+                "Mode for CVs (only used for SimStore DB files). Default "
+                f"'{default}'."
+            ),
+            default=default,
+        )
+
+    def clicked(self):
+        return self.param.clicked()
+
+    def __call__(self, storage, cv_mode):
+        from openpathsampling.experimental.storage import Storage
+        if cv_mode != self.default and not isinstance(storage, Storage):
+            warnings.warn("Not a SimStore file: cv-mode argument unused")
+            return
+
+        for cv in storage.cvs:
+            # TODO: add logger
+            # _logger.info(f"Setting '{cv.name}' to mode '{cv_mode}'.")
+            cv.mode = cv_mode
+
+SIMULATION_CV_MODE = CVMode(["production", "no-caching"], "production")
