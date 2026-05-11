@@ -21,7 +21,7 @@ with open("parameter_table.rst", mode='w') as f:
     make_param_main(f)
 
 # -- Project information -----------------------------------------------------
-import pkg_resources
+import importlib.metadata
 import packaging.version
 
 project = 'OpenPathSampling CLI'
@@ -29,7 +29,7 @@ copyright = '2019-2022, David W.H. Swenson and contributors'
 author = 'David W.H. Swenson'
 
 # The full version, including alpha/beta/rc tags
-release = pkg_resources.get_distribution('openpathsampling-cli').version
+release = importlib.metadata.version('openpathsampling-cli')
 version = packaging.version.Version(release).base_version
 
 master_doc = 'index'
